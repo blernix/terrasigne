@@ -7,11 +7,22 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      backdropBlur: {
+        xs: '2px',
       },
+      colors: {
+        brandGreenLight: '#E0F7EA',
+        brandPurple: '#6B46C1',
+        brandOrange: '#ED8936',
+        brandSecondary: '#38A169',
+        brandLavender: '#B794F4',
+        // Ajoutez d'autres couleurs si nécessaire
+      },
+      borderRadius: {
+        'xl': '1rem',
+      },
+      // Ajoutez d'autres personnalisations si nécessaire
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 };
