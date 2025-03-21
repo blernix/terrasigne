@@ -8,7 +8,7 @@ export async function GET(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles/${id}?fields=id,titre,contenu,categorie_id.nom,date_created,couverture,status`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles/${id}?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture,status`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,

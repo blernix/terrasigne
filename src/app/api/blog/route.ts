@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles?fields=id,titre,contenu,categorie_id.nom,date_created,couverture${filterQuery}&limit=10&page=${page}`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture${filterQuery}&limit=10&page=${page}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,

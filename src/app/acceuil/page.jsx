@@ -78,9 +78,9 @@ export default function Page() {
         <section className="relative max-w-6xl mx-auto overflow-hidden rounded-3xl shadow-2xl mb-28" data-aos="fade-up">
           <div className="flex transition-transform duration-700" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
             {images.map((image, index) => {
-              const imageUrl = image.images?.filename_disk
-                ? `${process.env.NEXT_PUBLIC_DIRECTUS_API}/assets/${image.images.filename_disk}`
-                : "/images/default-cover.jpg"; // Image par défaut si aucune trouvée
+         const imageUrl = image.images?.filename_disk
+         ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${image.images.filename_disk}`
+         : "/images/default-cover.jpg";
 
               return (
                 <div key={image.id} className="w-full flex-shrink-0">
@@ -134,7 +134,7 @@ export default function Page() {
             <p className="text-gray-500 mb-6">
               <span className="font-bold">Prix :</span> {service.prix} €
             </p>
-            <Link href={`/services/${service.id}`}>
+            <Link href={`/services`}>
               <button className="px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
                 Détails
               </button>

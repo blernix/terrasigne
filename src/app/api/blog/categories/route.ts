@@ -4,7 +4,7 @@ export async function GET() {
   console.log("📂 Requête API - Catégories d'articles");
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/categories_articles?fields=id,nom`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/categories_articles?fields=id,titre`, {
       headers: {
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
       },
