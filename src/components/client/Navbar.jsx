@@ -9,7 +9,7 @@ export default function Navbar() {
     <nav className="bg-gray-50 shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         {/* Logo */}
-        <Link href="/acceuil" className="text-2xl font-bold text-brandPurple">
+        <Link href="/" className="text-2xl font-bold text-brandPurple">
           Terrasigne
         </Link>
 
@@ -44,7 +44,7 @@ export default function Navbar() {
             isOpen ? "block" : "hidden"
           } sm:flex sm:items-center sm:space-x-6`}
         >
-          <Link href="/acceuil" className="block mt-2 sm:mt-0 text-gray-800 hover:text-brandPurple transition">
+          <Link href="/" className="block mt-2 sm:mt-0 text-gray-800 hover:text-brandPurple transition">
             Accueil
           </Link>
           <Link href="/services" className="block mt-2 sm:mt-0 text-gray-800 hover:text-brandPurple transition">

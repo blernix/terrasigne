@@ -8,7 +8,7 @@ export async function GET(
 
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles/${id}?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture,status`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles/${id}?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture.filename_disk,status`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
@@ -20,16 +20,27 @@ export async function GET(
       throw new Error(`❌ Erreur API: ${response.status}`);
     }
 
-    const data = await response.json();
+    const { data } = await response.json();
 
-    if (data.data.status !== "published") {
+    if (data.status !== "published") {
       return NextResponse.json(
         { message: "Cet article n'est pas encore disponible." },
         { status: 200 }
       );
     }
 
-    return NextResponse.json(data.data);
+    const formatted = {
+      id: data.id,
+      titre: data.titre,
+      contenu: data.contenu,
+      categorie: data.categorie_id?.titre || "Sans catégorie",
+      date_created: data.date_created,
+      couverture: data.photo_couverture?.filename_disk
+        ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${data.photo_couverture.filename_disk}`
+        : "/images/default-cover.jpg",
+    };
+
+    return NextResponse.json(formatted);
   } catch (error) {
     console.error("❌ Erreur lors de la récupération de l'article :", error);
     return NextResponse.json({ message: "Article introuvable" }, { status: 404 });

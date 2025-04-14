@@ -48,11 +48,11 @@ export default function BlogDetail() {
         
         {/* Affichage de l'image de couverture si elle existe */}
         {article.couverture && (
-          <img 
-            src={`${process.env.NEXT_PUBLIC_DIRECTUS_API}/assets/${article.couverture}`} 
-            alt={article.titre} 
-            className="w-full h-80 object-cover rounded-t-3xl shadow-lg"
-          />
+        <img 
+        src={article.couverture} 
+        alt={article.titre} 
+        className="w-full h-80 object-cover rounded-t-3xl shadow-lg"
+      />
         )}
 
         <h1 className="text-5xl font-bold mb-6">{article.titre}</h1>

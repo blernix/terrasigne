@@ -8,14 +8,14 @@ export async function GET(req: Request) {
     const page = url.searchParams.get("page") || "1";
     const category = url.searchParams.get("category") || "";
     const search = url.searchParams.get("search") || "";
-    const featured = url.searchParams.get("featured") === "true"; // Filtre pour les articles en vedette
+    const featured = url.searchParams.get("featured") === "true";
 
     console.log("🔎 Paramètres API - Page :", page, "Catégorie :", category, "Recherche :", search, "Mis en avant :", featured);
 
-    let filterQuery = "&filter[status][_eq]=published"; // 🔥 Ne récupérer que les articles publiés
+    let filterQuery = "&filter[status][_eq]=published";
 
     if (featured) {
-      filterQuery += `&filter[accueil][_eq]=true`; // 🔥 Récupérer uniquement les articles mis en avant
+      filterQuery += `&filter[accueil][_eq]=true`;
     }
 
     if (category) {
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture${filterQuery}&limit=10&page=${page}`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles?fields=id,titre,contenu,date_created,categorie_id.titre,photo_couverture.filename_disk&limit=10&page=${page}${filterQuery}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
@@ -41,19 +41,16 @@ export async function GET(req: Request) {
 
     const data = await response.json();
 
-    // 🛠️ Transformation des données pour le front
-    const formattedArticles = data.data.map(article => ({
+    const formattedArticles = data.data.map((article: any) => ({
       id: article.id,
       titre: article.titre,
       contenu: article.contenu,
-      categorie: article.categorie_id?.nom || "Sans catégorie",
-      date: new Date(article.date_created).toLocaleDateString("fr-FR"),
-      couverture: article.couverture
-        ? `${process.env.NEXT_PUBLIC_DIRECTUS_API}/assets/${article.couverture}`
+      date_created: article.date_created, // pas besoin de la formater ici, tu le fais dans le composant
+      categorie: article.categorie_id?.titre || "Sans catégorie",
+      couverture: article.photo_couverture?.filename_disk
+        ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${article.photo_couverture.filename_disk}`
         : "/images/default-cover.jpg",
     }));
-
-    console.log("📦 Articles formatés :", JSON.stringify(formattedArticles, null, 2));
 
     return NextResponse.json(formattedArticles);
   } catch (error) {

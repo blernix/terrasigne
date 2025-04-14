@@ -266,3 +266,21 @@ body {
                                             .editor-blog u {
                                               text-decoration: underline;
                                             }                                          
+
+
+
+                                            @layer utilities {
+                                              .animate-fadeIn {
+                                                animation: fadeIn 1s ease forwards;
+                                              }
+                                            
+                                              .animate-delay-500 {
+                                                animation-delay: 0.5s;
+                                              }
+                                            
+                                              @keyframes fadeIn {
+                                                to {
+                                                  opacity: 1;
+                                                }
+                                              }
+                                            }
