@@ -16,17 +16,14 @@ export default function Page() {
   useEffect(() => {
     async function fetchData() {
       try {
-        // Récupération du carrousel
         const carrouselResponse = await fetch("/api/carrousel");
         const carrouselData = await carrouselResponse.json();
         setImages(carrouselData);
 
-        // Récupération des services mis en avant
         const servicesResponse = await fetch("/api/services?featured=true");
         const servicesData = await servicesResponse.json();
         setFeaturedServices(servicesData);
 
-        // Récupération des articles mis en avant
         const articlesResponse = await fetch("/api/blog?featured=true");
         const articlesData = await articlesResponse.json();
         setFeaturedArticles(articlesData);
@@ -37,7 +34,6 @@ export default function Page() {
 
     fetchData();
 
-    // Gestion du carrousel
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 3000);
@@ -52,14 +48,18 @@ export default function Page() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fonction pour supprimer les balises HTML
-  const stripTags = (html) => html.replace(/<[^>]+>/g, "");
+  // 🔧 Nettoie le HTML et décode les entités
+  const stripTagsAndDecode = (html) => {
+    const text = html.replace(/<[^>]+>/g, "");
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
 
   return (
     <>
       <Navbar />
       <main className="bg-[var(--secondary)] min-h-screen w-full px-8 py-16">
-        {/* Titre & Présentation */}
         <section className="text-center max-w-4xl mx-auto mb-24" data-aos="fade-up">
           <h1 className="text-6xl font-bold text-gray-800 leading-tight">
             Bienvenue sur <span className="text-brandOrange font-extrabold">Terrasigne</span>
@@ -78,9 +78,9 @@ export default function Page() {
         <section className="relative max-w-6xl mx-auto overflow-hidden rounded-3xl shadow-2xl mb-28" data-aos="fade-up">
           <div className="flex transition-transform duration-700" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
             {images.map((image, index) => {
-         const imageUrl = image.images?.filename_disk
-         ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${image.images.filename_disk}`
-         : "/images/default-cover.jpg";
+              const imageUrl = image.images?.filename_disk
+                ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${image.images.filename_disk}`
+                : "/images/default-cover.jpg";
 
               return (
                 <div key={image.id} className="w-full flex-shrink-0">
@@ -107,46 +107,46 @@ export default function Page() {
           </div>
         </section>
 
-       {/* Services mis en avant */}
-<section className="max-w-6xl mx-auto my-28" data-aos="fade-up">
-  <div className="flex justify-between items-center mb-12">
-    <h2 className="text-3xl font-bold text-gray-800">Services Mis en Avant</h2>
-    <Link href="/services" className="text-brandOrange font-medium hover:underline">
-      Tous les services →
-    </Link>
-  </div>
-  <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
-    {featuredServices.length > 0 ? (
-      featuredServices.map((service, index) => (
-        <div
-          key={service.id}
-          className="bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
-          data-aos="fade-up"
-          data-aos-delay={index * 100}
-        >
-          <div className="p-6">
-            <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
-            <p className="text-gray-700 mb-4">
-              {stripTags(service.description).length > 160
-                ? stripTags(service.description).substring(0, 160) + "..."
-                : stripTags(service.description)}
-            </p>
-            <p className="text-gray-500 mb-6">
-              <span className="font-bold">Prix :</span> {service.prix} €
-            </p>
-            <Link href={`/services`}>
-              <button className="px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
-                Détails
-              </button>
+        {/* Services mis en avant */}
+        <section className="max-w-6xl mx-auto my-28" data-aos="fade-up">
+          <div className="flex justify-between items-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800">Services Mis en Avant</h2>
+            <Link href="/services" className="text-brandOrange font-medium hover:underline">
+              Tous les services →
             </Link>
           </div>
-        </div>
-      ))
-    ) : (
-      <p className="text-gray-500">Aucun service mis en avant pour le moment.</p>
-    )}
-  </div>
-</section>
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredServices.length > 0 ? (
+              featuredServices.map((service, index) => (
+                <div
+                  key={service.id}
+                  className="bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 100}
+                >
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
+                    <p className="text-gray-700 mb-4">
+                      {stripTagsAndDecode(service.description).length > 160
+                        ? stripTagsAndDecode(service.description).substring(0, 160) + "..."
+                        : stripTagsAndDecode(service.description)}
+                    </p>
+                    <p className="text-gray-500 mb-6">
+                      <span className="font-bold">Prix :</span> {service.prix} €
+                    </p>
+                    <Link href={`/services`}>
+                      <button className="px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
+                        Détails
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">Aucun service mis en avant pour le moment.</p>
+            )}
+          </div>
+        </section>
 
         {/* Articles mis en avant */}
         <section className="max-w-6xl mx-auto my-28" data-aos="fade-up">
@@ -166,7 +166,9 @@ export default function Page() {
                   data-aos-delay={index * 100}
                 >
                   <h3 className="text-xl font-bold text-gray-700">{article.titre}</h3>
-                  <p className="text-gray-600 mt-4">{stripTags(article.contenu).slice(0, 120)}...</p>
+                  <p className="text-gray-600 mt-4">
+                    {stripTagsAndDecode(article.contenu).slice(0, 120)}...
+                  </p>
                   <Link href={`/blog/${article.id}`}>
                     <button className="mt-6 px-6 py-3 bg-[var(--accent)] text-white rounded-full hover:bg-brandOrange/90 transition-all">
                       Lire l'article

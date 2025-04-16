@@ -99,9 +99,9 @@ export default function ServicesPage() {
                       className="text-gray-700 mb-4"
                       dangerouslySetInnerHTML={{
                         __html:
-                          service.description.length > 200
+                          service.description && service.description.length > 200
                             ? service.description.substring(0, 200) + "..."
-                            : service.description,
+                            : service.description || "<em>Aucune description.</em>",
                       }}
                     ></div>
                     <div className="text-gray-500 mb-6">

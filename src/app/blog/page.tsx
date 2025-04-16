@@ -36,6 +36,14 @@ export default function BlogPage() {
     fetchArticles();
   }, [selectedCategory, searchQuery]);
 
+  // 🔧 Fonction pour supprimer les balises HTML ET décoder les entités
+  const stripTagsAndDecode = (html) => {
+    const text = html.replace(/<[^>]+>/g, "");
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = text;
+    return textarea.value;
+  };
+
   return (
     <>
       <Navbar />
@@ -92,7 +100,7 @@ export default function BlogPage() {
               className="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
             >
               <img
-                src={article.couverture} // Assurez-vous que cette URL est correcte
+                src={article.couverture}
                 alt={article.titre}
                 className="w-full h-56 object-cover"
                 loading="lazy"
@@ -103,9 +111,9 @@ export default function BlogPage() {
                   {new Date(article.date_created).toLocaleDateString()}
                 </p>
                 <p className="text-gray-700 mb-6">
-  {article.contenu.replace(/<[^>]+>/g, "").split(" ").slice(0, 20).join(" ")}...
-</p>              
-                  <Link href={`/blog/${article.id}`}>
+                  {stripTagsAndDecode(article.contenu).split(" ").slice(0, 20).join(" ")}...
+                </p>
+                <Link href={`/blog/${article.id}`}>
                   <button className="px-6 py-3 bg-[var(--primary)] text-white rounded-full hover:bg-brandSecondary/90 transition-all">
                     Lire l'article
                   </button>
