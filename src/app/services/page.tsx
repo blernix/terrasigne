@@ -8,29 +8,32 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serviceCategories, setServiceCategories] = useState([]);
-  const [agendaIframe, setAgendaIframe] = useState(""); // 🗓️ Pour l'agenda
+  const [agendaIframe, setAgendaIframe] = useState("");
 
-  // 🔁 Récupération des services
   useEffect(() => {
     async function fetchServices() {
       try {
         const response = await fetch("/api/services");
         const services = await response.json();
 
-        const groupedServices: { [key: string]: any } = {};
+        const groupedServices = {};
         services.forEach(service => {
-          if (!groupedServices[service.categorie_id.titre]) {
-            groupedServices[service.categorie_id.titre] = {
-              category: service.categorie_id.titre,
+          const categoryTitle = service.categorie_id.titre;
+
+          if (!groupedServices[categoryTitle]) {
+            groupedServices[categoryTitle] = {
+              category: categoryTitle,
               description: service.categorie_id.description || "Pas de description disponible.",
               services: [],
             };
           }
-          groupedServices[service.categorie_id.titre].services.push({
+
+          groupedServices[categoryTitle].services.push({
             title: service.titre,
             description: service.description,
             price: service.prix,
             id: service.id,
+            rendez_vous: service.rendez_vous,
           });
         });
 
@@ -43,14 +46,13 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
-  // 🔁 Récupération de l'agenda depuis Directus
   useEffect(() => {
     async function fetchAgenda() {
       try {
         const res = await fetch("/api/agenda");
         const data = await res.json();
         setAgendaIframe(data?.code_integration || "");
-          } catch (error) {
+      } catch (error) {
         console.error("Erreur lors de la récupération de l'agenda :", error);
       }
     }
@@ -58,7 +60,7 @@ export default function ServicesPage() {
     fetchAgenda();
   }, []);
 
-  const openModal = (service: any) => {
+  const openModal = (service) => {
     setSelectedService(service);
     setIsModalOpen(true);
   };
@@ -67,6 +69,13 @@ export default function ServicesPage() {
     setSelectedService(null);
     setIsModalOpen(false);
   };
+
+  function decodeAndStrip(html) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    const decoded = txt.value;
+    return decoded.replace(/<[^>]*>?/gm, "");
+  }
 
   return (
     <>
@@ -85,36 +94,50 @@ export default function ServicesPage() {
           <section key={index} className="mb-16 max-w-7xl mx-auto text-center">
             <h2 className="text-3xl font-semibold text-brandPurple mb-4">{category.category}</h2>
             <div
-  className="text-gray-600 mb-6"
-  dangerouslySetInnerHTML={{ __html: category.description }}
-/>            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 mx-auto">
+              className="text-gray-600 mb-6"
+              dangerouslySetInnerHTML={{ __html: category.description }}
+            />
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch mx-auto">
               {category.services.map((service, serviceIndex) => (
                 <div
                   key={serviceIndex}
-                  className="bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                  className="flex flex-col justify-between h-full bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
                 >
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col justify-between h-full">
                     <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.title}</h3>
-                    <div
-                      className="text-gray-700 mb-4"
-                      dangerouslySetInnerHTML={{
-                        __html:
-                          service.description && service.description.length > 200
-                            ? service.description.substring(0, 200) + "..."
-                            : service.description || "<em>Aucune description.</em>",
-                      }}
-                    ></div>
+                    <p className="text-gray-700 mb-4">
+                      {decodeAndStrip(service.description).length > 200
+                        ? decodeAndStrip(service.description).substring(0, 200) + "..."
+                        : decodeAndStrip(service.description) || "Aucune description."}
+                    </p>
                     <div className="text-gray-500 mb-6">
                       <p>
                         <span className="font-bold">Prix :</span> {service.price} €
                       </p>
                     </div>
-                    <button
-                      onClick={() => openModal(service)}
-                      className="px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all"
-                    >
-                      Détails
-                    </button>
+                    <div className="mt-auto space-y-3">
+                      <button
+                        onClick={() => openModal(service)}
+                        className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all"
+                      >
+                        Détails
+                      </button>
+                      {service.rendez_vous ? (
+                        <a
+                          href="/rendez-vous"
+                          className="block w-full px-6 py-3 bg-brandOrange text-white rounded-full hover:bg-brandOrange/90 transition-all text-center"
+                        >
+                          Prendre rendez-vous
+                        </a>
+                      ) : (
+                        <a
+                          href="/contact"
+                          className="block w-full px-6 py-3 bg-gray-700 text-white rounded-full hover:bg-gray-800 transition-all text-center"
+                        >
+                          Me contacter
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -128,7 +151,6 @@ export default function ServicesPage() {
           service={selectedService}
         />
 
-        {/* 🌟 Affichage dynamique de l'agenda */}
         {agendaIframe && (
           <section className="max-w-5xl mx-auto mt-20 shadow-xl rounded-xl overflow-hidden">
             <div

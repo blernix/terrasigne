@@ -48,7 +48,6 @@ export default function Page() {
     return () => clearInterval(interval);
   }, []);
 
-  // 🔧 Nettoie le HTML et décode les entités
   const stripTagsAndDecode = (html) => {
     const text = html.replace(/<[^>]+>/g, "");
     const textarea = document.createElement("textarea");
@@ -115,16 +114,16 @@ export default function Page() {
               Tous les services →
             </Link>
           </div>
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
             {featuredServices.length > 0 ? (
               featuredServices.map((service, index) => (
                 <div
                   key={service.id}
-                  className="bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
+                  className="flex flex-col justify-between h-full bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
                   data-aos="fade-up"
                   data-aos-delay={index * 100}
                 >
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col justify-between h-full">
                     <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
                     <p className="text-gray-700 mb-4">
                       {stripTagsAndDecode(service.description).length > 160
@@ -134,11 +133,13 @@ export default function Page() {
                     <p className="text-gray-500 mb-6">
                       <span className="font-bold">Prix :</span> {service.prix} €
                     </p>
-                    <Link href={`/services`}>
-                      <button className="px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
-                        Détails
-                      </button>
-                    </Link>
+                    <div className="mt-auto">
+                      <Link href={`/services`}>
+                        <button className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
+                          Détails
+                        </button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               ))
@@ -156,24 +157,28 @@ export default function Page() {
               Tous les articles →
             </Link>
           </div>
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
             {featuredArticles.length > 0 ? (
               featuredArticles.map((article, index) => (
                 <div
                   key={article.id}
-                  className="p-8 bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-shadow"
+                  className="flex flex-col justify-between h-full p-8 bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-shadow"
                   data-aos="fade-up"
                   data-aos-delay={index * 100}
                 >
-                  <h3 className="text-xl font-bold text-gray-700">{article.titre}</h3>
-                  <p className="text-gray-600 mt-4">
-                    {stripTagsAndDecode(article.contenu).slice(0, 120)}...
-                  </p>
-                  <Link href={`/blog/${article.id}`}>
-                    <button className="mt-6 px-6 py-3 bg-[var(--accent)] text-white rounded-full hover:bg-brandOrange/90 transition-all">
-                      Lire l'article
-                    </button>
-                  </Link>
+                  <div className="flex flex-col h-full">
+                    <h3 className="text-xl font-bold text-gray-700 mb-4">{article.titre}</h3>
+                    <p className="text-gray-600 mb-6">
+                      {stripTagsAndDecode(article.contenu).slice(0, 120)}...
+                    </p>
+                    <div className="mt-auto">
+                      <Link href={`/blog/${article.id}`}>
+                        <button className="w-full px-6 py-3 bg-[var(--accent)] text-white rounded-full hover:bg-brandOrange/90 transition-all">
+                          Lire l'article
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               ))
             ) : (

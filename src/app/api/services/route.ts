@@ -8,18 +8,18 @@ export async function GET(req: Request) {
     console.log("🌍 URL API Directus :", process.env.NEXT_PUBLIC_DIRECTUS_API);
 
     const url = new URL(req.url);
-    const featured = url.searchParams.get("featured") === "true"; // Filtre pour les services mis en avant
+    const featured = url.searchParams.get("featured") === "true";
 
     console.log("🔎 Paramètres API - Mis en avant :", featured);
 
-    let filterQuery = "&filter[status][_eq]=published"; // 🔥 Ne récupérer que les services publiés
+    let filterQuery = "&filter[status][_eq]=published";
 
     if (featured) {
-      filterQuery += `&filter[accueil][_eq]=true`; // 🔥 Récupérer uniquement les services mis en avant
+      filterQuery += `&filter[accueil][_eq]=true`;
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,categorie_id.titre,categorie_id.description,status${filterQuery}`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,categorie_id.titre,categorie_id.description,status${filterQuery}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
@@ -33,10 +33,8 @@ export async function GET(req: Request) {
 
     const data = await response.json();
 
-    // 🛠️ Debugging: Vérifier la structure des données récupérées
     console.log("📦 Données détaillées récupérées :", JSON.stringify(data.data, null, 2));
 
-    // 🛠️ Vérifier si categorie_id est bien récupéré pour chaque service
     data.data.forEach(service => {
       if (!service.categorie_id || !service.categorie_id.titre) {
         console.warn(`🚨 Attention : Le service "${service.titre}" n'a pas de catégorie valide !`, service);
