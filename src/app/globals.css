@@ -284,3 +284,56 @@ body {
                                                 }
                                               }
                                             }
+
+
+
+
+                                            
+                                            .swiper {
+                                              padding-bottom: 3rem; /* espace pour la pagination */
+                                              position: relative;
+                                              overflow: visible;
+                                            }
+                                            
+                                            .swiper-pagination {
+                                              bottom: 0 !important;
+                                              left: 50% !important;
+                                              /* transform: translateX(-50%) !important; */
+                                              position: absolute !important;
+                                              z-index: 10;
+                                            }
+                                            
+                                            .swiper-button-next,
+                                            .swiper-button-prev {
+                                              top: 45% !important;
+                                              /* transform: translateY(-50%); */
+                                              background-color: white;
+                                              width: 40px;
+                                              height: 40px;
+                                              border-radius: 50%;
+                                              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                                              z-index: 10;
+                                            }
+                                            
+                                            .swiper-button-next::after,
+                                            .swiper-button-prev::after {
+                                              font-size: 18px !important;
+                                              color: #6B46C1; /* brandPurple */
+                                            }
+                                            
+                                            @media (max-width: 768px) {
+                                              .swiper-button-next,
+                                              .swiper-button-prev {
+                                                display: none !important;
+                                              }
+                                            }
+
+/* Centrage automatique des slides si moins de 3 */
+.custom-swiper-center .swiper-wrapper {
+  justify-content: center;
+}
+
+
+.swiper-wrapper.centered {
+  justify-content: center !important;
+}
