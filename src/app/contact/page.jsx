@@ -2,6 +2,7 @@
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
 import { useState, useEffect } from "react";
+import Image from "next/image"; // Pour utiliser la balise Image de Next.js 👔
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -39,13 +40,25 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-12 mb-12">
+      <main className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-20 mb-12">
         <h1 className="text-5xl font-bold text-gray-800 leading-tight text-center mb-6">
           Contactez-moi
         </h1>
         <p className="text-lg text-gray-600 text-center mb-12">
-          Une question ? Un besoin spécifique ? Laissez-moi un message et je vous  répondrai rapidement.
+          Une question ? Un besoin spécifique ? Laissez-moi un message !
         </p>
+
+        {/* 🌟 Ajout de la photo de profil */}
+        <div className="flex justify-center mb-12">
+          <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-lg">
+            <Image
+              src="/images/photo_profil.jpeg"
+              alt="Photo de profil"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
 
         <section className="bg-white p-8 shadow-lg rounded-lg max-w-3xl mx-auto">
           <h2 className="text-3xl font-semibold text-brandPurple mb-6 text-center">Envoyez-moi un message</h2>
@@ -103,13 +116,13 @@ export default function ContactPage() {
           <h2 className="text-3xl font-semibold text-brandPurple mb-4">Informations de contact</h2>
           <p className="text-lg text-gray-700">📍 Terre de Bas, Guadeloupe</p>
           <p className="text-lg text-gray-700">📧 terrasigne971@gmail.com</p>
-          <a 
-            href="https://wa.me/33621659214" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href="https://wa.me/33621659214"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-lg text-gray-700 hover:text-green-500 transition-all"
           >
-            📞 06 21 65 92 14
+            📞 06 90 51 68 51
           </a>
         </section>
       </main>

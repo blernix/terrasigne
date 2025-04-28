@@ -31,7 +31,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/api/categories/[id]/route.js", "src/app/api/categories/route.js", "src/app/api/articles/route.js", "src/app/api/articles/[id]/route.js"  ],
+, "src/app/api/categories/[id]/route.js", "src/app/api/categories/route.js", "src/app/api/articles/route.js", "src/app/api/articles/[id]/route.js", "src/app/test/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

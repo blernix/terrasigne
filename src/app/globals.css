@@ -330,10 +330,59 @@ body {
 
 /* Centrage automatique des slides si moins de 3 */
 .custom-swiper-center .swiper-wrapper {
+  display: flex;
   justify-content: center;
+
 }
 
 
 .swiper-wrapper.centered {
+  display: flex;
   justify-content: center !important;
+}
+
+
+
+
+.root-path {
+  transition: stroke-dashoffset 0s;
+}
+
+.root-anim {
+  animation: draw-root 1.5s ease-out forwards;
+}
+
+@keyframes draw-root {
+  to { stroke-dashoffset: 0; }
+}
+
+
+
+
+
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(5deg);
+  }
+}
+
+.animate-floatSlow {
+  animation: floatSlow 10s ease-in-out infinite;
+}
+
+
+
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(20px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-floating {
+  animation: floating 6s ease-in-out infinite;
 }

@@ -1,15 +1,19 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { ParallaxBanner, ParallaxProvider } from "react-scroll-parallax";
 import Link from "next/link";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
 import CTASection from "@/components/common/CTASection";
+import HeroSection from "@/components/client/HeroSection";
+import FeaturedServices from "@/components/client/FeaturedServices";
+import FeaturedArticles from "@/components/client/FeaturedArticles";
 
 export default function Page() {
   const [images, setImages] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [featuredServices, setFeaturedServices] = useState([]);
   const [featuredArticles, setFeaturedArticles] = useState([]);
 
@@ -33,167 +37,86 @@ export default function Page() {
     }
 
     fetchData();
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000);
-
     AOS.init({
       duration: 1200,
       easing: "ease-in-out",
       once: false,
       anchorPlacement: "top-bottom",
     });
-
-    return () => clearInterval(interval);
   }, []);
-
-  const stripTagsAndDecode = (html) => {
-    const text = html.replace(/<[^>]+>/g, "");
-    const textarea = document.createElement("textarea");
-    textarea.innerHTML = text;
-    return textarea.value;
-  };
 
   return (
     <>
       <Navbar />
-      <main className="bg-[var(--secondary)] min-h-screen w-full px-8 py-16">
-        <section className="text-center max-w-4xl mx-auto mb-24" data-aos="fade-up">
-          <h1 className="text-6xl font-bold text-gray-800 leading-tight">
-            Bienvenue sur <span className="text-brandOrange font-extrabold">Terrasigne</span>
-          </h1>
-          <p className="text-lg text-gray-600 mt-6">
-            Sophrologie et épanouissement personnel dans un cadre serein et harmonieux.
-          </p>
-          <Link href="/services">
-            <button className="mt-10 px-8 py-4 bg-[var(--primary)] text-white text-lg font-medium rounded-full shadow-md hover:shadow-lg hover:bg-brandSecondary/90 transition-all">
-              Découvrir mes services
-            </button>
-          </Link>
-        </section>
 
-        {/* Carrousel Dynamique */}
-        <section className="relative max-w-6xl mx-auto overflow-hidden rounded-3xl shadow-2xl mb-28" data-aos="fade-up">
-          <div className="flex transition-transform duration-700" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-            {images.map((image, index) => {
-              const imageUrl = image.images?.filename_disk
-                ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${image.images.filename_disk}`
-                : "/images/default-cover.jpg";
+      {/* 🌟 Hero Section */}
+      <HeroSection images={images} />
 
-              return (
-                <div key={image.id} className="w-full flex-shrink-0">
+      {/* 🌟 Parallax Content */}
+      <ParallaxProvider>
+        <ParallaxBanner
+          layers={[
+            {
+              speed: -30,
+              children: (
+                <div className="absolute inset-0 bg-[var(--secondary)]" />
+              ),
+            },
+            {
+              speed: -20,
+              children: (
+                <div className="absolute inset-0 flex items-center justify-center">
                   <img
-                    src={imageUrl}
-                    alt={image.images?.title || `Image ${index + 1}`}
-                    className="w-full h-96 object-cover rounded-3xl"
-                    loading="lazy"
+                    src="/images/logot.png"
+                    alt="Terrasigne Background Logo"
+                    className="w-1/2 md:w-1/3 opacity-50"
                   />
                 </div>
-              );
-            })}
-          </div>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-3">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-5 h-5 rounded-full border ${
-                  index === currentIndex ? "bg-brandPurple border-brandPurple" : "bg-gray-300 border-gray-300"
-                }`}
-              ></button>
-            ))}
-          </div>
-        </section>
+              ),
+            },
+            {
+              speed: -10,
+              children: (
+                <>
+                  {/* 🌿 Feuilles réparties avec plus d'élégance */}
+                  <img
+                    src="/images/feuilles.png"
+                    alt="Feuilles"
+                    className="absolute top-32 left-20 w-24 opacity-20"
+                  />
+                  <img
+                    src="/images/feuilles.png"
+                    alt="Feuilles"
+                    className="absolute bottom-32 right-20 w-24 opacity-20"
+                  />
+                  <img
+                    src="/images/feuilles.png"
+                    alt="Feuilles"
+                    className="absolute top-64 right-32 w-20 opacity-20"
+                  />
+                  <img
+                    src="/images/feuilles.png"
+                    alt="Feuilles"
+                    className="absolute bottom-64 left-32 w-20 opacity-20"
+                  />
+                </>
+              ),
+            },
+          ]}
+          className="w-full"
+        >
+          <main className="relative w-full">
+            <FeaturedServices services={featuredServices} />
+            <FeaturedArticles articles={featuredArticles} />
+            <CTASection
+              title="Explorez votre véritable potentiel"
+              description="Reconnectez-vous à vous-même et vivez l'équilibre naturel de votre être. Commencez votre transformation avec Terrasigne."
+            
+            />
+          </main>
+        </ParallaxBanner>
+      </ParallaxProvider>
 
-        {/* Services mis en avant */}
-        <section className="max-w-6xl mx-auto my-28" data-aos="fade-up">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800">Services Mis en Avant</h2>
-            <Link href="/services" className="text-brandOrange font-medium hover:underline">
-              Tous les services →
-            </Link>
-          </div>
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-            {featuredServices.length > 0 ? (
-              featuredServices.map((service, index) => (
-                <div
-                  key={service.id}
-                  className="flex flex-col justify-between h-full bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
-                  data-aos="fade-up"
-                  data-aos-delay={index * 100}
-                >
-                  <div className="p-6 flex flex-col justify-between h-full">
-                    <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
-                    <p className="text-gray-700 mb-4">
-                      {stripTagsAndDecode(service.description).length > 160
-                        ? stripTagsAndDecode(service.description).substring(0, 160) + "..."
-                        : stripTagsAndDecode(service.description)}
-                    </p>
-                    <p className="text-gray-500 mb-6">
-                      <span className="font-bold">Prix :</span> {service.prix} €
-                    </p>
-                    <div className="mt-auto">
-                      <Link href={`/services`}>
-                        <button className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
-                          Détails
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">Aucun service mis en avant pour le moment.</p>
-            )}
-          </div>
-        </section>
-
-        {/* Articles mis en avant */}
-        <section className="max-w-6xl mx-auto my-28" data-aos="fade-up">
-          <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800">Articles en Vedette</h2>
-            <Link href="/blog" className="text-brandOrange font-medium hover:underline">
-              Tous les articles →
-            </Link>
-          </div>
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
-            {featuredArticles.length > 0 ? (
-              featuredArticles.map((article, index) => (
-                <div
-                  key={article.id}
-                  className="flex flex-col justify-between h-full p-8 bg-white shadow-lg rounded-xl border border-gray-200 hover:shadow-2xl transition-shadow"
-                  data-aos="fade-up"
-                  data-aos-delay={index * 100}
-                >
-                  <div className="flex flex-col h-full">
-                    <h3 className="text-xl font-bold text-gray-700 mb-4">{article.titre}</h3>
-                    <p className="text-gray-600 mb-6">
-                      {stripTagsAndDecode(article.contenu).slice(0, 120)}...
-                    </p>
-                    <div className="mt-auto">
-                      <Link href={`/blog/${article.id}`}>
-                        <button className="w-full px-6 py-3 bg-[var(--accent)] text-white rounded-full hover:bg-brandOrange/90 transition-all">
-                          Lire l'article
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500">Aucun article mis en avant pour le moment.</p>
-            )}
-          </div>
-        </section>
-
-        <CTASection
-          title="Prêt à commencer votre voyage ?"
-          description="Rejoignez notre communauté et transformez votre vie dès aujourd'hui !"
-          buttonText="S'abonner à la newsletter"
-          buttonLink="/contact"
-        />
-      </main>
       <Footer />
     </>
   );

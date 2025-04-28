@@ -47,14 +47,14 @@ export default function BlogPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-[var(--secondary)] min-h-screen px-8 py-16">
+      <main className="bg-[var(--secondary)] min-h-screen mt-11 px-8 py-16">
         {/* Titre de la page */}
         <section className="text-center max-w-4xl mx-auto mb-24">
           <h1 className="text-5xl font-bold text-gray-800 leading-tight mb-4">
             Blog <span className="text-brandOrange">Terrasigne</span>
           </h1>
           <p className="text-lg text-gray-600">
-            Retrouvez des articles inspirants et des conseils pratiques pour équilibrer corps et esprit.
+          Retrouvez des articles, témoignages pour partager, découvrir, mieux se connaître SOI et évoluer ensemble vers plus d'équiLIBRE
           </p>
         </section>
 
