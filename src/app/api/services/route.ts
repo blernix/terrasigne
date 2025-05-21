@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,categorie_id.titre,categorie_id.description,status${filterQuery}`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,categorie_id.titre,categorie_id.description,categorie_id.couverture.filename_disk,status${filterQuery}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
@@ -33,15 +33,25 @@ export async function GET(req: Request) {
 
     const data = await response.json();
 
-    console.log("📦 Données détaillées récupérées :", JSON.stringify(data.data, null, 2));
+    const formattedServices = data.data.map((service: any) => ({
+      id: service.id,
+      titre: service.titre,
+      description: service.description,
+      prix: service.prix,
+      rendez_vous: service.rendez_vous,
+      status: service.status,
+      categorie: {
+        titre: service.categorie_id?.titre || "Sans catégorie",
+        description: service.categorie_id?.description || "",
+        couverture: service.categorie_id?.couverture?.filename_disk
+          ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${service.categorie_id.couverture.filename_disk}`
+          : "/images/default-cover.jpg",
+      },
+    }));
 
-    data.data.forEach(service => {
-      if (!service.categorie_id || !service.categorie_id.titre) {
-        console.warn(`🚨 Attention : Le service "${service.titre}" n'a pas de catégorie valide !`, service);
-      }
-    });
+    console.log("📦 Services formatés :", JSON.stringify(formattedServices, null, 2));
 
-    return NextResponse.json(data.data);
+    return NextResponse.json(formattedServices);
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des services :", error);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });

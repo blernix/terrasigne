@@ -12,6 +12,11 @@
   --accent: #FFD1A4; /* Orange Pêche */
   --highlight: #C9C5FF; /* Lavande Pastel */
   --test: #dbefe1;
+  --buttontest:#8DB498;
+  --buttoncontact : #358598;
+  --main : #F4EDE1;
+  --description : #C7DECE;
+  --bgservice : #CCDBBB;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -289,19 +294,41 @@ body {
 
 
                                             
-                                            .swiper {
-                                              padding-bottom: 3rem; /* espace pour la pagination */
-                                              position: relative;
-                                              overflow: visible;
-                                            }
-                                            
-                                            .swiper-pagination {
-                                              bottom: 0 !important;
-                                              left: 50% !important;
-                                              /* transform: translateX(-50%) !important; */
-                                              position: absolute !important;
-                                              z-index: 10;
-                                            }
+                                        /* Pagination bullets fixes, bien rondes */
+.swiper-pagination-bullet {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 9999px;
+  background-color: #ccc;
+  margin: 0 4px !important;
+  flex-shrink: 0; /* Empêche de se compresser */
+  transition: all 0.3s ease;
+}
+
+.swiper-pagination-bullet-active {
+  transform: scale(1.2);
+  background-color: var(--accent, #f97316);
+}
+
+/* Empêche les bullets de disparaître en overflow */
+.swiper-pagination {
+  min-height: 24px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto; /* Utile si beaucoup de bullets */
+  scrollbar-width: none; /* Firefox */
+}
+
+.swiper-pagination::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.swiper-slide {
+  transition-property: opacity !important;
+  transition-duration: 0.5s !important; /* ou ce que tu veux */
+  transition-timing-function: ease-out !important;
+}
                                             
                                             .swiper-button-next,
                                             .swiper-button-prev {
@@ -341,6 +368,13 @@ body {
   justify-content: center !important;
 }
 
+/* globals.css */
+.fade-slide {
+  opacity: 0;
+}
+.swiper-slide-active.fade-slide {
+  opacity: 1;
+}
 
 
 

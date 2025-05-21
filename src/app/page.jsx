@@ -59,7 +59,8 @@ export default function Page() {
             {
               speed: -30,
               children: (
-                <div className="absolute inset-0 bg-[var(--secondary)]" />
+                // <div className="absolute inset-0 bg-[var(--secondary)]" />
+                <div className="absolute inset-0 bg-white" />
               ),
             },
             {

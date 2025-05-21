@@ -39,20 +39,23 @@ export async function GET(req: Request) {
       throw new Error(`❌ Erreur API: ${response.status}`);
     }
 
-    const data = await response.json();
+ const { data: articles, meta } = await response.json();
 
-    const formattedArticles = data.data.map((article: any) => ({
-      id: article.id,
-      titre: article.titre,
-      contenu: article.contenu,
-      date_created: article.date_created, // pas besoin de la formater ici, tu le fais dans le composant
-      categorie: article.categorie_id?.titre || "Sans catégorie",
-      couverture: article.photo_couverture?.filename_disk
-        ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${article.photo_couverture.filename_disk}`
-        : "/images/default-cover.jpg",
-    }));
+const formattedArticles = articles.map((article: any) => ({
+  id: article.id,
+  titre: article.titre,
+  contenu: article.contenu,
+  date_created: article.date_created,
+  categorie: article.categorie_id?.titre || "Sans catégorie",
+  couverture: article.photo_couverture?.filename_disk
+    ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${article.photo_couverture.filename_disk}`
+    : "/images/default-cover.jpg",
+}));
 
-    return NextResponse.json(formattedArticles);
+return NextResponse.json({
+  articles: formattedArticles,
+  total: meta?.total_count ?? formattedArticles.length,
+});
   } catch (error) {
     console.error("❌ Erreur lors de la récupération des articles :", error);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });

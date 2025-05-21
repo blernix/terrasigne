@@ -2,7 +2,7 @@
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
 import { useState, useEffect } from "react";
-import Image from "next/image"; // Pour utiliser la balise Image de Next.js 👔
+import Image from "next/image";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,14 +13,35 @@ export default function ContactPage() {
   });
 
   const [services, setServices] = useState([]);
+  const [sending, setSending] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Votre message a bien été envoyé ! (simulation)");
+    setSending(true);
+
+    try {
+      const response = await fetch("/api/nodemailer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("✨ Merci pour votre message ! Je vous répondrai dans les plus brefs délais ! ✨");
+        setFormData({ name: "", email: "", message: "", service: "" });
+      } else {
+        alert("❌ Une erreur est survenue lors de l'envoi.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'envoi du formulaire :", error);
+      alert("❌ Une erreur inattendue est survenue.");
+    } finally {
+      setSending(false);
+    }
   };
 
   useEffect(() => {
@@ -48,7 +69,6 @@ export default function ContactPage() {
           Une question ? Un besoin spécifique ? Laissez-moi un message !
         </p>
 
-        {/* 🌟 Ajout de la photo de profil */}
         <div className="flex justify-center mb-12">
           <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-lg">
             <Image
@@ -61,7 +81,9 @@ export default function ContactPage() {
         </div>
 
         <section className="bg-white p-8 shadow-lg rounded-lg max-w-3xl mx-auto">
-          <h2 className="text-3xl font-semibold text-brandPurple mb-6 text-center">Envoyez-moi un message</h2>
+          <h2 className="text-3xl font-semibold text-brandPurple mb-6 text-center">
+            Envoyez-moi un message
+          </h2>
           <form className="grid gap-4" onSubmit={handleSubmit}>
             <input
               type="text"
@@ -90,7 +112,7 @@ export default function ContactPage() {
             >
               <option value="">Sélectionnez un service</option>
               {services.map((service) => (
-                <option key={service.id} value={service.id}>
+                <option key={service.id} value={service.titre}>
                   {service.titre}
                 </option>
               ))}
@@ -105,15 +127,18 @@ export default function ContactPage() {
             ></textarea>
             <button
               type="submit"
+              disabled={sending}
               className="bg-[var(--primary)] text-white py-3 px-6 rounded-lg hover:bg-brandSecondary/90 transition-all"
             >
-              Envoyer
+              {sending ? "Envoi en cours..." : "Envoyer"}
             </button>
           </form>
         </section>
 
         <section className="mt-12 text-center">
-          <h2 className="text-3xl font-semibold text-brandPurple mb-4">Informations de contact</h2>
+          <h2 className="text-3xl font-semibold text-brandPurple mb-4">
+            Informations de contact
+          </h2>
           <p className="text-lg text-gray-700">📍 Terre de Bas, Guadeloupe</p>
           <p className="text-lg text-gray-700">📧 terrasigne971@gmail.com</p>
           <a

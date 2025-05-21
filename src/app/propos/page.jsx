@@ -186,8 +186,7 @@ export default function Propos() {
       Quand le soin devient engagement personnel
     </h3>
     <p className="text-gray-700 leading-relaxed">
-      Suite à mon parcours professionnel, je suis touchée par la détresse physique, émotionnelle et mentale des
-      personnels hospitaliers et la solitude et les maux chroniques dont souffrent les patients.
+    Suite à mon parcours professionnel, je suis devenue particulièrement sensible à la détresse physique, émotionnelle et mentale, la solitude et les maux chroniques dont souffrent les personnels et les patients.
       Dans mon histoire personnelle, j'ai été transformée par deux épreuves. Le grand défi d'accompagner mon père
       tout au long de sa maladie grave et fulgurante jusqu'à sa fin de vie fut douloureux et formateur.
       De mon côté, j'ai expérimenté les répercussions physiques de plusieurs années de manque d'écoute et de respect
@@ -260,21 +259,20 @@ export default function Propos() {
         </section>
 
         {/* Citation avec photo */}
-        <section className="bg-brandOrange text-white p-8 rounded-lg shadow-lg mb-12 flex flex-col md:flex-row items-center gap-6">
-          <img
-            src="/images/photoCitation.jpeg"
-            alt="Cindy Guillaume"
-            className="w-40 h-40 object-cover object-top rounded-full shadow-md"
-          />
-          <div className="text-center md:text-left">
-            <p className="text-xl font-semibold mb-4">
-              "Terrasigne est né de mon envie d'offrir à chacun une expérience de ressourcement unique et sur-mesure.
-              Mon objectif est de vous aider à retrouver votre équilibre physique, émotionnel et énergétique."
-            </p>
-            <p className="text-lg font-medium">- Cindy Guillaume</p>
-          </div>
-        </section>
-
+        <section className="bg-brandOrange text-white rounded-lg shadow-lg mb-8 flex flex-col md:flex-row items-center md:-mx-8">
+        <img
+  src="/images/photoCitation.jpeg"
+  alt="Cindy Guillaume"
+  className="w-full max-h-80 md:w-56 md:h-56 object-cover rounded-lg shadow-md flex-shrink-0 object-[50%_50%] md:object-[50%_30%]"
+/>
+  <div className="py-4 px-8 text-center md:text-left flex-1">
+    <p className="text-xl font-semibold mb-4">
+      "Terrasigne est né de mon envie d'offrir à chacun une expérience de ressourcement unique et sur-mesure.
+      Mon objectif est de vous aider à retrouver votre équilibre physique, émotionnel et énergétique."
+    </p>
+    <p className="text-lg font-medium">- Cindy Guillaume</p>
+  </div>
+</section>
         {/* Call-to-action */}
         <section className="text-center">
           <h2 className="text-3xl font-semibold text-brandPurple mb-6">Envie d’en savoir plus ?</h2>

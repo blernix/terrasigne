@@ -37,7 +37,6 @@ export default function Navbar() {
       }`}
     >
       <nav className="flex items-center justify-between max-w-7xl mx-auto p-4 md:px-8">
-        
         {/* 🌟 Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <Image
@@ -69,29 +68,33 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* 🌟 Menu Mobile */}
-      {isOpen && (
-        <div className="md:hidden absolute top-[64px] left-0 w-full backdrop-blur-3xl bg-white/50 border-t border-white/20 shadow-md flex flex-col items-center space-y-6 py-8">
-          <Link href="/" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            Accueil
-          </Link>
-          <Link href="/propos" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            À propos
-          </Link>
-          <Link href="/services" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            Services
-          </Link>
-          <Link href="/rendez-vous" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            Réservation
-          </Link>
-          <Link href="/blog" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            Blog
-          </Link>
-          <Link href="/contact" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
-            Contact
-          </Link>
-        </div>
-      )}
+      {/* 🌟 Menu Mobile (toujours présent pour permettre l'animation) */}
+      <div
+        className={`md:hidden absolute top-full left-0 w-full backdrop-blur-3xl bg-white/50 border-t border-white/20 shadow-md flex flex-col items-center space-y-6 transform transition-all duration-500 ${
+          isOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto py-8 ease-out"
+            : "opacity-0 -translate-y-6 pointer-events-none py-0 ease-in"
+        }`}
+      >
+        <Link href="/" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          Accueil
+        </Link>
+        <Link href="/propos" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          À propos
+        </Link>
+        <Link href="/services" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          Services
+        </Link>
+        <Link href="/rendez-vous" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          Réservation
+        </Link>
+        <Link href="/blog" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          Blog
+        </Link>
+        <Link href="/contact" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+          Contact
+        </Link>
+      </div>
     </header>
   );
 }
