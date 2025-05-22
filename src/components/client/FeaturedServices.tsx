@@ -35,7 +35,7 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
             >
               <div className="p-6 flex flex-col justify-between h-full">
                 <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
-                <p className="text-gray-700 mb-4">
+                <p className="text-gray-700 text-lg mb-4">
                   {stripTagsAndDecode(service.description).length > 160
                     ? stripTagsAndDecode(service.description).substring(0, 160) + "..."
                     : stripTagsAndDecode(service.description)}
@@ -45,7 +45,7 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
                 </p>
                 <div className="mt-auto">
                   <Link href={`/services`}>
-                    <button className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 transition-all">
+                    <button className="w-full px-6 py-3 bg-[var(--buttontest)] text-white rounded-full hover:bg-brandSecondary/90 transition-all">
                       Détails
                     </button>
                   </Link>

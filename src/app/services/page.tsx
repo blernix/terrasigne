@@ -482,7 +482,7 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
 
     {/* Swiper des services */}
  <div className="w-full md:w-1/2">
-  <div className="relative w-full ml-2">
+  <div className="relative w-full ">
     <Swiper
       modules={[Navigation, Pagination, EffectFade]}
       // effect="fade"

@@ -108,49 +108,65 @@ useEffect(() => {
             </p>
           </div>
         </section>
+<section className="py-16 px-6 mb-16 mx-auto max-w-4xl">
+  {/* Séparation visuelle */}
+  <div className="h-px bg-gray-200 mb-12 w-3/4 mx-auto" />
 
-        <section className="py-12 px-6 mb-16 mx-4">
-          <div className="max-w-3xl mx-auto">
-            <input
-              type="text"
-              placeholder="Rechercher un article..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full px-6 py-3 mb-8 border border-gray-300 rounded-full shadow-md focus:outline-none focus:ring-2 focus:ring-brandOrange transition-all"
-            />
+  {/* Texte introductif */}
+  <div className="text-center mb-10 px-4">
+    <h2 className="text-3xl font-bold text-gray-800 mb-2">Trouvez ce qui vous inspire</h2>
+    <p className="text-gray-600 text-base sm:text-lg">
+      Recherchez un mot-clé ou explorez les différentes catégories d’articles.
+    </p>
+  </div>
 
-            <div className="flex flex-wrap gap-4 justify-center">
-              <button
-                onClick={() => {
-                  setSelectedCategory("");
-                  setCurrentPage(1);
-                }}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  selectedCategory === "" ? "bg-brandOrange text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                }`}
-              >
-                Toutes les catégories
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setSelectedCategory(cat.id);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 py-2 rounded-full transition-colors ${
-                    selectedCategory === cat.id ? "bg-brandOrange text-white" : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                  }`}
-                >
-                  {cat.titre}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
+  {/* Barre de recherche */}
+  <input
+    type="text"
+    placeholder="Rechercher un article..."
+    value={searchQuery}
+    onChange={(e) => {
+      setSearchQuery(e.target.value);
+      setCurrentPage(1);
+    }}
+    className="w-full px-6 py-3 mb-8 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-brandOrange transition-all"
+  />
+
+  {/* Filtres catégories */}
+  <div className="flex flex-wrap gap-4 justify-center">
+    <button
+      onClick={() => {
+        setSelectedCategory("");
+        setCurrentPage(1);
+      }}
+      className={`px-4 py-2 rounded-full transition-colors ${
+        selectedCategory === ""
+          ? "bg-brandOrange text-white"
+          : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+      }`}
+    >
+      Toutes les catégories
+    </button>
+    {categories.map((cat) => (
+      <button
+        key={cat.id}
+        onClick={() => {
+          setSelectedCategory(cat.id);
+          setCurrentPage(1);
+        }}
+        className={`px-4 py-2 rounded-full transition-colors ${
+          selectedCategory === cat.id
+            ? "bg-brandOrange text-white"
+            : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+        }`}
+      >
+        {cat.titre}
+      </button>
+    ))}
+  </div>
+    <div className="h-px bg-gray-200 my-12 w-3/4 mx-auto" />
+
+</section>
 
         <section className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 max-w-7xl px-7 py-8 mx-2">
           <AnimatePresence mode="wait">

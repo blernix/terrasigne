@@ -141,14 +141,14 @@ export default function ContactPage() {
           </h2>
           <p className="text-lg text-gray-700">📍 Terre de Bas, Guadeloupe</p>
           <p className="text-lg text-gray-700">📧 terrasigne971@gmail.com</p>
-          <a
-            href="https://wa.me/33621659214"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-lg text-gray-700 hover:text-green-500 transition-all"
-          >
-            📞 06 90 51 68 51
-          </a>
+         <a
+  href="https://wa.me/590690516851"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-lg text-gray-700 hover:text-green-500 transition-all"
+>
+  📞 +590 690 51 68 51
+</a>
         </section>
       </main>
       <Footer />
