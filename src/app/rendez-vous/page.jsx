@@ -24,7 +24,7 @@ export default function RendezVousPage() {
     <>
       <Navbar />
 
-      <main className="bg-[var(--secondary)] min-h-screen px-8 py-16">
+      <main className="bg-[var(--secondary)] min-h-screen mt-12 px-8 py-16">
         <section className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-5xl font-bold text-gray-800 leading-tight mb-6">
             Prendre <span className="text-brandOrange">Rendez-vous</span>

@@ -403,7 +403,7 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
   return (
     <>
       <Navbar />
-      <main className="bg-[var(--main)] min-h-screen">
+      <main className="bg-[var(--main)]  min-h-screen">
 <section
   className={`relative min-h-screen  flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-center gap-12 bg-cover bg-center transition-all duration-1000 ${
     scrolled ? "mx-5 rounded-3xl shadow-xl" : "mx-0"
@@ -426,7 +426,7 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
 
   {/* ---- CONTENU TEXTE ---- */}
   <div className="max-w-xl px-6 md:px-8 py-10 text-center z-10">
-    <h1 className="text-4xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
+    <h1 className="text-4xl md:text-7xl font-bold text-gray-800 mt-14 mb-6 leading-tight">
       Mes <span className="text-[var(--accent)]">Services</span>
     </h1>
     <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
