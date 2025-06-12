@@ -70,7 +70,7 @@ export default function Navbar() {
 
       {/* 🌟 Menu Mobile (toujours présent pour permettre l'animation) */}
       <div
-        className={`md:hidden absolute top-full left-0 w-full backdrop-blur-3xl bg-white/50 border-t border-white/20 shadow-md flex flex-col items-center space-y-6 transform transition-all duration-500 ${
+        className={`md:hidden absolute top-full left-0 w-full backdrop-blur-3xl bg-white/80 border-t border-white/20 shadow-2xl flex flex-col items-center space-y-6 transform transition-all duration-500 ${
           isOpen
             ? "opacity-100 translate-y-0 pointer-events-auto py-8 ease-out"
             : "opacity-0 -translate-y-6 pointer-events-none py-0 ease-in"

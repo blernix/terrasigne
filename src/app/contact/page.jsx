@@ -66,23 +66,23 @@ export default function ContactPage() {
           Contactez-moi
         </h1>
         <p className="text-lg text-gray-600 text-center mb-12">
-          Une question ? Un besoin spécifique ? Laissez-moi un message !
+          Une question ? Un besoin spécifique ? Laisse moi un message !
         </p>
 
         <div className="flex justify-center mb-12">
           <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-lg">
-            <Image
-              src="/images/photo_profil.jpeg"
-              alt="Photo de profil"
-              fill
-              className="object-cover"
-            />
+          <Image
+  src="/images/photo_profil.jpeg"
+  alt="Photo de profil"
+  fill
+  className="object-cover object-top"
+/>
           </div>
         </div>
 
         <section className="bg-white p-8 shadow-lg rounded-lg max-w-3xl mx-auto">
           <h2 className="text-3xl font-semibold text-brandPurple mb-6 text-center">
-            Envoyez-moi un message
+            Envoie-moi un message
           </h2>
           <form className="grid gap-4" onSubmit={handleSubmit}>
             <input
@@ -110,7 +110,7 @@ export default function ContactPage() {
               required
               className="border p-3 rounded-lg w-full"
             >
-              <option value="">Sélectionnez un service</option>
+              <option value="">Sélectionne un service</option>
               {services.map((service) => (
                 <option key={service.id} value={service.titre}>
                   {service.titre}
@@ -119,7 +119,7 @@ export default function ContactPage() {
             </select>
             <textarea
               name="message"
-              placeholder="Votre message..."
+              placeholder="ton message..."
               className="border p-3 rounded-lg w-full h-32"
               value={formData.message}
               onChange={handleChange}

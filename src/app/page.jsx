@@ -111,7 +111,7 @@ export default function Page() {
             <FeaturedArticles articles={featuredArticles} />
             <CTASection
               title="Explorez votre véritable potentiel"
-              description="Reconnectez-vous à vous-même et vivez l'équilibre naturel de votre être. Commencez votre transformation avec Terrasigne."
+              description="Reconnecte-toi à toi-même et vis l’équilibre naturel de ton être. Commence ta transformation avec Terrasigne."
             
             />
           </main>

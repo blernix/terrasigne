@@ -210,8 +210,8 @@ export default function Propos() {
       vers la reconversion qui me mène aujourd'hui à t’ouvrir cette porte.
       <br /><br />
       Cette opportunité, c'est te remettre au cœur de ta vie, pour véritablement rayonner, inspirer et colorer le monde
-      selon ta lumière unique, ta sonorité. C'est se sentir aimé pour qui tu es vraiment.
-      <strong> Mon engagement :</strong> T'aider à réguler ton équilibre naturel, physique et émotionnel,
+      selon ta lumière unique, ta sonorité. C'est te sentir aimé pour qui tu es vraiment.
+      <strong> Mon engagement :</strong> <br /><br />T'aider à réguler ton équilibre naturel, physique et émotionnel,
       avec respect, présence, bienveillance et authenticité.
     </p>
   </div>
@@ -224,7 +224,7 @@ export default function Propos() {
           </h2>
           <p className="text-gray-700 leading-relaxed text-center max-w-3xl mx-auto mb-8">
             Terrasigne propose un accompagnement personnalisé alliant techniques relationnelles, corporelles et énergétiques,
-            pour répondre aux besoins de chacun avec sens, justesse et douceur.
+            pour répondre aux besoins de chacun avec sens, compassion et douceur.
           </p>
 
           <div className="grid gap-8 sm:grid-cols-2">
@@ -268,7 +268,7 @@ export default function Propos() {
   <div className="py-4 px-8 text-center md:text-left flex-1">
     <p className="text-xl font-semibold mb-4">
       "Terrasigne est né de mon envie d'offrir à chacun une expérience de ressourcement unique et sur-mesure.
-      Mon objectif est de vous aider à retrouver votre équilibre physique, émotionnel et énergétique."
+      Mon objectif est de t'aider à retrouver ton équilibre physique, émotionnel et énergétique."
     </p>
     <p className="text-lg font-medium">- Cindy Guillaume</p>
   </div>
