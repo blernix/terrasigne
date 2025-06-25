@@ -27,7 +27,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
         <h1 className="text-5xl md:text-6xl font-bold text-gray-800 leading-tight">
           Bienvenue sur <span className="text-brandOrange font-extrabold">Terrasigne</span>
         </h1>
-        <p className="text-lg text-black mt-6 max-w-2xl mx-auto">
+        <p className="text-lg text-white font-bold mt-6 max-w-2xl mx-auto">
           Se relier à SOI pour vivre l'équiLIBRE et la joie D'ETRE
         </p>
         <Link href="/services" className="inline-block mt-8">

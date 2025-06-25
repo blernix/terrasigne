@@ -37,7 +37,7 @@ export async function GET(
       date_created: data.date_created,
       couverture: data.photo_couverture?.filename_disk
         ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${data.photo_couverture.filename_disk}`
-        : "/images/default-cover.jpg",
+        : undefined,
     };
 
     return NextResponse.json(formatted);

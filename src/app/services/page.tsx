@@ -12,6 +12,7 @@ import "swiper/css/pagination";
 import { useMediaQuery } from "react-responsive";
 import { Parallax } from 'react-scroll-parallax';
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 
 
@@ -118,13 +119,28 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
     <h1 className="text-4xl md:text-7xl font-bold text-gray-800 mt-14 mb-6 leading-tight">
       Mes <span className="text-brandOrange">Services</span>
     </h1>
-    <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
-      Découvrez un ensemble de prestations alliant techniques relationnelles,
-      corporelles et énergétiques, adaptées à vos besoins.
-      <br className="hidden md:block" />
-       <br /><br />Laisse toi guider, je te propose un rendez‑vous conseil gratuit,
-      pour évaluer la pratique qui te convient.
-    </p>
+ <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
+  Découvrez un ensemble de prestations alliant techniques relationnelles,
+  corporelles et énergétiques, adaptées à vos besoins.
+  <br className="hidden md:block" />
+  <br /><br />
+  Laisse toi guider, je te propose d’évaluer la pratique qui te convient.
+  
+  <Link href="/contact" className="w-full block max-w-xs mx-auto">
+    <button
+      className="w-full px-4 py-2 border border-brandSecondary text-brandSecondary rounded-full text-sm hover:bg-[var(--buttontest)] hover:text-white transition"
+    >
+      Rendez-vous conseil gratuit
+    </button>
+  </Link>
+</p>
+{/* Citation stylisée */}
+<div className="relative mx-auto max-w-2xl text-center mt-10 px-4">
+  <p className="text-lg italic text-gray-600 font-light leading-relaxed relative before:absolute before:content-['“'] before:text-5xl before:-top-6 before:-left-4 before:text-brandOrange after:absolute after:content-['”'] after:text-5xl after:-bottom-6 after:-right-4 after:text-brandOrange">
+    Chacun a la responsabilité de faire croître la paix en lui afin que la paix devienne générale.
+  </p>
+  <p className="text-sm text-gray-500 mt-2">– Le Dalaï Lama</p>
+</div>
   </div>
 </section>
         {serviceCategories.map((cat, idx) => {
@@ -171,7 +187,7 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
 
     {/* Swiper des services */}
  <div className="w-full md:w-1/2">
-  <div className="relative w-full ">
+  <div className="relative w-full px-4 ">
     <Swiper
       modules={[Navigation, Pagination, EffectFade]}
       // effect="fade"
@@ -252,30 +268,30 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
         {!isMobile && (
           <>
             <button
-              className={`swiper-button-prev prev-${idx} absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
+              className={` prev-${idx} absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
               aria-label="Précédent"
             >
-              <svg className="w-5 h-5 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <svg className="w-7 h-7 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
-              className={`swiper-button-next next-${idx} absolute top-1/2 right-0 -translate-y-1/2 translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
+              className={` next-${idx} absolute top-1/2 right-0 -translate-y-1/2 translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
               aria-label="Suivant"
             >
-              <svg className="w-5 h-5 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <svg className="w-7 h-7 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </>
         )}
 
-        {isMobile && (
-          <div
-            className={`swiper-pagination pagination-${idx} mt-4 flex justify-center w-full md:hidden z-10`}
-            style={{ minHeight: "24px" }}
-          />
-        )}
+        
+        <div
+  className={`swiper-pagination pagination-${idx} mt-4 flex justify-center w-full z-10`}
+  style={{ minHeight: "24px" }}
+/>
+        
       </div>
     </div>
   </div>

@@ -126,10 +126,7 @@ export default function Propos() {
         <h1 className="text-5xl font-bold text-gray-800 leading-tight text-center mb-6">
           À la découverte de <span className="text-brandOrange">Cindy Guillaume</span> & Terrasigne
         </h1>
-        <p className="text-lg text-gray-600 text-center mb-12">
-          Se relier à soi pour se relier à tout
-        </p>
-
+        
         {/* Section Présentation */}
         {/* Section Présentation */}
 {/* Section Présentation */}
@@ -153,6 +150,11 @@ export default function Propos() {
         qui est de plus en plus valorisée dans la société, même dans le domaine de la santé.
         Guidée par mon cœur, j'ai choisi de placer L’HUMAIN au cœur de ma pratique.
       </p>
+   <div className="relative mx-auto max-w-2xl text-center mt-14 mb-1 px-4">
+  <p className="text-xl md:text-2xl italic text-gray-700 font-light leading-relaxed relative before:absolute before:content-['“'] before:text-5xl before:-top-6 before:-left-4 before:text-brandOrange after:absolute after:content-['”'] after:text-5xl after:-bottom-6 after:-right-4 after:text-brandOrange">
+    Se relier à soi pour se relier à tout
+  </p>
+</div>
     </div>
   </div>
 </section>
@@ -204,7 +206,7 @@ export default function Propos() {
       Une invitation à te retrouver
     </h3>
     <p className="text-gray-700 leading-relaxed">
-      Si tu veux en savoir plus sur mon parcours, je t'invite à découvrir l'article suivant : LIEN.
+      Si tu veux en savoir plus sur mon parcours, je t'invite à découvrir l'article suivant : "Mon parcours" présent prochainement sur mon blog.
       <br /><br />
       À travers mon propre rééquilibrage physique, émotionnel, mental et spirituel, j'ai cheminé, pas à pas,
       vers la reconversion qui me mène aujourd'hui à t’ouvrir cette porte.

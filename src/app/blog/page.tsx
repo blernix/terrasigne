@@ -169,18 +169,23 @@ export default function BlogPage() {
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   className="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-transform"
                 >
-                  <img
-                    src={article.couverture}
-                    alt={article.titre}
-                    className="w-full h-56 object-cover"
-                    loading="lazy"
-                  />
+               {article.couverture && (
+  <img
+    src={article.couverture}
+    alt={article.titre}
+    className="w-full h-56 object-cover"
+    loading="lazy"
+  />
+)}
                   <div className="p-6">
                     <h2 className="text-2xl font-semibold text-brandPurple mb-2">{article.titre}</h2>
                     <p className="text-sm text-gray-500 mb-4">{new Date(article.date_created).toLocaleDateString()}</p>
                     <p className="text-gray-700 mb-6">
-                      {stripTagsAndDecode(article.contenu).split(" ").slice(0,20).join(" ")}...
-                    </p>
+  {stripTagsAndDecode(article.contenu)
+    .split(" ")
+    .slice(0, article.couverture ? 20 : 90)
+    .join(" ")}...
+</p>
                     <Link href={`/blog/${article.id}`}>
                       <button className="px-6 py-3 bg-[var(--primary)] text-white rounded-full">Lire l'article</button>
                     </Link>

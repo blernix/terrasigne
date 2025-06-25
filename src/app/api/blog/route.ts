@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       categorie: article.categorie_id?.titre || "Sans catégorie",
       couverture: article.photo_couverture?.filename_disk
         ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${article.photo_couverture.filename_disk}`
-        : "/images/default-cover.jpg",
+        : undefined,
     }));
 
     return NextResponse.json({

@@ -52,6 +52,8 @@ export default function Page() {
       {/* 🌟 Hero Section */}
       <HeroSection images={images} />
 
+
+
       {/* 🌟 Parallax Content */}
       <ParallaxProvider>
         <ParallaxBanner
@@ -68,7 +70,7 @@ export default function Page() {
               children: (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <img
-                    src="/images/logot.png"
+                    src="/images/logoterra.png"
                     alt="Terrasigne Background Logo"
                     className="w-1/2 md:w-1/3 opacity-50"
                   />
@@ -107,6 +109,13 @@ export default function Page() {
           className="w-full"
         >
           <main className="relative w-full">
+                  {/* Citation stylisée */}
+<div className="relative mx-auto max-w-2xl text-center mt-20 px-4">
+  <p className="text-lg italic text-gray-600 font-light leading-relaxed relative before:absolute before:content-['“'] before:text-5xl before:-top-6 before:-left-4 before:text-brandOrange after:absolute after:content-['”'] after:text-5xl after:-bottom-6 after:-right-4 after:text-brandOrange">
+   La satisfaction intérieure est en vérité ce que nous pouvons espérer de plus grand.
+  </p>
+  <p className="text-sm text-gray-500 mt-2">– Baruch Spinoza / Ethique</p>
+</div>
             <FeaturedServices services={featuredServices} />
             <FeaturedArticles articles={featuredArticles} />
             <CTASection

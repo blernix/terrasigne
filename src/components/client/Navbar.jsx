@@ -40,7 +40,7 @@ export default function Navbar() {
         {/* 🌟 Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <Image
-            src="/images/logot.png"
+            src="/images/logoterra.png"
             alt="Logo Terrasigne"
             width={50}
             height={50}
@@ -76,22 +76,22 @@ export default function Navbar() {
             : "opacity-0 -translate-y-6 pointer-events-none py-0 ease-in"
         }`}
       >
-        <Link href="/" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/" className="text-black font-bold hover:text-brandOrange text-lg" onClick={toggleMenu}>
           Accueil
         </Link>
-        <Link href="/propos" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/propos" className="text-black font-bold hover:text-brandOrange text-lg" onClick={toggleMenu}>
           À propos
         </Link>
-        <Link href="/services" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/services" className="text-black font-bold hover:text-brandOrange text-lg" onClick={toggleMenu}>
           Services
         </Link>
-        <Link href="/rendez-vous" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/rendez-vous" className="text-black font-bold hover:text-brandOrange text-lg" onClick={toggleMenu}>
           Réservation
         </Link>
-        <Link href="/blog" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/blog" className="text-black font-bold hover:text-brandOrange text-" onClick={toggleMenu}>
           Blog
         </Link>
-        <Link href="/contact" className="text-gray-700 hover:text-brandOrange text-lg" onClick={toggleMenu}>
+        <Link href="/contact" className="text-black font-bold hover:text-brandOrange text-lg" onClick={toggleMenu}>
           Contact
         </Link>
       </div>
