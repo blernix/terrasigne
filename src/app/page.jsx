@@ -30,7 +30,7 @@ export default function Page() {
 
         const articlesResponse = await fetch("/api/blog?featured=true");
         const articlesData = await articlesResponse.json();
-        setFeaturedArticles(articlesData);
+setFeaturedArticles(Array.isArray(articlesData.articles) ? articlesData.articles : []);
       } catch (error) {
         console.error("❌ Erreur chargement des données :", error);
       }
