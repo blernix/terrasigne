@@ -92,17 +92,25 @@ export default function Propos() {
     <h3 className="text-xl font-semibold text-gray-800 mb-2">
       Une invitation à te retrouver
     </h3>
-    <p className="text-gray-700 leading-relaxed">
-      Si tu veux en savoir plus sur mon parcours, je t'invite à découvrir l'article suivant : "Mon parcours" présent prochainement sur mon blog.
-      <br /><br />
-      À travers mon propre rééquilibrage physique, émotionnel, mental et spirituel, j'ai cheminé, pas à pas,
-      vers la reconversion qui me mène aujourd'hui à t’ouvrir cette porte.
-      <br /><br />
-      Cette opportunité, c'est te remettre au cœur de ta vie, pour véritablement rayonner, inspirer et colorer le monde
-      selon ta lumière unique, ta sonorité. C'est te sentir aimé pour qui tu es vraiment.
-      <strong> Mon engagement :</strong> <br /><br />T'aider à réguler ton équilibre naturel, physique et émotionnel,
-      avec respect, présence, bienveillance et authenticité.
-    </p>
+ <p className="text-gray-700 leading-relaxed">
+  Si tu veux en savoir plus sur mon parcours, je t'invite à lire l'article que j'ai rédigé à ce sujet : 
+  <a 
+    href="https://terrasigne.fr/blog/a733eb5b-568f-4729-a157-32bae0086fd0" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-brandPurple font-semibold hover:underline"
+  >
+    « Mon parcours » sur le blog
+  </a>.
+  <br /><br />
+  À travers mon propre rééquilibrage physique, émotionnel, mental et spirituel, j'ai cheminé, pas à pas,
+  vers la reconversion qui me mène aujourd'hui à t’ouvrir cette porte.
+  <br /><br />
+  Cette opportunité, c'est te remettre au cœur de ta vie, pour véritablement rayonner, inspirer et colorer le monde
+  selon ta lumière unique, ta sonorité. C'est te sentir aimé pour qui tu es vraiment.
+  <strong> Mon engagement :</strong> <br /><br />T'aider à réguler ton équilibre naturel, physique et émotionnel,
+  avec respect, présence, bienveillance et authenticité.
+</p>
   </div>
 </section>
 

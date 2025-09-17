@@ -8,8 +8,10 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "", // Champ téléphone ajouté
     message: "",
     service: "",
+    otherService: "",
   });
 
   const [services, setServices] = useState([]);
@@ -23,16 +25,23 @@ export default function ContactPage() {
     e.preventDefault();
     setSending(true);
 
+    const dataToSend = {
+      ...formData,
+      service: formData.service === 'Autre' ? formData.otherService : formData.service,
+    };
+    delete dataToSend.otherService;
+
     try {
       const response = await fetch("/api/nodemailer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
         alert("✨ Merci pour votre message ! Je vous répondrai dans les plus brefs délais ! ✨");
-        setFormData({ name: "", email: "", message: "", service: "" });
+        // Réinitialisation complète du formulaire
+        setFormData({ name: "", email: "", phone: "", message: "", service: "", otherService: "" });
       } else {
         alert("❌ Une erreur est survenue lors de l'envoi.");
       }
@@ -71,12 +80,12 @@ export default function ContactPage() {
 
         <div className="flex justify-center mb-12">
           <div className="relative w-40 h-40 rounded-full overflow-hidden shadow-lg">
-          <Image
-  src="/images/photo_profil.jpeg"
-  alt="Photo de profil"
-  fill
-  className="object-cover object-top"
-/>
+            <Image
+              src="/images/photo_profil.jpeg"
+              alt="Photo de profil"
+              fill
+              className="object-cover object-top"
+            />
           </div>
         </div>
 
@@ -103,6 +112,14 @@ export default function ContactPage() {
               onChange={handleChange}
               required
             />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Numéro de téléphone (facultatif)"
+              className="border p-3 rounded-lg w-full"
+              value={formData.phone}
+              onChange={handleChange}
+            />
             <select
               name="service"
               value={formData.service}
@@ -116,7 +133,21 @@ export default function ContactPage() {
                   {service.titre}
                 </option>
               ))}
+              <option value="Autre">Autre</option>
             </select>
+
+            {formData.service === "Autre" && (
+              <input
+                type="text"
+                name="otherService"
+                placeholder="Précisez votre demande"
+                className="border p-3 rounded-lg w-full"
+                value={formData.otherService}
+                onChange={handleChange}
+                required
+              />
+            )}
+
             <textarea
               name="message"
               placeholder="ton message..."
@@ -141,14 +172,14 @@ export default function ContactPage() {
           </h2>
           <p className="text-lg text-gray-700">📍 Terre de Bas, Guadeloupe</p>
           <p className="text-lg text-gray-700">📧 terrasigne971@gmail.com</p>
-         <a
-  href="https://wa.me/590690516851"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-lg text-gray-700 hover:text-green-500 transition-all"
->
-  📞 +590 690 51 68 51
-</a>
+          <a
+            href="https://wa.me/590690516851"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg text-gray-700 hover:text-green-500 transition-all"
+          >
+            📞 +590 690 51 68 51
+          </a>
         </section>
       </main>
       <Footer />
