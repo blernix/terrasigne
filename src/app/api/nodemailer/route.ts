@@ -86,8 +86,8 @@ export async function POST(req: Request) {
 
     await transporter.sendMail({
       from: `"Formulaire Terrasigne" <${process.env.SMTP_USER}>`,
-      // to: "terrasigne971@gmail.com",
-      to: "killian.lecrut@gmail.com",
+      to: "terrasigne971@gmail.com",
+      // to: "killian.lecrut@gmail.com",
       replyTo: email,
       subject: `Nouveau message de ${name} - Service : ${service}`,
       html: emailHtml,
