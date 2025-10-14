@@ -11,7 +11,7 @@ export default function Propos() {
       <main className="bg-gray-50 min-h-screen px-8 py-16 max-w-4xl mx-auto mt-12 mb-12">
         {/* Titre principal */}
         <h1 className="text-5xl font-bold text-gray-800 leading-tight text-center mb-6">
-          À la découverte de <span className="text-brandOrange">Cindy Guillaume</span> & Terrasigne
+          À la découverte de <span className="text-brandOrange">Cindy</span> & Terrasigne
         </h1>
         
         {/* Section Présentation */}
