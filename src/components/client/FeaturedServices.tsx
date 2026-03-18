@@ -8,11 +8,25 @@ function stripTagsAndDecode(html: string) {
   return textarea.value;
 }
 
+function createSlug(text: string): string {
+  return text
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
 interface Service {
   id: number;
   titre: string;
   description: string;
   prix: number;
+  categorie: {
+    titre: string;
+  };
 }
 
 export default function FeaturedServices({ services }: { services: Service[] }) {
@@ -43,13 +57,13 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
                 <p className="text-gray-500 mb-6">
                   <span className="font-bold">Prix :</span> {service.prix} €
                 </p>
-                <div className="mt-auto">
-                  <Link href={`/services`}>
-                    <button className="w-full px-6 py-3 bg-[var(--buttontest)] text-white rounded-full hover:bg-brandSecondary/90 transition-all">
-                      Détails
-                    </button>
-                  </Link>
-                </div>
+                 <div className="mt-auto">
+                   <Link href={`/services?service=${service.id}#category-${createSlug(service.categorie.titre)}`}>
+                     <button className="w-full px-6 py-3 bg-[var(--buttontest)] text-white rounded-full hover:bg-brandSecondary/90 transition-all">
+                       Détails
+                     </button>
+                   </Link>
+                 </div>
               </div>
             </div>
           ))

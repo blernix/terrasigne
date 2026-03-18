@@ -13,43 +13,62 @@ import { useMediaQuery } from "react-responsive";
 import { Parallax } from 'react-scroll-parallax';
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useRef, Suspense } from "react";
 
 
-
-export default function ServicesPage() {
+function ServicesPageContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serviceCategories, setServiceCategories] = useState([]);
   const [agendaIframe, setAgendaIframe] = useState("");
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const swiperRefs = useRef<{ [key: number]: any }>({});
+  const [serviceMap, setServiceMap] = useState<{ [key: string]: { catIndex: number; serviceIndex: number; catSlug: string } }>({});
+  const [hasNavigated, setHasNavigated] = useState(false);
+  const targetServiceId = searchParams.get('service');
 
-  useEffect(() => {
-    async function fetchServices() {
-      try {
-        const res = await fetch("/api/services");
-        const services = await res.json();
-        const grouped: { [key: string]: any } = {};
-  
-        services.forEach(s => {
-          const cat = s.categorie.titre;
-          if (!grouped[cat]) {
-            grouped[cat] = {
-              category: cat,
-              description: s.categorie.description || "Pas de description disponible.",
-              couverture: s.categorie.couverture || "/images/default-cover.jpg",
-              services: [],
-            };
-          }
-          grouped[cat].services.push(s);
-        });
-  
-        setServiceCategories(Object.values(grouped));
-      } catch (e) {
-        console.error("Erreur récupération services :", e);
-      }
-    }
-    fetchServices();
-  }, []);
+   useEffect(() => {
+     async function fetchServices() {
+       try {
+         const res = await fetch("/api/services");
+         const services = await res.json();
+         const grouped: { [key: string]: any } = {};
+
+         services.forEach(s => {
+           const cat = s.categorie.titre;
+           if (!grouped[cat]) {
+             grouped[cat] = {
+               category: cat,
+               description: s.categorie.description || "Pas de description disponible.",
+               couverture: s.categorie.couverture || "/images/default-cover.jpg",
+               services: [],
+             };
+           }
+           grouped[cat].services.push(s);
+         });
+
+         const map: { [key: string]: { catIndex: number; serviceIndex: number; catSlug: string } } = {};
+         const categoriesArray = Object.keys(grouped).map((catTitle, catIndex) => {
+           const catSlug = createSlug(catTitle);
+           const catData = grouped[catTitle];
+           catData.slug = catSlug;
+           catData.services.forEach((svc: any, serviceIndex: number) => {
+             map[String(svc.id)] = { catIndex, serviceIndex, catSlug };
+           });
+           return catData;
+         });
+
+         setServiceMap(map);
+         setServiceCategories(categoriesArray);
+       } catch (e) {
+         console.error("Erreur récupération services :", e);
+       }
+     }
+     fetchServices();
+   }, []);
 
   useEffect(() => {
     async function fetchAgenda() {
@@ -62,9 +81,48 @@ export default function ServicesPage() {
       }
     }
     fetchAgenda();
-  }, []);
+   }, []);
 
-  const openModal = (svc: any) => {
+   useEffect(() => {
+     if (targetServiceId) {
+       setHasNavigated(false);
+     }
+   }, [targetServiceId]);
+
+   useEffect(() => {
+     if (!targetServiceId || !serviceCategories.length || Object.keys(serviceMap).length === 0 || hasNavigated) return;
+
+     const mapping = serviceMap[targetServiceId];
+     if (!mapping) return;
+
+     const { catIndex, serviceIndex, catSlug } = mapping;
+     
+      // Fonction pour tenter de contrôler le Swiper
+     const trySlide = (attempt = 0) => {
+       const swiper = swiperRefs.current[catIndex];
+       if (swiper) {
+         swiper.slideTo(serviceIndex);
+         setHasNavigated(true);
+         // Nettoyer l'URL : retirer le paramètre service, garder le hash
+         router.replace('/services#category-' + catSlug, { scroll: false });
+         
+         // Scroll doux vers la catégorie après un court délai
+         setTimeout(() => {
+           const categoryElement = document.getElementById('category-' + catSlug);
+           if (categoryElement) {
+             categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+           }
+         }, 300);
+       } else if (attempt < 10) {
+         // Réessayer après un délai (attente que Swiper soit monté)
+         setTimeout(() => trySlide(attempt + 1), 200 * (attempt + 1));
+       }
+     };
+
+     trySlide();
+   }, [targetServiceId, serviceCategories, serviceMap, router, hasNavigated]);
+
+   const openModal = (svc: any) => {
     setSelectedService(svc);
     setIsModalOpen(true);
   };
@@ -72,13 +130,24 @@ export default function ServicesPage() {
     setSelectedService(null);
     setIsModalOpen(false);
   };
-  function decodeAndStrip(html) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value.replace(/<[^>]*>?/gm, "");
-  }
+   function decodeAndStrip(html) {
+     const txt = document.createElement("textarea");
+     txt.innerHTML = html;
+     return txt.value.replace(/<[^>]*>?/gm, "");
+   }
 
-  const [scrolled, setScrolled] = useState(false);
+   function createSlug(text: string): string {
+     return text
+       .normalize('NFKD')
+       .toLowerCase()
+       .replace(/\s+/g, '-')
+       .replace(/[^\w\-]+/g, '')
+       .replace(/\-\-+/g, '-')
+       .replace(/^-+/, '')
+       .replace(/-+$/, '');
+   }
+
+   const [scrolled, setScrolled] = useState(false);
 
 useEffect(() => {
   const handleScroll = () => {
@@ -148,8 +217,9 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
 
           return (
          
-<motion.section
+ <motion.section
   key={idx}
+  id={`category-${cat.slug}`}
   className="min-h-screen w-full px-4 md:px-12 py-20 flex flex-col gap-12"
   initial={{ opacity: 0, y: 100 }}
   whileInView={{ opacity: 1, y: 0 }}
@@ -207,11 +277,13 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
         768: { slidesPerView: 1 },
         1024: { slidesPerView: 1 },
       }}
-      className="!pb-12 w-full max-w-xl mx-auto"
+       className="!pb-12 w-full max-w-xl mx-auto"
+       onSwiper={(swiper) => { swiperRefs.current[idx] = swiper }}
     >
       {cat.services.map((svc, sidx) => (
-<SwiperSlide
+ <SwiperSlide
   key={sidx}
+  id={`service-${svc.id}`}
   className="fade-slide transition-opacity duration-3000 ease-in-out"
 >
          <div
@@ -312,5 +384,13 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function ServicesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+      <ServicesPageContent />
+    </Suspense>
   );
 }

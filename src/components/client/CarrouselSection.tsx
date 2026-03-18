@@ -14,6 +14,18 @@ interface CarrouselImage {
 }
 
 export default function CarrouselSection({ images }: { images: CarrouselImage[] }) {
+  const imageArray = Array.isArray(images) ? images : [];
+  
+  if (imageArray.length === 0) {
+    return (
+      <section className="relative w-full h-full overflow-hidden bg-gray-100">
+        <div className="w-full h-full flex items-center justify-center">
+          <p className="text-gray-500">Aucune image disponible</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative w-full h-full overflow-hidden">
       <Swiper
@@ -28,7 +40,7 @@ export default function CarrouselSection({ images }: { images: CarrouselImage[] 
         }}
         className="w-full h-full"
       >
-        {images.map((image, idx) => {
+        {imageArray.map((image, idx) => {
           const url = image.images?.filename_disk
             ? `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${image.images.filename_disk}`
             : "/images/default-cover.jpg";
