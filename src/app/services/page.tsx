@@ -106,13 +106,24 @@ function ServicesPageContent() {
          // Nettoyer l'URL : retirer le paramètre service, garder le hash
          router.replace('/services#category-' + catSlug, { scroll: false });
          
-         // Scroll doux vers la catégorie après un court délai
-         setTimeout(() => {
-           const categoryElement = document.getElementById('category-' + catSlug);
-           if (categoryElement) {
-             categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-           }
-         }, 300);
+          // Scroll vers le service après un délai pour laisser le Swiper s'animer
+          setTimeout(() => {
+            const serviceElement = document.getElementById('service-' + targetServiceId);
+            if (serviceElement) {
+              // Scroll vers le service avec offset pour la navbar
+              const yOffset = -80;
+              const y = serviceElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+              window.scrollTo({ top: y, behavior: 'smooth' });
+            } else {
+              // Fallback vers la catégorie
+              const categoryElement = document.getElementById('category-' + catSlug);
+              if (categoryElement) {
+                const yOffset = -80;
+                const y = categoryElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+              }
+            }
+          }, 500);
        } else if (attempt < 10) {
          // Réessayer après un délai (attente que Swiper soit monté)
          setTimeout(() => trySlide(attempt + 1), 200 * (attempt + 1));
@@ -220,7 +231,7 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
  <motion.section
   key={idx}
   id={`category-${cat.slug}`}
-  className="min-h-screen w-full px-4 md:px-12 py-20 flex flex-col gap-12"
+   className="min-h-screen w-full px-4 md:px-12 py-20 flex flex-col gap-12 scroll-mt-20"
   initial={{ opacity: 0, y: 100 }}
   whileInView={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -244,8 +255,8 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
       idx % 2 === 1 ? 'md:flex-row-reverse' : ''
     }`}
   >
-    {/* Image de couverture */}
-    <div className="w-full md:w-1/2">
+     {/* Image de couverture */}
+     <div className="w-full md:w-1/2 order-2 md:order-none">
       <Parallax translateY={["-20px", "20px"]} speed={10} easing="easeOut">
         <img
           src={cat.couverture}
@@ -255,8 +266,8 @@ const [openDescriptions, setOpenDescriptions] = useState<{ [key: number]: boolea
       </Parallax>
     </div>
 
-    {/* Swiper des services */}
- <div className="w-full md:w-1/2">
+     {/* Swiper des services */}
+  <div className="w-full md:w-1/2 order-1 md:order-none">
   <div className="relative w-full px-4 ">
     <Swiper
       modules={[Navigation, Pagination, EffectFade]}
