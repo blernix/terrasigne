@@ -167,7 +167,7 @@ export default function Propos() {
       "Terrasigne est né de mon envie d'offrir à chacun une expérience de ressourcement unique et sur-mesure.
       Mon objectif est de t'aider à retrouver ton équilibre physique, émotionnel et énergétique."
     </p>
-    <p className="text-lg font-medium">- Cindy Guillaume</p>
+    <p className="text-lg font-medium">- Cindy Terrasigne</p>
   </div>
 </section>
         {/* Call-to-action */}
