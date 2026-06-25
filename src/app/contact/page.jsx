@@ -8,7 +8,7 @@ export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "", // Champ téléphone ajouté
+    phone: "",
     message: "",
     service: "",
     otherService: "",
@@ -16,6 +16,7 @@ export default function ContactPage() {
 
   const [services, setServices] = useState([]);
   const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,6 +25,7 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
+    setFeedback(null);
 
     const dataToSend = {
       ...formData,
@@ -39,15 +41,14 @@ export default function ContactPage() {
       });
 
       if (response.ok) {
-        alert("✨ Merci pour votre message ! Je vous répondrai dans les plus brefs délais ! ✨");
-        // Réinitialisation complète du formulaire
+        setFeedback({ type: "success", text: "Merci pour votre message ! Je vous répondrai dans les plus brefs délais !" });
         setFormData({ name: "", email: "", phone: "", message: "", service: "", otherService: "" });
       } else {
-        alert("❌ Une erreur est survenue lors de l'envoi.");
+        setFeedback({ type: "error", text: "Une erreur est survenue lors de l'envoi." });
       }
     } catch (error) {
       console.error("Erreur lors de l'envoi du formulaire :", error);
-      alert("❌ Une erreur inattendue est survenue.");
+      setFeedback({ type: "error", text: "Une erreur inattendue est survenue." });
     } finally {
       setSending(false);
     }
@@ -70,7 +71,7 @@ export default function ContactPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-20 mb-12">
+      <main id="main-content" className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-20 mb-12">
         <h1 className="text-5xl font-bold text-gray-800 leading-tight text-center mb-6">
           Contactez-moi
         </h1>
@@ -84,82 +85,118 @@ export default function ContactPage() {
               src="/images/photo_profil.jpeg"
               alt="Photo de profil"
               fill
+              sizes="160px"
               className="object-cover object-top"
             />
           </div>
         </div>
 
+        {feedback && (
+          <div className={`max-w-3xl mx-auto mb-6 p-4 text-center font-medium rounded-lg ${
+            feedback.type === "success" ? "text-green-800 bg-green-100" : "text-red-800 bg-red-100"
+          }`}>
+            {feedback.text}
+          </div>
+        )}
+
         <section className="bg-white p-8 shadow-lg rounded-lg max-w-3xl mx-auto">
           <h2 className="text-3xl font-semibold text-brandPurple mb-6 text-center">
             Envoie-moi un message
           </h2>
-          <form className="grid gap-4" onSubmit={handleSubmit}>
-            <input
-              type="text"
-              name="name"
-              placeholder="Nom et prénom"
-              className="border p-3 rounded-lg w-full"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              className="border p-3 rounded-lg w-full"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Numéro de téléphone (facultatif)"
-              className="border p-3 rounded-lg w-full"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-            <select
-              name="service"
-              value={formData.service}
-              onChange={handleChange}
-              required
-              className="border p-3 rounded-lg w-full"
-            >
-              <option value="">Sélectionne un service</option>
-              {services.map((service) => (
-                <option key={service.id} value={service.titre}>
-                  {service.titre}
-                </option>
-              ))}
-              <option value="Autre">Autre</option>
-            </select>
-
-            {formData.service === "Autre" && (
+          <form className="grid gap-4" onSubmit={handleSubmit} noValidate>
+            <div>
+              <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">Nom et prénom</label>
               <input
+                id="contact-name"
                 type="text"
-                name="otherService"
-                placeholder="Précisez votre demande"
-                className="border p-3 rounded-lg w-full"
-                value={formData.otherService}
+                name="name"
+                placeholder="Votre nom complet"
+                autoComplete="name"
+                className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+                value={formData.name}
                 onChange={handleChange}
                 required
               />
+            </div>
+            <div>
+              <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                id="contact-email"
+                type="email"
+                name="email"
+                placeholder="votre@email.com"
+                autoComplete="email"
+                className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-phone" className="block text-sm font-medium text-gray-700 mb-1">Téléphone (facultatif)</label>
+              <input
+                id="contact-phone"
+                type="tel"
+                name="phone"
+                placeholder="Numéro de téléphone"
+                autoComplete="tel"
+                className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-service" className="block text-sm font-medium text-gray-700 mb-1">Service souhaité</label>
+              <select
+                id="contact-service"
+                name="service"
+                value={formData.service}
+                onChange={handleChange}
+                required
+                className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+              >
+                <option value="" disabled>Sélectionne un service</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.titre}>
+                    {service.titre}
+                  </option>
+                ))}
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+
+            {formData.service === "Autre" && (
+              <div>
+                <label htmlFor="contact-other" className="block text-sm font-medium text-gray-700 mb-1">Précisez votre demande</label>
+                <input
+                  id="contact-other"
+                  type="text"
+                  name="otherService"
+                  placeholder="Décrivez le service souhaité"
+                  className="border p-3 rounded-lg w-full focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+                  value={formData.otherService}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             )}
 
-            <textarea
-              name="message"
-              placeholder="ton message..."
-              className="border p-3 rounded-lg w-full h-32"
-              value={formData.message}
-              onChange={handleChange}
-              required
-            ></textarea>
+            <div>
+              <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">Votre message</label>
+              <textarea
+                id="contact-message"
+                name="message"
+                placeholder="Ton message..."
+                className="border p-3 rounded-lg w-full h-32 focus:ring-2 focus:ring-brandPurple focus:border-brandPurple"
+                value={formData.message}
+                onChange={handleChange}
+                required
+              ></textarea>
+            </div>
             <button
               type="submit"
               disabled={sending}
-              className="bg-[var(--primary)] text-white py-3 px-6 rounded-lg hover:bg-brandSecondary/90 transition-all"
+              className="bg-brandPurple text-white py-3 px-6 rounded-lg hover:bg-brandPurple/90 focus:ring-2 focus:ring-brandPurple focus:ring-offset-2 transition-all"
             >
               {sending ? "Envoi en cours..." : "Envoyer"}
             </button>

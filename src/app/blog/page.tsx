@@ -11,16 +11,24 @@ export default function BlogPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
 
   // pagination « classique » par blocs de 10
   const [paginationPage, setPaginationPage] = useState<number>(1);
   // cycle interne : 1 = initial (5), 2 = scroll (5)
   const [offsetCycle, setOffsetCycle] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
 
-  const FETCH_PER_BATCH = 6;      // 5 articles par batch
-  const BATCHES_PER_PAGE = 2;     // 2 batches = 10 articles par page
+  const FETCH_PER_BATCH = 6;
+  const BATCHES_PER_PAGE = 2;
 
   const articlesRef = useRef<HTMLDivElement>(null);
+
+  // debounce pour la recherche
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // récupérer TOUTES les catégories
   useEffect(() => {
@@ -33,13 +41,13 @@ export default function BlogPage() {
   // récupérer TOUTES les articles à chaque filtre/recherche
   useEffect(() => {
     fetch(
-      `/api/blog?category=${selectedCategory}&search=${encodeURIComponent(searchQuery)}`
+      `/api/blog?category=${selectedCategory}&search=${encodeURIComponent(debouncedSearch)}`
     )
       .then(r => r.json())
       .then(data => setAllArticles(Array.isArray(data.articles) ? data.articles : []))
       .catch(console.error)
-      .finally(() => setOffsetCycle(1));
-  }, [selectedCategory, searchQuery]);
+      .finally(() => { setOffsetCycle(1); setLoading(false); });
+  }, [selectedCategory, debouncedSearch]);
 
   // scroll pour charger le 2ᵉ batch
   useEffect(() => {
@@ -71,6 +79,7 @@ export default function BlogPage() {
 
   const stripTagsAndDecode = (html: string) => {
     const text = html.replace(/<[^>]+>/g, "");
+    if (typeof document === "undefined") return text;
     const ta = document.createElement("textarea");
     ta.innerHTML = text;
     return ta.value;
@@ -132,7 +141,7 @@ export default function BlogPage() {
             type="text"
             placeholder="Rechercher un article..."
             value={searchQuery}
-            onChange={e => { setSearchQuery(e.target.value); setPaginationPage(1); }}
+            onChange={e => { setSearchQuery(e.target.value); setPaginationPage(1); setLoading(true); }}
             className="w-full px-6 py-3 mb-8 border rounded-full focus:ring-2 focus:ring-brandOrange"
           />
           <div className="flex flex-wrap gap-4 justify-center">
@@ -186,14 +195,24 @@ export default function BlogPage() {
     .slice(0, article.couverture ? 20 : 90)
     .join(" ")}...
 </p>
-                    <Link href={`/blog/${article.id}`}>
-                      <button className="px-6 py-3 bg-[var(--primary)] text-white rounded-full">Lire l'article</button>
-                    </Link>
+                     <Link href={`/blog/${article.id}`}>
+                       <button className="px-6 py-3 bg-brandPurple text-white rounded-full hover:bg-brandPurple/90 focus:ring-2 focus:ring-brandPurple focus:ring-offset-2 transition-all">Lire l&rsquo;article</button>
+                     </Link>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </section>
+
+          {!loading && allArticles.length === 0 && (
+            <p className="text-center text-gray-500 text-lg py-12">
+              Aucun article trouvé pour cette recherche.
+            </p>
+          )}
+
+          {loading && (
+            <p className="text-center text-gray-500 py-12">Recherche en cours...</p>
+          )}
 
           {/* Pagination numérotée */}
           {pageCount > 1 && (

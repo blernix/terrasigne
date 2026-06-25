@@ -3,6 +3,7 @@ import Link from "next/link";
 
 function stripTagsAndDecode(html: string) {
   const text = html.replace(/<[^>]+>/g, "");
+  if (typeof document === "undefined") return text;
   const textarea = document.createElement("textarea");
   textarea.innerHTML = text;
   return textarea.value;
@@ -59,7 +60,7 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
                 </p>
                  <div className="mt-auto">
                    <Link href={`/services?service=${service.id}#category-${createSlug(service.categorie.titre)}`}>
-                     <button className="w-full px-6 py-3 bg-[var(--buttontest)] text-white rounded-full hover:bg-brandSecondary/90 transition-all">
+                      <button className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 focus:ring-2 focus:ring-brandSecondary focus:ring-offset-2 transition-all">
                        Détails
                      </button>
                    </Link>

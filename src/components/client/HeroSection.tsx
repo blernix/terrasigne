@@ -28,10 +28,10 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
           Bienvenue sur <span className="text-brandOrange font-extrabold">Terrasigne</span>
         </h1>
         <p className="text-lg text-white font-bold mt-6 max-w-2xl mx-auto">
-          Se relier à SOI pour vivre l'équiLIBRE et la joie D'ETRE
+          Se relier à SOI pour vivre l&rsquo;équiLIBRE et la joie D&rsquo;ETRE
         </p>
         <Link href="/services" className="inline-block mt-8">
-          <button className="px-8 py-4 bg-[var(--primary)] text-white text-lg font-medium rounded-full shadow-md hover:shadow-lg hover:bg-brandSecondary/90 transition-all">
+          <button className="px-8 py-4 bg-brandSecondary text-white text-lg font-medium rounded-full shadow-md hover:shadow-lg hover:bg-brandSecondary/90 focus:ring-2 focus:ring-brandSecondary focus:ring-offset-2 transition-all">
             Découvrir mes services
           </button>
         </Link>

@@ -2,69 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
-
 :root {
-  --background: #F6E8D6; /* Beige Sable */
-  --foreground: #3E3E3E; /* Gris anthracite pour plus de douceur */
-  --primary: #A7C7A1; /* Vert Sauge */
-  --secondary: #def1e4; /* Bleu Ciel Doux */
-  --accent: #FFD1A4; /* Orange Pêche */
-  --highlight: #C9C5FF; /* Lavande Pastel */
-  --test: #dbefe1;
-  --buttontest:#8DB498;
-  --buttoncontact : #358598;
-  --main : #F4EDE1;
-  --description : #C7DECE;
-  --bgservice : #CCDBBB;
+  --background: #F6E8D6;
+  --foreground: #3E3E3E;
+  --primary: #6B46C1;
+  --secondary: #def1e4;
+  --accent: #ED8936;
+  --highlight: #C9C5FF;
 }
-
-/* @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #171717;
-    --foreground: #EDEDED;
-  }
-} */
 
 body {
   color: var(--foreground);
   background: var(--secondary);
-  font-family: 'Merriweather', serif;
 }
 
-/* Boutons & éléments interactifs */
-.button-primary {
-  background-color: var(--primary);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: background 0.3s;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
-.button-primary:hover {
-  background-color: #8ABF91; /* Teinte plus foncée pour effet hover */
-}
-
-.button-secondary {
-  background-color: var(--secondary);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  transition: background 0.3s;
-}
-.button-secondary:hover {
-  background-color: #8DB8FF;
-}
-
-.section-title {
-  color: var(--highlight);
-  font-size: 2rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
 
 /* Liens */
 .editor-content a {
@@ -77,15 +36,13 @@ body {
   color: #0056b3;
 }
 
-/* Images */
 .editor-content img {
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 10px auto; /* Centrage automatique */
+  margin: 10px auto;
 }
 
-/* Tableaux */
 .editor-content table {
   width: 100%;
   border-collapse: collapse;
@@ -102,7 +59,6 @@ body {
   font-weight: bold;
 }
 
-/* Listes */
 .editor-content ul {
   list-style-type: disc;
   padding-left: 20px;
@@ -113,195 +69,164 @@ body {
   padding-left: 20px;
 }
 
+/* CSS ARTICLES BLOG */
+.editor-blog {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #333;
+}
 
-                                             /* CSS ARTICLES BLOG  */
+.editor-blog h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1a202c;
+}
 
+.editor-blog h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
 
-                                             .editor-blog {
-                                              font-family: 'Arial', sans-serif;
-                                              font-size: 1rem;
-                                              line-height: 1.8;
-                                              color: #333;
-                                            }
-                                            
-                                            /* TITRES */
-                                            .editor-blog h1 {
-                                              font-size: 2.5rem;
-                                              font-weight: bold;
-                                              margin-bottom: 1rem;
-                                              color: #1a202c; /* Couleur foncée pour les titres */
-                                            }
-                                            
-                                            .editor-blog h2 {
-                                              font-size: 2rem;
-                                              font-weight: bold;
-                                              margin-bottom: 1rem;
-                                              color: #2d3748;
-                                            }
-                                            
-                                            .editor-blog h3 {
-                                              font-size: 1.75rem;
-                                              font-weight: bold;
-                                              margin-bottom: 0.8rem;
-                                              color: #4a5568;
-                                            }
-                                            
-                                            .editor-blog h4 {
-                                              font-size: 1.5rem;
-                                              font-weight: bold;
-                                              margin-bottom: 0.7rem;
-                                              color: #718096;
-                                            }
-                                            
-                                            .editor-blog h5 {
-                                              font-size: 1.25rem;
-                                              font-weight: bold;
-                                              margin-bottom: 0.6rem;
-                                              color: #a0aec0;
-                                            }
-                                            
-                                            .editor-blog h6 {
-                                              font-size: 1rem;
-                                              font-weight: bold;
-                                              margin-bottom: 0.5rem;
-                                              color: #cbd5e0;
-                                            }
-                                            
-                                            /* PARAGRAPHES */
-                                            .editor-blog p {
-                                              margin-bottom: 1rem;
-                                              text-align: justify;
-                                            }
-                                            
-                                            /* CITATION */
-                                            .editor-blog blockquote {
-                                              border-left: 4px solid #ff6600;
-                                              padding-left: 1rem;
-                                              font-style: italic;
-                                              color: #555;
-                                              margin: 1.5rem 0;
-                                            }
-                                            
-                                            /* LISTES */
-                                            .editor-blog ul {
-                                              list-style-type: disc;
-                                              padding-left: 1.5rem;
-                                              margin-bottom: 1rem;
-                                            }
-                                            
-                                            .editor-blog ol {
-                                              list-style-type: decimal;
-                                              padding-left: 1.5rem;
-                                              margin-bottom: 1rem;
-                                            }
-                                            
-                                            .editor-blog li {
-                                              margin-bottom: 0.5rem;
-                                            }
-                                            
-                                            /* LIENS */
-                                            .editor-blog a {
-                                              color: #0070f3;
-                                              text-decoration: underline;
-                                              transition: color 0.2s ease-in-out;
-                                            }
-                                            
-                                            .editor-blog a:hover {
-                                              color: #0056b3;
-                                            }
-                                            
-                                            /* TABLEAUX */
-                                            .editor-blog table {
-                                              width: 100%;
-                                              border-collapse: collapse;
-                                              margin: 1.5rem 0;
-                                            }
-                                            
-                                            .editor-blog th, 
-                                            .editor-blog td {
-                                              border: 1px solid #ddd;
-                                              padding: 0.75rem;
-                                              text-align: left;
-                                            }
-                                            
-                                            .editor-blog th {
-                                              background-color: #f7f7f7;
-                                              font-weight: bold;
-                                            }
-                                            
-                                            /* IMAGES */
-                                            .editor-blog img {
-                                              max-width: 100%;
-                                              height: auto;
-                                              display: block;
-                                              margin: 1.5rem auto;
-                                              border-radius: 8px;
-                                              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                                            }
-                                            
-                                            /* VIDÉOS */
-                                            .editor-blog iframe {
-                                              max-width: 100%;
-                                              border-radius: 8px;
-                                              margin: 1.5rem 0;
-                                            }
-                                            
-                                            /* ALIGNEMENTS */
-                                            .editor-blog .text-left {
-                                              text-align: left;
-                                            }
-                                            
-                                            .editor-blog .text-center {
-                                              text-align: center;
-                                            }
-                                            
-                                            .editor-blog .text-right {
-                                              text-align: right;
-                                            }
-                                            
-                                            /* SOULIGNÉ, GRAS, ITALIQUE */
-                                            .editor-blog strong {
-                                              font-weight: bold;
-                                            }
-                                            
-                                            .editor-blog em {
-                                              font-style: italic;
-                                            }
-                                            
-                                            .editor-blog u {
-                                              text-decoration: underline;
-                                            }                                          
+.editor-blog h3 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 0.8rem;
+  color: #4a5568;
+}
 
+.editor-blog h4 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.7rem;
+  color: #718096;
+}
 
+.editor-blog h5 {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 0.6rem;
+  color: #a0aec0;
+}
 
-                                            @layer utilities {
-                                              .animate-fadeIn {
-                                                animation: fadeIn 1s ease forwards;
-                                              }
-                                            
-                                              .animate-delay-500 {
-                                                animation-delay: 0.5s;
-                                              }
-                                            
-                                              @keyframes fadeIn {
-                                                to {
-                                                  opacity: 1;
-                                                }
-                                              }
-                                            }
+.editor-blog h6 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #718096;
+}
 
+.editor-blog p {
+  margin-bottom: 1rem;
+  text-align: left;
+  hyphens: auto;
+}
 
+.editor-blog blockquote {
+  border-left: 4px solid #ff6600;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #555;
+  margin: 1.5rem 0;
+}
 
+.editor-blog ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
 
-                                            
-                                        /* Pagination bullets fixes, bien rondes */
+.editor-blog ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.editor-blog li {
+  margin-bottom: 0.5rem;
+}
+
+.editor-blog a {
+  color: #0070f3;
+  text-decoration: underline;
+  transition: color 0.2s ease-in-out;
+}
+
+.editor-blog a:hover {
+  color: #0056b3;
+}
+
+.editor-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.editor-blog th,
+.editor-blog td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.editor-blog th {
+  background-color: #f7f7f7;
+  font-weight: bold;
+}
+
+.editor-blog img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.editor-blog iframe {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.editor-blog strong {
+  font-weight: bold;
+}
+
+.editor-blog em {
+  font-style: italic;
+}
+
+.editor-blog u {
+  text-decoration: underline;
+}
+
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 1s ease forwards;
+  }
+
+  .animate-delay-500 {
+    animation-delay: 0.5s;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Swiper pagination */
 .swiper-pagination-bullet {
   width: 10px !important;
   height: 10px !important;
   border-radius: 9999px;
   background-color: #ccc;
   margin: 0 4px !important;
-  flex-shrink: 0; /* Empêche de se compresser */
+  flex-shrink: 0;
   transition: all 0.3s ease;
 }
 
@@ -310,27 +235,26 @@ body {
   background-color: var(--accent, #f97316);
 }
 
-/* Empêche les bullets de disparaître en overflow */
 .swiper-pagination {
   min-height: 24px;
   display: flex !important;
   align-items: center;
   justify-content: center;
-  overflow-x: auto; /* Utile si beaucoup de bullets */
-  scrollbar-width: none; /* Firefox */
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .swiper-pagination::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .swiper-slide {
   transition-property: opacity !important;
-  transition-duration: 0.5s !important; /* ou ce que tu veux */
+  transition-duration: 0.5s !important;
   transition-timing-function: ease-out !important;
 }
-                                            
-                                    .swiper-button-next,
+
+.swiper-button-next,
 .swiper-button-prev {
   width: 20px !important;
   height: 20px !important;
@@ -342,59 +266,37 @@ body {
   align-items: center !important;
   justify-content: center !important;
 }
-                                            
-                                            .swiper-button-next::after,
-                                            .swiper-button-prev::after {
-                                              font-size: 18px !important;
-                                              color: #6B46C1; /* brandPurple */
-                                            }
-                                            
-                                            @media (max-width: 768px) {
-                                              .swiper-button-next,
-                                              .swiper-button-prev {
-                                                display: none !important;
-                                              }
-                                            }
 
-/* Centrage automatique des slides si moins de 3 */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  font-size: 18px !important;
+  color: #6B46C1;
+}
+
+@media (max-width: 768px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    display: none !important;
+  }
+}
+
 .custom-swiper-center .swiper-wrapper {
   display: flex;
   justify-content: center;
-
 }
-
 
 .swiper-wrapper.centered {
   display: flex;
   justify-content: center !important;
 }
 
-/* globals.css */
 .fade-slide {
   opacity: 0;
 }
+
 .swiper-slide-active.fade-slide {
   opacity: 1;
 }
-
-
-
-.root-path {
-  transition: stroke-dashoffset 0s;
-}
-
-.root-anim {
-  animation: draw-root 1.5s ease-out forwards;
-}
-
-@keyframes draw-root {
-  to { stroke-dashoffset: 0; }
-}
-
-
-
-
-
 
 @keyframes floatSlow {
   0%, 100% {
@@ -409,8 +311,11 @@ body {
   animation: floatSlow 10s ease-in-out infinite;
 }
 
-
-
+@media (prefers-reduced-motion: reduce) {
+  .animate-floatSlow {
+    animation: none;
+  }
+}
 
 @keyframes floating {
   0% { transform: translateY(0px); }
@@ -420,4 +325,10 @@ body {
 
 .animate-floating {
   animation: floating 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-floating {
+    animation: none;
+  }
 }

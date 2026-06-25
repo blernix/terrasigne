@@ -24,5 +24,5 @@ export default {
       // Ajoutez d'autres personnalisations si nécessaire
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [],
 };

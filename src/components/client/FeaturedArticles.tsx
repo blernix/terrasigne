@@ -3,6 +3,7 @@ import Link from "next/link";
 
 function stripTagsAndDecode(html: string) {
   const text = html.replace(/<[^>]+>/g, "");
+  if (typeof document === "undefined") return text;
   const textarea = document.createElement("textarea");
   textarea.innerHTML = text;
   return textarea.value;
@@ -47,7 +48,7 @@ export default function FeaturedArticles({ articles }: { articles: Article[] }) 
                 <div className="mt-auto">
                   <Link href={`/blog/${article.id}`}>
                     <button className="w-full px-6 py-3 bg-[var(--accent)] text-white rounded-full hover:bg-brandOrange/90 transition-all">
-                      Lire l'article
+                      Lire l&rsquo;article
                     </button>
                   </Link>
                 </div>

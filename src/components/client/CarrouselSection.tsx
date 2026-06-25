@@ -51,7 +51,8 @@ export default function CarrouselSection({ images }: { images: CarrouselImage[] 
                 src={url}
                 alt={image.images?.title || `Image ${idx + 1}`}
                 className="w-full h-full object-cover animate-zoomSlow"
-                loading="lazy"
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchPriority={idx === 0 ? "high" : "auto"}
               />
               </div>
             </SwiperSlide>

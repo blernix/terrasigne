@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/client/Navbar";
@@ -44,7 +45,13 @@ export default function BlogDetail() {
   return (
     <>
       <Navbar />
-      <main className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-12 mb-12">
+      <main id="main-content" className="bg-white/50 backdrop-blur-lg min-h-screen px-8 py-16 max-w-4xl mx-auto rounded-3xl shadow-lg mt-12 mb-12">
+
+        <nav className="mb-8 text-sm text-gray-500" aria-label="Fil d&rsquo;Ariane">
+          <Link href="/blog" className="hover:text-brandPurple transition">Blog</Link>
+          <span className="mx-2">/</span>
+          <span className="text-gray-800">{article.titre}</span>
+        </nav>
         
         {/* Affichage de l'image de couverture si elle existe */}
         {article.couverture && (

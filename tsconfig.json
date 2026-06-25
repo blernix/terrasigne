@@ -7,7 +7,7 @@
       "esnext"
     ],
     "paths": {
-      "@/*": ["./src/*"] // Important : assure-toi que le chemin est correct ici
+      "@/*": ["./src/*"]
     },
     "allowJs": true,
     "skipLibCheck": true,
@@ -30,8 +30,10 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "src/app/api/categories/[id]/route.js", "src/app/api/categories/route.js", "src/app/api/articles/route.js", "src/app/api/articles/[id]/route.js", "src/app/test/page.tsx", "src/app/propos/metadata.js", "src/app/blog/metadata.js", "src/app/services/metadate.js"  ],
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx"
+  ],
   "exclude": [
     "node_modules"
   ]
