@@ -24,7 +24,7 @@ export default function RendezVousPage() {
     <>
       <Navbar />
 
-      <main className="bg-[var(--secondary)] min-h-screen mt-12 px-8 py-16">
+      <main className="min-h-screen mt-12 px-8 py-16">
         <section className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-5xl font-bold text-gray-800 leading-tight mb-6">
             Prendre <span className="text-brandOrange">Rendez-vous</span>
@@ -35,11 +35,17 @@ export default function RendezVousPage() {
         </section>
 
         {agendaIframe ? (
-          <section className="max-w-5xl mx-auto shadow-xl rounded-xl overflow-hidden">
-            <div
-              className="w-full"
-              dangerouslySetInnerHTML={{ __html: agendaIframe }}
-            />
+          <section className="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="w-full h-[85vh] min-h-[600px] md:h-[80vh]">
+              <div
+                className="w-full h-full"
+                dangerouslySetInnerHTML={{
+                  __html: agendaIframe
+                    .replace(/style="[^"]*"/g, 'style="width:100%;height:100%;border:none;"')
+                    .replace(/frameborder="[^"]*"/g, ""),
+                }}
+              />
+            </div>
           </section>
         ) : (
           <p className="text-center text-gray-500 mt-12">Chargement du calendrier...</p>
