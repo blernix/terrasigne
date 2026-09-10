@@ -68,6 +68,8 @@ export default function RootLayout({ children }) {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script defer src="https://analytique.killian-lecrut.com/script.js" data-website-id="5f56f35e-097a-4dab-966a-19a0deb6afb3"></script>
+        <script defer src="https://analytique.killian-lecrut.com/recorder.js" data-website-id="5f56f35e-097a-4dab-966a-19a0deb6afb3" data-sample-rate="1" data-mask-level="moderate" data-max-duration="300000"></script>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-white focus:p-4 focus:shadow-lg focus:rounded-lg">
           Aller au contenu principal
         </a>
