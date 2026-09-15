@@ -12,6 +12,7 @@ export default function ContactPage() {
     message: "",
     service: "",
     otherService: "",
+    consent: false,
   });
 
   const [services, setServices] = useState([]);
@@ -19,7 +20,8 @@ export default function ContactPage() {
   const [feedback, setFeedback] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
   const handleSubmit = async (e) => {
@@ -34,7 +36,7 @@ export default function ContactPage() {
     delete dataToSend.otherService;
 
     try {
-      const response = await fetch("/api/nodemailer", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSend),
@@ -42,7 +44,7 @@ export default function ContactPage() {
 
       if (response.ok) {
         setFeedback({ type: "success", text: "Merci pour votre message ! Je vous répondrai dans les plus brefs délais !" });
-        setFormData({ name: "", email: "", phone: "", message: "", service: "", otherService: "" });
+        setFormData({ name: "", email: "", phone: "", message: "", service: "", otherService: "", consent: false });
       } else {
         setFeedback({ type: "error", text: "Une erreur est survenue lors de l'envoi." });
       }
@@ -193,6 +195,27 @@ export default function ContactPage() {
                 required
               ></textarea>
             </div>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="consent"
+                checked={formData.consent}
+                onChange={handleChange}
+                required
+                className="mt-0.5 w-4 h-4 accent-brandPurple"
+              />
+              <span className="text-sm text-gray-600">
+                J'accepte que mes informations soient utilisées pour le
+                traitement de ma demande, conformément à la{" "}
+                <a
+                  href="/confidentialite"
+                  className="text-brandPurple font-semibold underline hover:text-brandOrange transition"
+                >
+                  politique de confidentialité
+                </a>
+                . *
+              </span>
+            </label>
             <button
               type="submit"
               disabled={sending}

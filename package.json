@@ -6,14 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:booking": "node --env-file=.env scripts/simulate-booking.mjs"
   },
   "dependencies": {
     "aos": "^2.3.4",
     "framer-motion": "^12.12.1",
+    "googleapis": "^181.0.0",
     "lucide-react": "^0.503.0",
     "next": "^15.5.9",
-    "nodemailer": "^7.0.3",
     "react": "^19.0.2",
     "react-dom": "^19.0.2",
     "react-responsive": "^10.0.1",

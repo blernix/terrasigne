@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,categorie_id.titre,categorie_id.description,categorie_id.couverture.filename_disk,status${filterQuery}`,
+      `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,duree,pause,categorie_id.titre,categorie_id.description,categorie_id.couverture.filename_disk,status${filterQuery}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
@@ -39,6 +39,8 @@ export async function GET(req: Request) {
       description: service.description,
       prix: service.prix,
       rendez_vous: service.rendez_vous,
+      duree: service.duree,
+      pause: service.pause,
       status: service.status,
       categorie: {
         titre: service.categorie_id?.titre || "Sans catégorie",

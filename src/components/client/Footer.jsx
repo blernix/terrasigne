@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 text-gray-700">
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           {/* Navigation Links */}
-          <div className="flex space-x-6">
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 sm:gap-x-6">
             <Link href="/" className="hover:text-brandPurple transition">
               Accueil
             </Link>
@@ -21,6 +21,9 @@ export default function Footer() {
             </Link>
             <Link href="/propos" className="hover:text-brandPurple transition">
               A propos
+            </Link>
+            <Link href="/confidentialite" className="hover:text-brandPurple transition">
+              Confidentialité
             </Link>
           </div>
 

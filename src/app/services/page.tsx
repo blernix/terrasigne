@@ -20,7 +20,6 @@ function ServicesPageContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serviceCategories, setServiceCategories] = useState([]);
-  const [agendaIframe, setAgendaIframe] = useState("");
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -67,19 +66,6 @@ function ServicesPageContent() {
        }
      }
      fetchServices();
-   }, []);
-
-  useEffect(() => {
-    async function fetchAgenda() {
-      try {
-        const res = await fetch("/api/agenda");
-        const data = await res.json();
-        setAgendaIframe(data?.code_integration || "");
-      } catch (e) {
-        console.error("Erreur récupération agenda :", e);
-      }
-    }
-    fetchAgenda();
    }, []);
 
    useEffect(() => {
@@ -303,7 +289,7 @@ useEffect(() => {
     </button>
     {svc.rendez_vous ? (
       <a
-        href="/rendez-vous"
+        href={`/rendez-vous?service=${svc.id}`}
         className="w-full px-4 py-2 bg-brandSecondary text-white rounded-full text-sm hover:bg-brandSecondary/80 transition text-center"
       >
         Prendre rendez-vous
@@ -356,12 +342,6 @@ useEffect(() => {
         ))}
 
         <ServiceModal isOpen={isModalOpen} onClose={closeModal} service={selectedService} />
-
-        {agendaIframe && (
-          <section className="max-w-5xl mx-auto mt-20 shadow-xl rounded-xl overflow-hidden">
-            <div className="w-full" dangerouslySetInnerHTML={{ __html: agendaIframe }} />
-          </section>
-        )}
       </main>
       <Footer />
     </>
