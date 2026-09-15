@@ -135,6 +135,7 @@ function BookingContent() {
   const [feedback, setFeedback] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
   const availabilityRequestId = useRef(0);
+  const selectedServiceRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -169,6 +170,21 @@ function BookingContent() {
           const target = bookable.find((s) => String(s.id) === targetServiceId);
           if (target) selectService(target);
         }
+
+        const persistedService = persisted?.selectedService;
+        if (!targetServiceId && persistedService) {
+          const stillBookable = bookable.some(
+            (s) => String(s.id) === String(persistedService.id)
+          );
+          if (!stillBookable) {
+            setSelectedService(null);
+            setSelectedDay(null);
+            setSelectedSlot(null);
+            setStep(1);
+            setFeedback(null);
+            selectedServiceRef.current = null;
+          }
+        }
       } catch (e) {
         console.error("Erreur récupération services :", e);
       }
@@ -199,11 +215,16 @@ function BookingContent() {
       const res = await fetch(
         `/api/booking/availability?serviceId=${service.id}&timezone=${tz}`
       );
+      if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
       const data = await res.json();
       if (requestId !== availabilityRequestId.current) return;
       setAvailability(data);
     } catch (e) {
-      if (requestId !== availabilityRequestId.current) return;
+      if (
+        requestId !== availabilityRequestId.current ||
+        selectedServiceRef.current?.id !== service.id
+      )
+        return;
       console.error("Erreur récupération disponibilités :", e);
       setFeedback({
         type: "error",
@@ -213,6 +234,7 @@ function BookingContent() {
   }
 
   async function selectService(service) {
+    selectedServiceRef.current = service;
     setSelectedService(service);
     setSelectedDay(null);
     setSelectedSlot(null);
@@ -306,13 +328,13 @@ function BookingContent() {
     }
   }
 
-  const daysByKey = availability
+  const daysByKey = availability?.days
     ? Object.fromEntries(availability.days.map((d) => [d.date, d]))
     : {};
   const availableDates = new Set(
-    availability ? availability.days.map((d) => d.date) : []
+    availability?.days ? availability.days.map((d) => d.date) : []
   );
-  const availMonths = availability
+  const availMonths = availability?.days
     ? [...new Set(availability.days.map((d) => d.date.slice(0, 7)))].sort()
     : [];
   const activeMonth = availMonths.includes(viewMonth)
