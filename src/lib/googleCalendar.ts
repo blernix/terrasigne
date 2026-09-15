@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import path from "path";
+import { randomUUID } from "crypto";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const OPEN_MARKER = "dispo";
@@ -125,7 +126,10 @@ export async function getAvailability(
 
 export interface BookingInput {
   serviceName: string;
+  serviceId?: string;
+  durationMin?: number;
   prix?: number | null;
+  bookingToken?: string;
   start: Date;
   end: Date;
   clientTimezone?: string;
@@ -176,6 +180,9 @@ export async function createBookingEvent(input: BookingInput) {
       end: { dateTime: input.end.toISOString(), timeZone: BUSINESS_TIMEZONE },
       extendedProperties: {
         private: {
+          bookingToken: input.bookingToken || randomUUID(),
+          serviceId: input.serviceId || "",
+          durationMin: String(input.durationMin || 0),
           clientEmail: input.client.email,
           clientName: input.client.name,
           serviceName: input.serviceName,
@@ -246,13 +253,107 @@ export async function markReminderSent(eventId: string) {
   });
 }
 
-export async function isSlotFree(start: Date, end: Date): Promise<boolean> {
+export async function isSlotFree(
+  start: Date,
+  end: Date,
+  excludeEventId?: string
+): Promise<boolean> {
   const events = await listEvents(start, end);
-  const busy = events.filter((e) => !isOpenWindow(e.summary));
+  const busy = events.filter(
+    (e) => !isOpenWindow(e.summary) && e.id !== excludeEventId
+  );
   return !busy.some((b) => {
     const bs = new Date(b.start);
     const be = new Date(b.end);
     if (Number.isNaN(bs.getTime()) || Number.isNaN(be.getTime())) return false;
     return overlaps({ start, end }, bs, be);
   });
+}
+
+export interface ManagedBooking {
+  id: string;
+  token: string;
+  start: string;
+  end: string;
+  summary: string;
+  serviceName: string;
+  serviceId: string;
+  durationMin: number;
+  clientName: string;
+  clientEmail: string;
+  clientTimezone: string;
+  meetingType?: string;
+  phone?: string;
+}
+
+export async function findBookingByToken(
+  token: string
+): Promise<ManagedBooking | null> {
+  const calendar = await getCalendarClient();
+  const res = await calendar.events.list({
+    calendarId: getCalendarId(),
+    timeMin: new Date(Date.now() - 86400000).toISOString(),
+    singleEvents: true,
+    orderBy: "startTime",
+    maxResults: 2500,
+  });
+
+  const e = (res.data.items || []).find(
+    (ev) => ev.extendedProperties?.private?.bookingToken === token
+  );
+  if (!e) return null;
+
+  const p = e.extendedProperties?.private || {};
+  return {
+    id: e.id || "",
+    token,
+    start: e.start?.dateTime || e.start?.date || "",
+    end: e.end?.dateTime || e.end?.date || "",
+    summary: e.summary || "",
+    serviceName: p.serviceName || "",
+    serviceId: p.serviceId || "",
+    durationMin: Number(p.durationMin || 0),
+    clientName: p.clientName || "",
+    clientEmail: p.clientEmail || "",
+    clientTimezone: p.clientTimezone || BUSINESS_TIMEZONE,
+  };
+}
+
+export async function cancelBooking(
+  token: string
+): Promise<ManagedBooking | null> {
+  const booking = await findBookingByToken(token);
+  if (!booking) return null;
+
+  const calendar = await getCalendarClient();
+  await calendar.events.delete({
+    calendarId: getCalendarId(),
+    eventId: booking.id,
+  });
+  return booking;
+}
+
+export async function rescheduleBooking(
+  token: string,
+  newStart: Date,
+  newEnd: Date
+): Promise<ManagedBooking | null> {
+  const booking = await findBookingByToken(token);
+  if (!booking) return null;
+
+  const calendar = await getCalendarClient();
+  await calendar.events.patch({
+    calendarId: getCalendarId(),
+    eventId: booking.id,
+    requestBody: {
+      start: { dateTime: newStart.toISOString(), timeZone: BUSINESS_TIMEZONE },
+      end: { dateTime: newEnd.toISOString(), timeZone: BUSINESS_TIMEZONE },
+    },
+  });
+
+  return {
+    ...booking,
+    start: newStart.toISOString(),
+    end: newEnd.toISOString(),
+  };
 }

@@ -85,16 +85,25 @@ export interface BookingEmailParams {
   durationMin: number;
   price?: number | null;
   timezoneLabel?: string;
+  manageUrl?: string;
 }
 
 export function bookingConfirmationEmailHtml(params: BookingEmailParams): string {
-  const { name, service, dateLabel, durationMin, price, timezoneLabel } = params;
+  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
     { label: "Durée", value: `${durationMin} min` },
   ];
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
+
+  const manageBlock = manageUrl
+    ? `<tr>
+    <td style="padding:24px 32px 4px;text-align:center;">
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+    </td>
+  </tr>`
+    : "";
 
   const inner = `
   ${header("Rendez-vous confirmé")}
@@ -114,15 +123,11 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
       ? `<tr><td style="padding:12px 32px 0;text-align:center;"><p style="margin:0;font-size:12px;color:${BRAND.muted};">Horaires affichés en heure de ${escapeHtml(timezoneLabel)}</p></td></tr>`
       : ""
   }
-  <tr>
-    <td style="padding:24px 32px 4px;text-align:center;">
-      <a href="https://terrasigne.fr" style="display:inline-block;background-color:${BRAND.orange};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Voir le site</a>
-    </td>
-  </tr>
+  ${manageBlock}
   <tr>
     <td style="padding:16px 32px 32px;text-align:center;">
       <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
-        Besoin de modifier ou annuler ? Contactez-nous et nous nous ferons un plaisir de vous aider.
+        Besoin de modifier ou annuler ? Utilisez le bouton ci-dessus.
       </p>
     </td>
   </tr>`;
@@ -163,6 +168,73 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
       </p>
     </td>
   </tr>`;
+
+  return layout(inner);
+}
+
+export interface CancellationEmailParams {
+  name: string;
+  service: string;
+  dateLabel: string;
+}
+
+export function cancellationEmailHtml(params: CancellationEmailParams): string {
+  const { name, service, dateLabel } = params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Date & heure", value: escapeHtml(dateLabel) },
+  ];
+
+  const inner = `
+  ${header("Rendez-vous annulé")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 8px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour <strong>${escapeHtml(name)}</strong>,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Votre rendez-vous a bien été annulé :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  <tr>
+    <td style="padding:24px 32px 32px;text-align:center;">
+      <a href="https://terrasigne.fr/rendez-vous" style="display:inline-block;background-color:${BRAND.orange};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Prendre un nouveau rendez-vous</a>
+    </td>
+  </tr>`;
+
+  return layout(inner);
+}
+
+export interface RescheduleEmailParams {
+  name: string;
+  service: string;
+  oldDateLabel: string;
+  newDateLabel: string;
+}
+
+export function rescheduleEmailHtml(params: RescheduleEmailParams): string {
+  const { name, service, oldDateLabel, newDateLabel } = params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
+    { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
+  ];
+
+  const inner = `
+  ${header("Rendez-vous modifié")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 8px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour <strong>${escapeHtml(name)}</strong>,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Votre rendez-vous a bien été déplacé :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}`;
 
   return layout(inner);
 }

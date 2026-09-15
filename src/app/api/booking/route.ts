@@ -7,6 +7,7 @@ import {
   ownerNotificationEmailHtml,
 } from "@/lib/emails";
 import { resolveTimezone, getTimezoneLabel } from "@/lib/timezones";
+import { randomUUID } from "crypto";
 
 function formatDateLabel(date: Date, timeZone: string): string {
   const label = new Intl.DateTimeFormat("fr-FR", {
@@ -101,9 +102,15 @@ export async function POST(req: Request) {
       );
     }
 
+    const bookingToken = randomUUID();
+    const siteUrl = process.env.SITE_URL || "https://terrasigne.fr";
+
     const event = await createBookingEvent({
       serviceName: service.titre,
+      serviceId: String(service.id),
+      durationMin: duration,
       prix: service.prix,
+      bookingToken,
       start: startDate,
       end: endDate,
       clientTimezone,
@@ -122,6 +129,7 @@ export async function POST(req: Request) {
 
     const dateLabel = formatDateLabel(startDate, clientTimezone);
     const ownerDateLabel = formatDateLabel(startDate, BUSINESS_TIMEZONE);
+    const manageUrl = `${siteUrl}/rendez-vous/gerer?token=${bookingToken}`;
 
     await sendBrevoEmail({
       to: [{ email, name }],
@@ -133,6 +141,7 @@ export async function POST(req: Request) {
         name,
         price: service.prix,
         timezoneLabel: getTimezoneLabel(clientTimezone),
+        manageUrl,
       }),
     });
 
