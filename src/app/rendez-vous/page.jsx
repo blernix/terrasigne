@@ -101,19 +101,12 @@ function BookingContent() {
   const searchParams = useSearchParams();
   const targetServiceId = searchParams.get("service");
 
-  const persisted = loadPersisted();
-  const profile = loadProfile();
-
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState(
-    persisted?.selectedService || null
-  );
+  const [selectedService, setSelectedService] = useState(null);
   const [availability, setAvailability] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(persisted?.selectedDay || null);
-  const [selectedSlot, setSelectedSlot] = useState(
-    persisted?.selectedSlot || null
-  );
-  const [step, setStep] = useState(persisted?.step || 1);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [step, setStep] = useState(1);
   const [timezone] = useState(detectTimezone);
   const [viewMonth, setViewMonth] = useState("");
   const [formData, setFormData] = useState({
@@ -128,16 +121,42 @@ function BookingContent() {
     typeSeance: "",
     message: "",
     consent: false,
-    ...(profile || {}),
-    ...(persisted?.formData || {}),
   });
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
   const availabilityRequestId = useRef(0);
   const selectedServiceRef = useRef(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    const persisted = loadPersisted();
+    const profile = loadProfile();
+
+    setFormData((prev) => ({
+      ...prev,
+      ...(profile || {}),
+      ...(persisted?.formData || {}),
+    }));
+
+    if (persisted) {
+      if (persisted.step) setStep(persisted.step);
+      if (persisted.selectedService) {
+        setSelectedService(persisted.selectedService);
+        selectedServiceRef.current = persisted.selectedService;
+        if (persisted.step >= 2) {
+          loadAvailability(persisted.selectedService, timezone);
+        }
+      }
+      if (persisted.selectedDay) setSelectedDay(persisted.selectedDay);
+      if (persisted.selectedSlot) setSelectedSlot(persisted.selectedSlot);
+    }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -153,7 +172,7 @@ function BookingContent() {
     } catch {
       /* ignore */
     }
-  }, [timezone, step, selectedService, selectedDay, selectedSlot, formData]);
+  }, [hydrated, timezone, step, selectedService, selectedDay, selectedSlot, formData]);
 
   useEffect(() => {
     async function fetchServices() {
@@ -166,12 +185,12 @@ function BookingContent() {
         );
         setServices(bookable);
 
-        if (targetServiceId && !persisted?.selectedService) {
+        if (targetServiceId && !selectedServiceRef.current) {
           const target = bookable.find((s) => String(s.id) === targetServiceId);
           if (target) selectService(target);
         }
 
-        const persistedService = persisted?.selectedService;
+        const persistedService = selectedServiceRef.current;
         if (!targetServiceId && persistedService) {
           const stillBookable = bookable.some(
             (s) => String(s.id) === String(persistedService.id)
@@ -192,13 +211,6 @@ function BookingContent() {
     fetchServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetServiceId]);
-
-  useEffect(() => {
-    if (selectedService && step >= 2) {
-      loadAvailability(selectedService, timezone);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (availability?.days?.length) {
