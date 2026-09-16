@@ -120,6 +120,7 @@ function BookingContent({ targetServiceId }) {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
+  const [servicesError, setServicesError] = useState(null);
   const availabilityRequestId = useRef(0);
   const selectedServiceRef = useRef(null);
   const [hydrated, setHydrated] = useState(false);
@@ -135,16 +136,25 @@ function BookingContent({ targetServiceId }) {
     }));
 
     if (persisted) {
-      if (persisted.step) setStep(persisted.step);
-      if (persisted.selectedService) {
-        setSelectedService(persisted.selectedService);
-        selectedServiceRef.current = persisted.selectedService;
-        if (persisted.step >= 2) {
-          loadAvailability(persisted.selectedService, timezone);
+      const service = persisted.selectedService || null;
+      const day = persisted.selectedDay || null;
+      const slot = persisted.selectedSlot || null;
+      let restoredStep = Number(persisted.step) || 1;
+
+      if (restoredStep >= 4 && (!slot || !day || !service)) restoredStep = 3;
+      if (restoredStep >= 3 && (!day || !service)) restoredStep = 2;
+      if (restoredStep >= 2 && !service) restoredStep = 1;
+
+      if (service) {
+        setSelectedService(service);
+        selectedServiceRef.current = service;
+        if (restoredStep >= 2) {
+          loadAvailability(service, timezone);
         }
       }
-      if (persisted.selectedDay) setSelectedDay(persisted.selectedDay);
-      if (persisted.selectedSlot) setSelectedSlot(persisted.selectedSlot);
+      if (restoredStep >= 3 && day) setSelectedDay(day);
+      if (restoredStep >= 4 && slot) setSelectedSlot(slot);
+      setStep(restoredStep);
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,12 +183,14 @@ function BookingContent({ targetServiceId }) {
     async function fetchServices() {
       try {
         const res = await fetch("/api/services");
+        if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
         const data = await res.json();
-        const list = Array.isArray(data) ? data : [];
-        const bookable = list.filter(
+        if (!Array.isArray(data)) throw new Error("Réponse API invalide");
+        const bookable = data.filter(
           (s) => s.rendez_vous && Number(s.duree) > 0
         );
         setServices(bookable);
+        setServicesError(null);
 
         if (targetServiceId && !selectedServiceRef.current) {
           const target = bookable.find((s) => String(s.id) === targetServiceId);
@@ -201,6 +213,9 @@ function BookingContent({ targetServiceId }) {
         }
       } catch (e) {
         console.error("Erreur récupération services :", e);
+        setServicesError(
+          "Impossible de charger les services pour le moment. Veuillez réessayer plus tard."
+        );
       }
     }
     fetchServices();
@@ -481,11 +496,15 @@ function BookingContent({ targetServiceId }) {
                 );
               })}
             </div>
-            {services.length === 0 && (
+            {servicesError ? (
+              <p className="text-center text-red-600 bg-red-50 rounded-xl p-4">
+                {servicesError}
+              </p>
+            ) : services.length === 0 ? (
               <p className="text-center text-gray-500">
                 Aucun service réservable pour le moment.
               </p>
-            )}
+            ) : null}
           </section>
         )}
 
