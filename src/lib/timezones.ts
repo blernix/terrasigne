@@ -45,3 +45,16 @@ export function dateKeyInTimezone(date: Date, timeZone: string): string {
   for (const p of parts) map[p.type] = p.value;
   return `${map.year}-${map.month}-${map.day}`;
 }
+
+export function formatDateLabel(date: Date, timeZone: string): string {
+  const label = new Intl.DateTimeFormat("fr-FR", {
+    timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}

@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useRef, Suspense } from "react";
+import { stripHtml, createSlug } from "@/lib/utils";
 
 
 function ServicesPageContent() {
@@ -120,24 +121,6 @@ function ServicesPageContent() {
     setSelectedService(null);
     setIsModalOpen(false);
   };
-   function decodeAndStrip(html) {
-     if (typeof document === "undefined") return html.replace(/<[^>]*>?/gm, "");
-     const txt = document.createElement("textarea");
-     txt.innerHTML = html;
-     return txt.value.replace(/<[^>]*>?/gm, "");
-   }
-
-   function createSlug(text: string): string {
-     return text
-       .normalize('NFKD')
-       .toLowerCase()
-       .replace(/\s+/g, '-')
-       .replace(/[^\w\-]+/g, '')
-       .replace(/\-\-+/g, '-')
-       .replace(/^-+/, '')
-       .replace(/-+$/, '');
-   }
-
    const [scrolled, setScrolled] = useState(false);
 
 useEffect(() => {
@@ -275,9 +258,9 @@ useEffect(() => {
   </p>
 
   <p className="text-xl text-gray-700 leading-relaxed text-center flex-1 overflow-hidden">
-    {decodeAndStrip(svc.description).length > 200
-      ? decodeAndStrip(svc.description).slice(0, 200) + "..."
-      : decodeAndStrip(svc.description) || "Aucune description."}
+    {stripHtml(svc.description).length > 200
+      ? stripHtml(svc.description).slice(0, 200) + "..."
+      : stripHtml(svc.description) || "Aucune description."}
   </p>
 
   <div className="mt-6 flex flex-col gap-2">

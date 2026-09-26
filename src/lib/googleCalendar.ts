@@ -187,6 +187,7 @@ export async function createBookingEvent(input: BookingInput) {
           clientName: input.client.name,
           serviceName: input.serviceName,
           clientTimezone: input.clientTimezone || BUSINESS_TIMEZONE,
+          clientPhone: input.client.phone || "",
           reminderSent: "false",
         },
       },
@@ -316,6 +317,7 @@ export async function findBookingByToken(
     clientName: p.clientName || "",
     clientEmail: p.clientEmail || "",
     clientTimezone: p.clientTimezone || BUSINESS_TIMEZONE,
+    phone: p.clientPhone || "",
   };
 }
 
@@ -342,12 +344,21 @@ export async function rescheduleBooking(
   if (!booking) return null;
 
   const calendar = await getCalendarClient();
+  const existing = await calendar.events.get({
+    calendarId: getCalendarId(),
+    eventId: booking.id,
+  });
+  const privateProps = existing.data.extendedProperties?.private || {};
+
   await calendar.events.patch({
     calendarId: getCalendarId(),
     eventId: booking.id,
     requestBody: {
       start: { dateTime: newStart.toISOString(), timeZone: BUSINESS_TIMEZONE },
       end: { dateTime: newEnd.toISOString(), timeZone: BUSINESS_TIMEZONE },
+      extendedProperties: {
+        private: { ...privateProps, reminderSent: "false" },
+      },
     },
   });
 

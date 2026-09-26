@@ -2,11 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
+import { stripHtml } from "@/lib/utils";
+import {
+  WEEKDAYS,
+  capitalize,
+  monthLabel,
+  groupSlots,
+  buildMonthGrid,
+} from "@/lib/calendar";
 
 const STEPS = ["Service", "Date", "Horaire", "Vos infos"];
 const STORAGE_KEY = "terrasigne-booking";
 const PROFILE_KEY = "terrasigne-client-profile";
-const WEEKDAYS = ["Lu", "Ma", "Me", "Je", "Ve", "Sa", "Di"];
 
 function detectTimezone() {
   try {
@@ -17,20 +24,6 @@ function detectTimezone() {
   } catch {
     return "America/Guadeloupe";
   }
-}
-
-function stripHtml(html) {
-  if (!html) return "";
-  return html.replace(/<[^>]+>/g, "").trim();
-}
-
-function capitalize(str) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function pad2(n) {
-  return String(n).padStart(2, "0");
 }
 
 function loadPersisted() {
@@ -53,51 +46,10 @@ function loadProfile() {
   }
 }
 
-function monthLabel(yearMonth) {
-  const [y, m] = (yearMonth || "").split("-").map(Number);
-  if (!y || !m) return "";
-  return capitalize(
-    new Intl.DateTimeFormat("fr-FR", {
-      month: "long",
-      year: "numeric",
-    }).format(new Date(y, m - 1, 1))
-  );
-}
-
-function groupSlots(slots) {
-  const groups = [
-    { label: "Matin", slots: [] },
-    { label: "Après-midi", slots: [] },
-    { label: "Soir", slots: [] },
-  ];
-  for (const s of slots) {
-    const h = parseInt(s.timeLabel.split(":")[0], 10);
-    if (h < 12) groups[0].slots.push(s);
-    else if (h < 18) groups[1].slots.push(s);
-    else groups[2].slots.push(s);
-  }
-  return groups.filter((g) => g.slots.length > 0);
-}
-
-function buildMonthGrid(yearMonth, availableDates) {
-  const [y, m] = yearMonth.split("-").map(Number);
-  const firstDay = new Date(y, m - 1, 1);
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const offset = (firstDay.getDay() + 6) % 7;
-
-  const cells = [];
-  for (let i = 0; i < offset; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateKey = `${y}-${pad2(m)}-${pad2(d)}`;
-    cells.push({ day: d, dateKey, available: availableDates.has(dateKey) });
-  }
-  while (cells.length % 7 !== 0) cells.push(null);
-  return cells;
-}
-
 function BookingContent({ targetServiceId }) {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [selectedFormule, setSelectedFormule] = useState(null);
   const [availability, setAvailability] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -116,6 +68,7 @@ function BookingContent({ targetServiceId }) {
     typeSeance: "",
     message: "",
     consent: false,
+    newsletter: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -136,25 +89,32 @@ function BookingContent({ targetServiceId }) {
     }));
 
     if (persisted) {
-      const service = persisted.selectedService || null;
-      const day = persisted.selectedDay || null;
-      const slot = persisted.selectedSlot || null;
       let restoredStep = Number(persisted.step) || 1;
 
-      if (restoredStep >= 4 && (!slot || !day || !service)) restoredStep = 3;
-      if (restoredStep >= 3 && (!day || !service)) restoredStep = 2;
-      if (restoredStep >= 2 && !service) restoredStep = 1;
+      if (restoredStep >= 5) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        const service = persisted.selectedService || null;
+        const day = persisted.selectedDay || null;
+        const slot = persisted.selectedSlot || null;
+        const formule = persisted.selectedFormule || null;
 
-      if (service) {
-        setSelectedService(service);
-        selectedServiceRef.current = service;
-        if (restoredStep >= 2) {
-          loadAvailability(service, timezone);
+        if (restoredStep >= 4 && (!slot || !day || !service || !formule)) restoredStep = 3;
+        if (restoredStep >= 3 && (!day || !service || !formule)) restoredStep = 2;
+        if (restoredStep >= 2 && (!service || !formule)) restoredStep = 1;
+
+        if (service) {
+          setSelectedService(service);
+          selectedServiceRef.current = service;
         }
+        if (formule) setSelectedFormule(formule);
+        if (service && formule && restoredStep >= 2) {
+          loadAvailability(service, formule, timezone);
+        }
+        if (restoredStep >= 3 && day) setSelectedDay(day);
+        if (restoredStep >= 4 && slot) setSelectedSlot(slot);
+        setStep(restoredStep);
       }
-      if (restoredStep >= 3 && day) setSelectedDay(day);
-      if (restoredStep >= 4 && slot) setSelectedSlot(slot);
-      setStep(restoredStep);
     }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,6 +122,7 @@ function BookingContent({ targetServiceId }) {
 
   useEffect(() => {
     if (!hydrated) return;
+    if (step >= 5) return;
     try {
       localStorage.setItem(
         STORAGE_KEY,
@@ -169,6 +130,7 @@ function BookingContent({ targetServiceId }) {
           timezone,
           step,
           selectedService,
+          selectedFormule,
           selectedDay,
           selectedSlot,
           formData,
@@ -177,7 +139,7 @@ function BookingContent({ targetServiceId }) {
     } catch {
       /* ignore */
     }
-  }, [hydrated, timezone, step, selectedService, selectedDay, selectedSlot, formData]);
+  }, [hydrated, timezone, step, selectedService, selectedFormule, selectedDay, selectedSlot, formData]);
 
   useEffect(() => {
     async function fetchServices() {
@@ -187,7 +149,7 @@ function BookingContent({ targetServiceId }) {
         const data = await res.json();
         if (!Array.isArray(data)) throw new Error("Réponse API invalide");
         const bookable = data.filter(
-          (s) => s.rendez_vous && Number(s.duree) > 0
+          (s) => s.rendez_vous && s.formules?.length > 0
         );
         setServices(bookable);
         setServicesError(null);
@@ -199,16 +161,20 @@ function BookingContent({ targetServiceId }) {
 
         const persistedService = selectedServiceRef.current;
         if (!targetServiceId && persistedService) {
-          const stillBookable = bookable.some(
+          const fresh = bookable.find(
             (s) => String(s.id) === String(persistedService.id)
           );
-          if (!stillBookable) {
+          if (!fresh) {
             setSelectedService(null);
+            setSelectedFormule(null);
             setSelectedDay(null);
             setSelectedSlot(null);
             setStep(1);
             setFeedback(null);
             selectedServiceRef.current = null;
+          } else {
+            selectedServiceRef.current = fresh;
+            setSelectedService(fresh);
           }
         }
       } catch (e) {
@@ -231,11 +197,11 @@ function BookingContent({ targetServiceId }) {
     }
   }, [availability]);
 
-  async function loadAvailability(service, tz) {
+  async function loadAvailability(service, formule, tz) {
     const requestId = ++availabilityRequestId.current;
     try {
       const res = await fetch(
-        `/api/booking/availability?serviceId=${service.id}&timezone=${tz}`
+        `/api/booking/availability?serviceId=${service.id}&duree=${formule.duree}&pause=${formule.pause || 0}&timezone=${tz}`
       );
       if (!res.ok) throw new Error(`Erreur HTTP ${res.status}`);
       const data = await res.json();
@@ -255,14 +221,30 @@ function BookingContent({ targetServiceId }) {
     }
   }
 
-  async function selectService(service) {
+  function selectService(service) {
     selectedServiceRef.current = service;
     setSelectedService(service);
+    setSelectedFormule(null);
     setSelectedDay(null);
     setSelectedSlot(null);
     setAvailability(null);
+    setFeedback(null);
+
+    if (service.formules && service.formules.length === 1) {
+      selectFormule(service.formules[0]);
+    } else {
+      setStep(1);
+    }
+  }
+
+  function selectFormule(formule) {
+    setSelectedFormule(formule);
+    setSelectedDay(null);
+    setSelectedSlot(null);
+    setAvailability(null);
+    setFeedback(null);
     setStep(2);
-    loadAvailability(service, timezone);
+    loadAvailability(selectedServiceRef.current, formule, timezone);
   }
 
   function handleChange(e) {
@@ -290,6 +272,8 @@ function BookingContent({ targetServiceId }) {
           serviceId: selectedService.id,
           start: selectedSlot.start,
           end: selectedSlot.end,
+          duree: selectedFormule.duree,
+          prix: selectedFormule.prix,
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -300,6 +284,7 @@ function BookingContent({ targetServiceId }) {
           typeSeance: formData.typeSeance,
           message: formData.message,
           consent: formData.consent,
+          newsletter: formData.newsletter,
           timezone,
         }),
       });
@@ -455,7 +440,7 @@ function BookingContent({ targetServiceId }) {
           </div>
         )}
 
-        {step === 1 && (
+        {step === 1 && !selectedService && (
           <section className="max-w-4xl mx-auto px-4 pb-24">
             <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
               Choisissez un service
@@ -463,6 +448,14 @@ function BookingContent({ targetServiceId }) {
             <div className="grid gap-4 sm:grid-cols-2">
               {services.map((s) => {
                 const desc = stripHtml(s.description);
+                const formules = s.formules || [];
+                const prixFormules = formules
+                  .filter((f) => f.prix != null)
+                  .map((f) => f.prix);
+                const minPrix = prixFormules.length
+                  ? Math.min(...prixFormules)
+                  : null;
+                const hasMultiple = formules.length > 1;
                 return (
                   <button
                     key={s.id}
@@ -484,11 +477,15 @@ function BookingContent({ targetServiceId }) {
                     )}
                     <div className="flex items-center gap-3 text-sm">
                       <span className="inline-flex items-center px-3 py-1 rounded-full bg-brandSecondary/10 text-brandSecondary font-semibold">
-                        {s.duree} min
+                        {hasMultiple
+                          ? `${formules.length} durées`
+                          : formules[0]
+                          ? `${formules[0].duree} min`
+                          : ""}
                       </span>
-                      {s.prix ? (
+                      {minPrix != null ? (
                         <span className="text-gray-700 font-semibold">
-                          {s.prix} €
+                          {hasMultiple ? `dès ${minPrix} €` : `${minPrix} €`}
                         </span>
                       ) : null}
                     </div>
@@ -508,11 +505,68 @@ function BookingContent({ targetServiceId }) {
           </section>
         )}
 
+        {step === 1 && selectedService && !selectedFormule && (
+          <section className="max-w-2xl mx-auto px-4 pb-24">
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={() => {
+                  setSelectedService(null);
+                  selectedServiceRef.current = null;
+                  setSelectedFormule(null);
+                  setAvailability(null);
+                }}
+                className="text-brandPurple hover:underline text-sm font-medium"
+              >
+                ← Changer de service
+              </button>
+              <span className="text-gray-600 font-medium text-sm">
+                {selectedService.titre}
+              </span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
+              Choisissez une durée
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {(selectedService.formules || []).map((f) => (
+                <button
+                  key={f.id || `${f.duree}-${f.prix}`}
+                  onClick={() => selectFormule(f)}
+                  className="group text-left p-5 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-gray-100"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-base font-bold text-gray-800">
+                      {f.titre || `${f.duree} min`}
+                    </span>
+                    <span className="w-8 h-8 rounded-full bg-brandOrange/10 text-brandOrange flex items-center justify-center group-hover:bg-brandOrange group-hover:text-white transition">
+                      →
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm mt-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-brandSecondary/10 text-brandSecondary font-semibold">
+                      {f.duree} min
+                    </span>
+                    {f.prix != null ? (
+                      <span className="text-gray-700 font-semibold">
+                        {f.prix} €
+                      </span>
+                    ) : null}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {step === 2 && (
           <section className="max-w-xl mx-auto px-4 pb-24">
             <div className="flex items-center justify-between mb-6">
               <button
-                onClick={() => setStep(1)}
+                onClick={() => {
+                  setStep(1);
+                  setSelectedService(null);
+                  setSelectedFormule(null);
+                  setAvailability(null);
+                }}
                 className="text-brandPurple hover:underline text-sm font-medium"
               >
                 ← Changer de service
@@ -650,7 +704,7 @@ function BookingContent({ targetServiceId }) {
           </section>
         )}
 
-        {step === 4 && selectedSlot && selectedService && (
+        {step === 4 && selectedSlot && selectedService && selectedFormule && (
           <section className="max-w-xl mx-auto px-4 pb-24">
             <button
               onClick={() => setStep(3)}
@@ -692,14 +746,14 @@ function BookingContent({ targetServiceId }) {
                 <div className="flex justify-between">
                   <span className="text-gray-500">Durée</span>
                   <span className="text-gray-800 font-semibold">
-                    {selectedService.duree} min
+                    {selectedFormule?.duree} min
                   </span>
                 </div>
-                {selectedService.prix ? (
+                {selectedFormule?.prix ? (
                   <div className="flex justify-between border-t border-gray-100 pt-3">
                     <span className="text-gray-500">Tarif</span>
                     <span className="text-brandOrange font-bold">
-                      {selectedService.prix} €
+                      {selectedFormule.prix} €
                     </span>
                   </div>
                 ) : null}
@@ -879,6 +933,20 @@ function BookingContent({ targetServiceId }) {
                     politique de confidentialité
                   </a>
                   . *
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="newsletter"
+                  checked={formData.newsletter}
+                  onChange={handleChange}
+                  className="mt-0.5 w-4 h-4 accent-brandPurple"
+                />
+                <span className="text-sm text-gray-600">
+                  Je souhaite recevoir la newsletter de TerraSigne (actualités,
+                  conseils bien-être, offres).
                 </span>
               </label>
 

@@ -50,3 +50,40 @@ export async function sendBrevoEmail({
 
   return res.json();
 }
+
+export interface AddContactParams {
+  email: string;
+  listIds: number[];
+  attributes?: Record<string, string>;
+}
+
+export async function addContactToList({
+  email,
+  listIds,
+  attributes,
+}: AddContactParams) {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new Error("BREVO_API_KEY manquante");
+
+  const res = await fetch("https://api.brevo.com/v3/contacts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": apiKey,
+    },
+    body: JSON.stringify({
+      email,
+      listIds,
+      attributes: attributes || {},
+      updateEnabled: true,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Erreur Brevo contacts ${res.status}: ${body}`);
+  }
+
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}

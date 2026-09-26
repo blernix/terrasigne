@@ -9,7 +9,7 @@ const BRAND = {
   muted: "#8A8A8A",
 };
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -303,6 +303,116 @@ export function ownerNotificationEmailHtml(
   <tr>
     <td style="padding:0 32px 32px;text-align:center;">
       <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+    </td>
+  </tr>`;
+
+  return layout(inner);
+}
+
+export interface OwnerCancellationEmailParams {
+  name: string;
+  email: string;
+  phone?: string;
+  service: string;
+  dateLabel: string;
+}
+
+export function ownerCancellationEmailHtml(
+  params: OwnerCancellationEmailParams
+): string {
+  const { name, email, phone, service, dateLabel } = params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Date & heure", value: escapeHtml(dateLabel) },
+    { label: "Client", value: escapeHtml(name) },
+    { label: "Email", value: escapeHtml(email) },
+  ];
+  if (phone) rows.push({ label: "Téléphone", value: escapeHtml(phone) });
+
+  const inner = `
+  ${header("Rendez-vous annulé")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Un rendez-vous vient d'être annulé par le client :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  <tr>
+    <td style="padding:0 32px 32px;text-align:center;">
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+    </td>
+  </tr>`;
+
+  return layout(inner);
+}
+
+export interface OwnerRescheduleEmailParams {
+  name: string;
+  email: string;
+  phone?: string;
+  service: string;
+  oldDateLabel: string;
+  newDateLabel: string;
+}
+
+export function ownerRescheduleEmailHtml(
+  params: OwnerRescheduleEmailParams
+): string {
+  const { name, email, phone, service, oldDateLabel, newDateLabel } = params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
+    { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
+    { label: "Client", value: escapeHtml(name) },
+    { label: "Email", value: escapeHtml(email) },
+  ];
+  if (phone) rows.push({ label: "Téléphone", value: escapeHtml(phone) });
+
+  const inner = `
+  ${header("Rendez-vous modifié")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Un rendez-vous vient d'être déplacé par le client :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  <tr>
+    <td style="padding:0 32px 32px;text-align:center;">
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+    </td>
+  </tr>`;
+
+  return layout(inner);
+}
+
+export interface NewsletterConfirmationEmailParams {
+  confirmUrl: string;
+}
+
+export function newsletterConfirmationEmailHtml(
+  params: NewsletterConfirmationEmailParams
+): string {
+  const { confirmUrl } = params;
+
+  const inner = `
+  ${header("Confirmez votre inscription")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 16px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Merci de vous être inscrit(e) à la newsletter TerraSigne. Pour finaliser votre inscription, merci de confirmer votre adresse email en cliquant sur le bouton ci-dessous :
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:8px 32px 32px;text-align:center;">
+      <a href="${escapeHtml(confirmUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Confirmer mon inscription</a>
     </td>
   </tr>`;
 

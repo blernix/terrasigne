@@ -6,20 +6,11 @@ import {
   BUSINESS_TIMEZONE,
 } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
-import { rescheduleEmailHtml } from "@/lib/emails";
-
-function formatDateLabel(date: Date, timeZone: string): string {
-  const label = new Intl.DateTimeFormat("fr-FR", {
-    timeZone,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
+import {
+  rescheduleEmailHtml,
+  ownerRescheduleEmailHtml,
+} from "@/lib/emails";
+import { formatDateLabel } from "@/lib/timezones";
 
 export async function POST(req: Request) {
   try {
@@ -98,7 +89,14 @@ export async function POST(req: Request) {
       await sendBrevoEmail({
         to: [{ email: ownerEmail }],
         subject: `Rendez-vous modifié - ${existing.serviceName}`,
-        textContent: `Rendez-vous déplacé.\nService : ${existing.serviceName}\nAncienne date : ${oldDateLabel}\nNouvelle date : ${newDateLabel}\nClient : ${existing.clientName}\nEmail : ${existing.clientEmail}`,
+        htmlContent: ownerRescheduleEmailHtml({
+          name: existing.clientName,
+          email: existing.clientEmail,
+          phone: existing.phone,
+          service: existing.serviceName,
+          oldDateLabel,
+          newDateLabel,
+        }),
       });
     }
 

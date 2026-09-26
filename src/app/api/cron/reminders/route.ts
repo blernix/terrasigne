@@ -6,26 +6,13 @@ import {
 } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
 import { reminderEmailHtml } from "@/lib/emails";
-
-function formatDateLabel(date: Date, timeZone: string): string {
-  const label = new Intl.DateTimeFormat("fr-FR", {
-    timeZone,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
+import { formatDateLabel } from "@/lib/timezones";
 
 export async function GET(req: Request) {
   try {
-    const url = new URL(req.url);
-    const secret =
-      url.searchParams.get("secret") ||
-      req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    const secret = req.headers
+      .get("authorization")
+      ?.replace(/^Bearer\s+/i, "");
 
     if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 });

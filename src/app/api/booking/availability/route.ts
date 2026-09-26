@@ -26,8 +26,19 @@ export async function GET(req: Request) {
     }
 
     const service = await fetchService(serviceId);
-    const duration = Number(service.duree);
-    const pause = Number(service.pause || 0);
+    const duration = Number(
+      url.searchParams.get("duree") || service.duree
+    );
+    const pause = Number(
+      url.searchParams.get("pause") || service.pause || 0
+    );
+
+    if (service.rendez_vous !== true) {
+      return NextResponse.json(
+        { message: "Ce service n'est pas réservable" },
+        { status: 400 }
+      );
+    }
 
     if (!duration || duration <= 0) {
       return NextResponse.json(

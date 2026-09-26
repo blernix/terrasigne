@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendBrevoEmail } from "@/lib/brevo";
+import { escapeHtml } from "@/lib/emails";
 
 export async function POST(req: Request) {
   try {
@@ -14,6 +15,12 @@ export async function POST(req: Request) {
     }
 
     const brandColor = "#6a2c70";
+
+    const escName = escapeHtml(name);
+    const escEmail = escapeHtml(email);
+    const escPhone = phone ? escapeHtml(phone) : "";
+    const escService = escapeHtml(service);
+    const escMessage = escapeHtml(message).replace(/\n/g, "<br>");
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -32,17 +39,17 @@ export async function POST(req: Request) {
               <tr>
                 <td style="padding:40px 30px;">
                   <p style="margin:0 0 20px;font-size:16px;color:#333333;">Bonjour,</p>
-                  <p style="margin:0 0 20px;font-size:16px;color:#333333;">Vous avez reçu un nouveau message de <strong>${name}</strong> via le formulaire de votre site.</p>
+                  <p style="margin:0 0 20px;font-size:16px;color:#333333;">Vous avez reçu un nouveau message de <strong>${escName}</strong> via le formulaire de votre site.</p>
                   <hr style="border:0;border-top:1px solid #eeeeee;margin:20px 0;">
                   <h3 style="color:${brandColor};margin-top:0;">Détails du contact :</h3>
-                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Nom :</strong> ${name}</p>
-                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Email :</strong> <a href="mailto:${email}" style="color:${brandColor};text-decoration:none;">${email}</a></p>
-                  ${phone ? `<p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Téléphone :</strong> ${phone}</p>` : ""}
+                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Nom :</strong> ${escName}</p>
+                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Email :</strong> <a href="mailto:${escEmail}" style="color:${brandColor};text-decoration:none;">${escEmail}</a></p>
+                  ${phone ? `<p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Téléphone :</strong> ${escPhone}</p>` : ""}
                   <h3 style="color:${brandColor};margin-top:30px;">Sujet de la demande :</h3>
-                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Service :</strong> ${service}</p>
+                  <p style="margin:5px 0;font-size:16px;color:#333333;"><strong>Service :</strong> ${escService}</p>
                   <h3 style="color:${brandColor};margin-top:30px;">Message :</h3>
                   <div style="background-color:#f9f9f9;padding:15px;border-radius:5px;font-size:16px;color:#555555;line-height:1.5;">
-                    ${message.replace(/\n/g, "<br>")}
+                    ${escMessage}
                   </div>
                   <p style="margin:20px 0 0;font-size:13px;color:#888888;">Consentement RGPD : Oui</p>
                 </td>

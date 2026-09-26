@@ -1,26 +1,18 @@
 import { NextResponse } from "next/server";
 import { fetchService } from "@/lib/directus";
 import { createBookingEvent, isSlotFree, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
-import { sendBrevoEmail } from "@/lib/brevo";
+import { sendBrevoEmail, addContactToList } from "@/lib/brevo";
+import { sendNewsletterConfirmation } from "@/lib/newsletter";
 import {
   bookingConfirmationEmailHtml,
   ownerNotificationEmailHtml,
 } from "@/lib/emails";
-import { resolveTimezone, getTimezoneLabel } from "@/lib/timezones";
+import {
+  resolveTimezone,
+  getTimezoneLabel,
+  formatDateLabel,
+} from "@/lib/timezones";
 import { randomUUID } from "crypto";
-
-function formatDateLabel(date: Date, timeZone: string): string {
-  const label = new Intl.DateTimeFormat("fr-FR", {
-    timeZone,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
 
 export async function POST(req: Request) {
   try {
@@ -39,6 +31,9 @@ export async function POST(req: Request) {
       typeSeance,
       message,
       consent,
+      newsletter,
+      duree: bodyDuree,
+      prix: bodyPrix,
       timezone,
     } = body;
     const clientTimezone = resolveTimezone(timezone);
@@ -63,7 +58,15 @@ export async function POST(req: Request) {
     }
 
     const service = await fetchService(String(serviceId));
-    const duration = Number(service.duree);
+    const duration = Number(bodyDuree ?? service.duree);
+    const prix = bodyPrix ?? service.prix;
+    if (service.rendez_vous !== true) {
+      return NextResponse.json(
+        { message: "Ce service n'est pas réservable" },
+        { status: 400 }
+      );
+    }
+
     if (!duration || duration <= 0) {
       return NextResponse.json(
         { message: "Ce service n'est pas réservable" },
@@ -109,7 +112,7 @@ export async function POST(req: Request) {
       serviceName: service.titre,
       serviceId: String(service.id),
       durationMin: duration,
-      prix: service.prix,
+      prix,
       bookingToken,
       start: startDate,
       end: endDate,
@@ -139,7 +142,7 @@ export async function POST(req: Request) {
         dateLabel,
         durationMin: duration,
         name,
-        price: service.prix,
+        price: prix,
         timezoneLabel: getTimezoneLabel(clientTimezone),
         manageUrl,
       }),
@@ -160,10 +163,37 @@ export async function POST(req: Request) {
           profession,
           suivi,
           typeSeance,
-          price: service.prix,
+          price: prix,
           message,
         }),
       });
+    }
+
+    const bookingListId = Number(process.env.BREVO_BOOKING_LIST_ID);
+    if (bookingListId) {
+      try {
+        await addContactToList({
+          email,
+          listIds: [bookingListId],
+          attributes: {
+            FIRSTNAME: firstName || "",
+            LASTNAME: lastName || "",
+          },
+        });
+      } catch (e) {
+        console.error("Erreur ajout contact Brevo (RDV) :", e);
+      }
+
+      if (newsletter) {
+        const newsletterListId = Number(process.env.BREVO_NEWSLETTER_LIST_ID);
+        if (newsletterListId) {
+          try {
+            await sendNewsletterConfirmation(email, [newsletterListId]);
+          } catch (e) {
+            console.error("Erreur envoi confirmation newsletter :", e);
+          }
+        }
+      }
     }
 
     return NextResponse.json({

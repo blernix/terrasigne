@@ -1,13 +1,6 @@
 "use client";
 import Link from "next/link";
-
-function stripTagsAndDecode(html: string) {
-  const text = html.replace(/<[^>]+>/g, "");
-  if (typeof document === "undefined") return text;
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = text;
-  return textarea.value;
-}
+import { stripHtml } from "@/lib/utils";
 
 interface Article {
   id: number;
@@ -43,7 +36,7 @@ export default function FeaturedArticles({ articles }: { articles: Article[] }) 
               <div className="p-6 flex flex-col h-full">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">{article.titre}</h3>
                 <p className="text-gray-600 mb-6">
-                  {stripTagsAndDecode(article.contenu).slice(0, 120)}...
+                  {stripHtml(article.contenu).slice(0, 120)}...
                 </p>
                 <div className="mt-auto">
                   <Link href={`/blog/${article.id}`}>

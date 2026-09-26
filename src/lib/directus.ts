@@ -1,5 +1,5 @@
 const DIRECTUS_API = process.env.NEXT_PUBLIC_DIRECTUS_API;
-const DIRECTUS_TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+const DIRECTUS_TOKEN = process.env.DIRECTUS_TOKEN;
 
 interface DirectusService {
   id: number;

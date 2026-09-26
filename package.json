@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test:booking": "node --env-file=.env scripts/simulate-booking.mjs"
   },
   "dependencies": {

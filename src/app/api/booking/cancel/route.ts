@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
 import { cancelBooking, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
-import { cancellationEmailHtml } from "@/lib/emails";
-
-function formatDateLabel(date: Date, timeZone: string): string {
-  const label = new Intl.DateTimeFormat("fr-FR", {
-    timeZone,
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
+import {
+  cancellationEmailHtml,
+  ownerCancellationEmailHtml,
+} from "@/lib/emails";
+import { formatDateLabel } from "@/lib/timezones";
 
 export async function POST(req: Request) {
   try {
@@ -51,7 +42,13 @@ export async function POST(req: Request) {
       await sendBrevoEmail({
         to: [{ email: ownerEmail }],
         subject: `Rendez-vous annulé - ${booking.serviceName}`,
-        textContent: `Rendez-vous annulé.\nService : ${booking.serviceName}\nDate : ${dateLabel}\nClient : ${booking.clientName}\nEmail : ${booking.clientEmail}`,
+        htmlContent: ownerCancellationEmailHtml({
+          name: booking.clientName,
+          email: booking.clientEmail,
+          phone: booking.phone,
+          service: booking.serviceName,
+          dateLabel,
+        }),
       });
     }
 

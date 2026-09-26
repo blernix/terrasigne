@@ -5,6 +5,7 @@ import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { stripHtml } from "@/lib/utils";
 
 export default function BlogPage() {
   const [allArticles, setAllArticles] = useState<any[]>([]);
@@ -76,14 +77,6 @@ export default function BlogPage() {
 
   // nombre de pages
   const pageCount = Math.ceil(allArticles.length / (FETCH_PER_BATCH * BATCHES_PER_PAGE));
-
-  const stripTagsAndDecode = (html: string) => {
-    const text = html.replace(/<[^>]+>/g, "");
-    if (typeof document === "undefined") return text;
-    const ta = document.createElement("textarea");
-    ta.innerHTML = text;
-    return ta.value;
-  };
 
    const [scrolled, setScrolled] = useState(false);
 
@@ -190,7 +183,7 @@ export default function BlogPage() {
                     <h2 className="text-2xl font-semibold text-brandPurple mb-2">{article.titre}</h2>
                     <p className="text-sm text-gray-500 mb-4">{new Date(article.date_created).toLocaleDateString()}</p>
                     <p className="text-gray-700 mb-6">
-  {stripTagsAndDecode(article.contenu)
+  {stripHtml(article.contenu)
     .split(" ")
     .slice(0, article.couverture ? 20 : 90)
     .join(" ")}...
