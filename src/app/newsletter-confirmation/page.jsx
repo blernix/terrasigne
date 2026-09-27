@@ -1,8 +1,9 @@
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
 
-export default function NewsletterConfirmation({ searchParams }) {
-  const ok = searchParams?.status === "ok";
+export default async function NewsletterConfirmation({ searchParams }) {
+  const params = await searchParams;
+  const ok = params?.status === "ok";
 
   return (
     <>
