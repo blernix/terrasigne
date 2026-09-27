@@ -40,13 +40,22 @@ export function verifyConfirmationToken(
   }
 }
 
+export function getRequestOrigin(req: Request): string {
+  const host =
+    req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  return host
+    ? `${proto}://${host}`
+    : process.env.SITE_URL || "https://terrasigne.fr";
+}
+
 export async function sendNewsletterConfirmation(
   email: string,
-  listIds: number[]
+  listIds: number[],
+  origin: string
 ) {
   const token = generateConfirmationToken(email, listIds);
-  const siteUrl = process.env.SITE_URL || "https://terrasigne.fr";
-  const confirmUrl = `${siteUrl}/api/newsletter/confirm?token=${token}`;
+  const confirmUrl = `${origin}/api/newsletter/confirm?token=${token}`;
 
   await sendBrevoEmail({
     to: [{ email }],

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendNewsletterConfirmation } from "@/lib/newsletter";
+import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
 
 export async function POST(req: Request) {
   try {
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       );
     }
 
-    await sendNewsletterConfirmation(email, [listId]);
+    await sendNewsletterConfirmation(email, [listId], getRequestOrigin(req));
 
     return NextResponse.json(
       { message: "Un email de confirmation vient de vous être envoyé." },

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchService } from "@/lib/directus";
 import { createBookingEvent, isSlotFree, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
 import { sendBrevoEmail, addContactToList } from "@/lib/brevo";
-import { sendNewsletterConfirmation } from "@/lib/newsletter";
+import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
 import {
   bookingConfirmationEmailHtml,
   ownerNotificationEmailHtml,
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
     }
 
     const bookingToken = randomUUID();
-    const siteUrl = process.env.SITE_URL || "https://terrasigne.fr";
+    const siteUrl = getRequestOrigin(req);
 
     const event = await createBookingEvent({
       serviceName: service.titre,
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
         const newsletterListId = Number(process.env.BREVO_NEWSLETTER_LIST_ID);
         if (newsletterListId) {
           try {
-            await sendNewsletterConfirmation(email, [newsletterListId]);
+            await sendNewsletterConfirmation(email, [newsletterListId], siteUrl);
           } catch (e) {
             console.error("Erreur envoi confirmation newsletter :", e);
           }
