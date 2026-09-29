@@ -86,10 +86,11 @@ export interface BookingEmailParams {
   price?: number | null;
   timezoneLabel?: string;
   manageUrl?: string;
+  pdfNote?: boolean;
 }
 
 export function bookingConfirmationEmailHtml(params: BookingEmailParams): string {
-  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl } = params;
+  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl, pdfNote } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
@@ -101,6 +102,18 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
     ? `<tr>
     <td style="padding:24px 32px 4px;text-align:center;">
       <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+    </td>
+  </tr>`
+    : "";
+
+  const pdfBlock = pdfNote
+    ? `<tr>
+    <td style="padding:16px 32px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;">
+        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
+          <strong>Document à prévoir :</strong> veuillez prendre connaissance du document ci-joint avant votre rendez-vous, le signer et le renvoyer par email.
+        </td></tr>
+      </table>
     </td>
   </tr>`
     : "";
@@ -118,6 +131,7 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
     </td>
   </tr>
   ${card(rows)}
+  ${pdfBlock}
   ${
     timezoneLabel
       ? `<tr><td style="padding:12px 32px 0;text-align:center;"><p style="margin:0;font-size:12px;color:${BRAND.muted};">Horaires affichés en heure de ${escapeHtml(timezoneLabel)}</p></td></tr>`
@@ -139,14 +153,27 @@ export interface ReminderEmailParams {
   name: string;
   service: string;
   dateLabel: string;
+  pdfNote?: boolean;
 }
 
 export function reminderEmailHtml(params: ReminderEmailParams): string {
-  const { name, service, dateLabel } = params;
+  const { name, service, dateLabel, pdfNote } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
   ];
+
+  const pdfBlock = pdfNote
+    ? `<tr>
+    <td style="padding:16px 32px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;">
+        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
+          Vérifiez que tout est en ordre avant votre rendez-vous : avez-vous bien pris connaissance et signé le document ?
+        </td></tr>
+      </table>
+    </td>
+  </tr>`
+    : "";
 
   const inner = `
   ${header("Rappel de rendez-vous")}
@@ -161,6 +188,7 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
     </td>
   </tr>
   ${card(rows)}
+  ${pdfBlock}
   <tr>
     <td style="padding:16px 32px 32px;text-align:center;">
       <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
@@ -212,15 +240,24 @@ export interface RescheduleEmailParams {
   service: string;
   oldDateLabel: string;
   newDateLabel: string;
+  manageUrl?: string;
 }
 
 export function rescheduleEmailHtml(params: RescheduleEmailParams): string {
-  const { name, service, oldDateLabel, newDateLabel } = params;
+  const { name, service, oldDateLabel, newDateLabel, manageUrl } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
     { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
   ];
+
+  const manageBlock = manageUrl
+    ? `<tr>
+    <td style="padding:24px 32px 32px;text-align:center;">
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+    </td>
+  </tr>`
+    : "";
 
   const inner = `
   ${header("Rendez-vous modifié")}
@@ -234,7 +271,8 @@ export function rescheduleEmailHtml(params: RescheduleEmailParams): string {
       </p>
     </td>
   </tr>
-  ${card(rows)}`;
+  ${card(rows)}
+  ${manageBlock}`;
 
   return layout(inner);
 }

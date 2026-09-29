@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { fetchService } from "@/lib/directus";
+import { fetchService, getDirectusFileUrl } from "@/lib/directus";
 import { createBookingEvent, isSlotFree, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
 import { sendBrevoEmail, addContactToList } from "@/lib/brevo";
 import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       consent,
       newsletter,
       duree: bodyDuree,
+      pause: bodyPause,
       prix: bodyPrix,
       timezone,
     } = body;
@@ -59,7 +60,17 @@ export async function POST(req: Request) {
 
     const service = await fetchService(String(serviceId));
     const duration = Number(bodyDuree ?? service.duree);
+    const pause = Number(bodyPause ?? (service.pause || 0));
     const prix = bodyPrix ?? service.prix;
+
+    const pdf = service.pdf?.filename_disk
+      ? {
+          url: getDirectusFileUrl(service.pdf.filename_disk),
+          name:
+            service.pdf.filename_download ||
+            `document-${service.pdf.filename_disk}`,
+        }
+      : null;
     if (service.rendez_vous !== true) {
       return NextResponse.json(
         { message: "Ce service n'est pas réservable" },
@@ -112,7 +123,9 @@ export async function POST(req: Request) {
       serviceName: service.titre,
       serviceId: String(service.id),
       durationMin: duration,
+      pauseMin: pause,
       prix,
+      pdf,
       bookingToken,
       start: startDate,
       end: endDate,
@@ -145,7 +158,9 @@ export async function POST(req: Request) {
         price: prix,
         timezoneLabel: getTimezoneLabel(clientTimezone),
         manageUrl,
+        pdfNote: Boolean(pdf),
       }),
+      attachments: pdf ? [{ url: pdf.url, name: pdf.name }] : undefined,
     });
 
     const ownerEmail = process.env.GOOGLE_OWNER_EMAIL;

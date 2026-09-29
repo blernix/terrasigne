@@ -73,6 +73,7 @@ function BookingContent({ targetServiceId }) {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [servicesError, setServicesError] = useState(null);
   const availabilityRequestId = useRef(0);
   const selectedServiceRef = useRef(null);
@@ -255,8 +256,12 @@ function BookingContent({ targetServiceId }) {
     }));
   }
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
+    setShowConfirm(true);
+  }
+
+  async function doSubmit() {
     setSubmitting(true);
     setFeedback(null);
 
@@ -273,6 +278,7 @@ function BookingContent({ targetServiceId }) {
           start: selectedSlot.start,
           end: selectedSlot.end,
           duree: selectedFormule.duree,
+          pause: selectedFormule.pause || 0,
           prix: selectedFormule.prix,
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -291,6 +297,7 @@ function BookingContent({ targetServiceId }) {
 
       const data = await res.json();
       if (res.ok) {
+        setShowConfirm(false);
         setConfirmed(data);
         setStep(5);
         try {
@@ -313,6 +320,7 @@ function BookingContent({ targetServiceId }) {
           /* ignore */
         }
       } else {
+        setShowConfirm(false);
         setFeedback({
           type: "error",
           text:
@@ -326,6 +334,7 @@ function BookingContent({ targetServiceId }) {
       }
     } catch (error) {
       console.error("Erreur réservation :", error);
+      setShowConfirm(false);
       setFeedback({
         type: "error",
         text: "Une erreur inattendue est survenue.",
@@ -348,6 +357,12 @@ function BookingContent({ targetServiceId }) {
     ? viewMonth
     : availMonths[0];
   const monthIndex = availMonths.indexOf(activeMonth);
+
+  const meetingModes =
+    Array.isArray(selectedService?.mode_rdv) &&
+    selectedService.mode_rdv.length > 0
+      ? selectedService.mode_rdv
+      : ["Téléphone", "Visioconférence", "Présentiel"];
 
   return (
     <>
@@ -669,7 +684,12 @@ function BookingContent({ targetServiceId }) {
               >
                 ← Changer de date
               </button>
-              <span className="text-gray-600 font-medium text-sm">
+              <span className="text-gray-600 font-medium text-sm text-right">
+                {selectedService && (
+                  <span className="block text-brandPurple font-semibold">
+                    {selectedService.titre}
+                  </span>
+                )}
                 {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
                 {capitalize(selectedDay.month)}
               </span>
@@ -824,11 +844,11 @@ function BookingContent({ targetServiceId }) {
                   <option value="" disabled>
                     Choisir...
                   </option>
-                  <option value="Visioconférence (Zoom)">
-                    Visioconférence (Zoom)
-                  </option>
-                  <option value="Appel téléphonique">Appel téléphonique</option>
-                  <option value="Présentiel">Présentiel</option>
+                  {meetingModes.map((mode) => (
+                    <option key={mode} value={mode}>
+                      {mode}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -883,20 +903,6 @@ function BookingContent({ targetServiceId }) {
                   onChange={handleChange}
                   required
                   placeholder="Oui / Non / Précisez"
-                  className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Type de séance désirée
-                </label>
-                <input
-                  type="text"
-                  name="typeSeance"
-                  value={formData.typeSeance}
-                  onChange={handleChange}
-                  placeholder="Ecoute ton corps, mémoires Akashiques, massage, technique neuro-cutanée..."
                   className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
                 />
               </div>
@@ -1000,6 +1006,92 @@ function BookingContent({ targetServiceId }) {
           </section>
         )}
       </main>
+
+      {showConfirm && selectedService && selectedFormule && selectedDay && selectedSlot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="bg-brandPurple/5 px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-brandPurple">
+                Confirmer votre réservation
+              </h3>
+            </div>
+            <div className="px-6 py-5 space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Service</span>
+                <span className="text-gray-800 font-semibold text-right">
+                  {selectedService.titre}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Date</span>
+                <span className="text-gray-800 font-semibold">
+                  {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
+                  {capitalize(selectedDay.month)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Horaire</span>
+                <span className="text-gray-800 font-semibold">
+                  {selectedSlot.timeLabel}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Durée</span>
+                <span className="text-gray-800 font-semibold">
+                  {selectedFormule.duree} min
+                </span>
+              </div>
+              {selectedFormule.prix ? (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Tarif</span>
+                  <span className="text-brandOrange font-bold">
+                    {selectedFormule.prix} €
+                  </span>
+                </div>
+              ) : null}
+              <div className="flex justify-between">
+                <span className="text-gray-500">Nom</span>
+                <span className="text-gray-800 font-semibold">
+                  {formData.firstName} {formData.lastName}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Email</span>
+                <span className="text-gray-800 font-semibold">
+                  {formData.email}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Rencontre</span>
+                <span className="text-gray-800 font-semibold">
+                  {formData.meetingType}
+                </span>
+              </div>
+            </div>
+            <div className="px-6 pb-6 grid gap-3">
+              <button
+                type="button"
+                onClick={doSubmit}
+                disabled={submitting}
+                className="bg-brandOrange text-white py-3.5 rounded-xl font-semibold hover:bg-brandOrange/90 transition disabled:opacity-60"
+              >
+                {submitting
+                  ? "Réservation en cours..."
+                  : "Confirmer la réservation"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                disabled={submitting}
+                className="bg-white text-gray-700 py-3.5 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition disabled:opacity-60"
+              >
+                Modifier mes informations
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );

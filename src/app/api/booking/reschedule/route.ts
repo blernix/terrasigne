@@ -11,6 +11,7 @@ import {
   ownerRescheduleEmailHtml,
 } from "@/lib/emails";
 import { formatDateLabel } from "@/lib/timezones";
+import { getRequestOrigin } from "@/lib/newsletter";
 
 export async function POST(req: Request) {
   try {
@@ -72,6 +73,12 @@ export async function POST(req: Request) {
     const tz = existing.clientTimezone || BUSINESS_TIMEZONE;
     const oldDateLabel = formatDateLabel(new Date(existing.start), tz);
     const newDateLabel = formatDateLabel(newStart, tz);
+    const ownerOldDateLabel = formatDateLabel(
+      new Date(existing.start),
+      BUSINESS_TIMEZONE
+    );
+    const ownerNewDateLabel = formatDateLabel(newStart, BUSINESS_TIMEZONE);
+    const manageUrl = `${getRequestOrigin(req)}/rendez-vous/gerer?token=${token}`;
 
     await sendBrevoEmail({
       to: [{ email: existing.clientEmail, name: existing.clientName }],
@@ -81,6 +88,7 @@ export async function POST(req: Request) {
         service: existing.serviceName,
         oldDateLabel,
         newDateLabel,
+        manageUrl,
       }),
     });
 
@@ -94,8 +102,8 @@ export async function POST(req: Request) {
           email: existing.clientEmail,
           phone: existing.phone,
           service: existing.serviceName,
-          oldDateLabel,
-          newDateLabel,
+          oldDateLabel: ownerOldDateLabel,
+          newDateLabel: ownerNewDateLabel,
         }),
       });
     }

@@ -39,6 +39,10 @@ export async function POST(req: Request) {
 
     const ownerEmail = process.env.GOOGLE_OWNER_EMAIL;
     if (ownerEmail) {
+      const ownerDateLabel = formatDateLabel(
+        new Date(booking.start),
+        BUSINESS_TIMEZONE
+      );
       await sendBrevoEmail({
         to: [{ email: ownerEmail }],
         subject: `Rendez-vous annulé - ${booking.serviceName}`,
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
           email: booking.clientEmail,
           phone: booking.phone,
           service: booking.serviceName,
-          dateLabel,
+          dateLabel: ownerDateLabel,
         }),
       });
     }

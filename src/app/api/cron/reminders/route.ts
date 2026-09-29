@@ -39,6 +39,7 @@ export async function GET(req: Request) {
             name: b.clientName,
             service: b.serviceName,
             dateLabel,
+            pdfNote: Boolean(b.pdfName),
           }),
         });
 

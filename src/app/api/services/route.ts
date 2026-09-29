@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 
     const [servicesRes, formulesRes] = await Promise.all([
       fetch(
-        `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,duree,pause,categorie_id.titre,categorie_id.description,categorie_id.couverture.filename_disk,status${filterQuery}`,
+        `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/services?fields=id,titre,description,prix,rendez_vous,duree,pause,mode_rdv,categorie_id.titre,categorie_id.description,categorie_id.couverture.filename_disk,status${filterQuery}`,
         {
           headers: {
             Authorization: `Bearer ${process.env.DIRECTUS_TOKEN}`,
@@ -78,6 +78,7 @@ export async function GET(req: Request) {
         rendez_vous: service.rendez_vous,
         duree: service.duree,
         pause: service.pause,
+        mode_rdv: Array.isArray(service.mode_rdv) ? service.mode_rdv : [],
         status: service.status,
         formules: resolvedFormules,
         categorie: {

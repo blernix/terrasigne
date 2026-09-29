@@ -33,6 +33,7 @@ interface CalendarEvent {
   summary: string;
   start: string;
   end: string;
+  pauseMin: number;
 }
 
 export function isOpenWindow(summary: string): boolean {
@@ -58,6 +59,7 @@ export async function listEvents(
     summary: e.summary || "",
     start: e.start?.dateTime || e.start?.date || "",
     end: e.end?.dateTime || e.end?.date || "",
+    pauseMin: Number(e.extendedProperties?.private?.pauseMin || 0),
   }));
 }
 
@@ -69,18 +71,16 @@ export interface Slot {
 function splitWindowIntoSlots(
   windowStart: Date,
   windowEnd: Date,
-  durationMin: number,
-  pauseMin: number
+  durationMin: number
 ): Slot[] {
   const slots: Slot[] = [];
   const durationMs = durationMin * 60000;
-  const stepMs = (durationMin + pauseMin) * 60000;
   let t = windowStart.getTime();
   const endMs = windowEnd.getTime();
 
   while (t + durationMs <= endMs) {
     slots.push({ start: new Date(t), end: new Date(t + durationMs) });
-    t += stepMs;
+    t += durationMs;
   }
 
   return slots;
@@ -106,7 +106,7 @@ export async function getAvailability(
     const start = new Date(w.start);
     const end = new Date(w.end);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) continue;
-    slots.push(...splitWindowIntoSlots(start, end, durationMin, pauseMin));
+    slots.push(...splitWindowIntoSlots(start, end, durationMin));
   }
 
   const now = Date.now();
@@ -119,7 +119,8 @@ export async function getAvailability(
         const be = new Date(b.end);
         if (Number.isNaN(bs.getTime()) || Number.isNaN(be.getTime()))
           return false;
-        return overlaps(slot, bs, be);
+        const pauseMs = (b.pauseMin > 0 ? b.pauseMin : pauseMin) * 60000;
+        return overlaps(slot, bs, new Date(be.getTime() + pauseMs));
       })
   );
 }
@@ -128,8 +129,10 @@ export interface BookingInput {
   serviceName: string;
   serviceId?: string;
   durationMin?: number;
+  pauseMin?: number;
   prix?: number | null;
   bookingToken?: string;
+  pdf?: { url: string; name: string } | null;
   start: Date;
   end: Date;
   clientTimezone?: string;
@@ -183,11 +186,14 @@ export async function createBookingEvent(input: BookingInput) {
           bookingToken: input.bookingToken || randomUUID(),
           serviceId: input.serviceId || "",
           durationMin: String(input.durationMin || 0),
+          pauseMin: String(input.pauseMin || 0),
           clientEmail: input.client.email,
           clientName: input.client.name,
           serviceName: input.serviceName,
           clientTimezone: input.clientTimezone || BUSINESS_TIMEZONE,
           clientPhone: input.client.phone || "",
+          pdfName: input.pdf?.name || "",
+          pdfUrl: input.pdf?.url || "",
           reminderSent: "false",
         },
       },
@@ -204,6 +210,8 @@ export interface ReminderBooking {
   clientName: string;
   serviceName: string;
   clientTimezone: string;
+  pdfName: string;
+  pdfUrl: string;
 }
 
 export async function listPendingReminders(
@@ -232,6 +240,8 @@ export async function listPendingReminders(
         e.extendedProperties?.private?.serviceName || e.summary || "",
       clientTimezone:
         e.extendedProperties?.private?.clientTimezone || BUSINESS_TIMEZONE,
+      pdfName: e.extendedProperties?.private?.pdfName || "",
+      pdfUrl: e.extendedProperties?.private?.pdfUrl || "",
     }))
     .filter((e) => e.clientEmail);
 }
@@ -259,7 +269,8 @@ export async function isSlotFree(
   end: Date,
   excludeEventId?: string
 ): Promise<boolean> {
-  const events = await listEvents(start, end);
+  const lookback = new Date(start.getTime() - 24 * 3600000);
+  const events = await listEvents(lookback, end);
   const busy = events.filter(
     (e) => !isOpenWindow(e.summary) && e.id !== excludeEventId
   );
@@ -267,7 +278,8 @@ export async function isSlotFree(
     const bs = new Date(b.start);
     const be = new Date(b.end);
     if (Number.isNaN(bs.getTime()) || Number.isNaN(be.getTime())) return false;
-    return overlaps({ start, end }, bs, be);
+    const pauseMs = (b.pauseMin || 0) * 60000;
+    return overlaps({ start, end }, bs, new Date(be.getTime() + pauseMs));
   });
 }
 

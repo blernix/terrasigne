@@ -24,7 +24,18 @@ function ManageContent({ token }) {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  function loadBooking() {
+    setStatus("loading");
+    setMode("view");
+    setBooking(null);
+    setDateLabel("");
+    setNewDateLabel("");
+    setFeedback(null);
+    setConfirmCancel(false);
+    setAvailability(null);
+    setSelectedDay(null);
+    setSelectedSlot(null);
+
     if (!token) {
       setStatus("notfound");
       return;
@@ -41,6 +52,11 @@ function ManageContent({ token }) {
         setStatus("ready");
       })
       .catch(() => setStatus("notfound"));
+  }
+
+  useEffect(() => {
+    loadBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   async function startReschedule() {
@@ -195,12 +211,20 @@ function ManageContent({ token }) {
               <p className="text-gray-500 mt-2 mb-6">
                 Un email de confirmation vient de vous être envoyé.
               </p>
-              <a
-                href="/"
-                className="inline-block bg-brandSecondary text-white py-3 px-6 rounded-full font-semibold hover:bg-brandSecondary/90 transition"
-              >
-                Retour à l'accueil
-              </a>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={loadBooking}
+                  className="inline-block bg-brandPurple text-white py-3 px-6 rounded-full font-semibold hover:bg-brandPurple/90 transition"
+                >
+                  Modifier ou annuler à nouveau
+                </button>
+                <a
+                  href="/"
+                  className="inline-block bg-brandSecondary text-white py-3 px-6 rounded-full font-semibold hover:bg-brandSecondary/90 transition"
+                >
+                  Retour à l'accueil
+                </a>
+              </div>
             </div>
           )}
 

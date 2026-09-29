@@ -5,12 +5,19 @@ interface BrevoRecipient {
   name?: string;
 }
 
+interface BrevoAttachment {
+  url?: string;
+  content?: string;
+  name: string;
+}
+
 interface SendBrevoEmailParams {
   to: BrevoRecipient[];
   subject: string;
   htmlContent?: string;
   textContent?: string;
   replyTo?: string;
+  attachments?: BrevoAttachment[];
 }
 
 export async function sendBrevoEmail({
@@ -19,6 +26,7 @@ export async function sendBrevoEmail({
   htmlContent,
   textContent,
   replyTo,
+  attachments,
 }: SendBrevoEmailParams) {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error("BREVO_API_KEY manquante");
@@ -40,6 +48,7 @@ export async function sendBrevoEmail({
       subject,
       htmlContent,
       textContent,
+      attachment: attachments?.length ? attachments : undefined,
     }),
   });
 
