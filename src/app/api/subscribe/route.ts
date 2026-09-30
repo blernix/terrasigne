@@ -1,60 +1,45 @@
 import { NextResponse } from "next/server";
+import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
 
 export async function POST(req: Request) {
   try {
-    const { email, consentement } = await req.json();
-    const userCreated = process.env.NEXT_PUBLIC_DIRECTUS_CLIENT_ID;
-
-    console.log("🔍 Valeurs reçues :", { email, consentement, userCreated });
+    const { email: rawEmail, consentement } = await req.json();
+    const email = typeof rawEmail === "string" ? rawEmail.trim() : "";
 
     if (!email) {
       return NextResponse.json({ message: "Email requis." }, { status: 400 });
     }
 
-    // 🔍 Vérifier si l'email existe déjà
-    const checkResponse = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/abonnes?filter[email][_eq]=${email}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
-      },
-    });
-
-    const checkData = await checkResponse.json();
-    if (checkData.data.length > 0) {
-      console.log("🚫 Email déjà inscrit :", email);
-      return NextResponse.json({ message: "Cet email est déjà inscrit à la newsletter." }, { status: 409 });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { message: "Adresse email invalide." },
+        { status: 400 }
+      );
     }
 
-    // ✅ Nouvelle insertion AVEC valeurs forcées (y compris `consentement`)
-    const payload = {
-      email,
-      consentement: consentement === true ? 1 : 0, // SQLite stocke les booléens en tant que `0` ou `1`
-      user_created: userCreated ?? null,
-      date_created: new Date().toISOString(), // Ajoute toujours la date
-    };
-
-    console.log("📤 Envoi des données à Directus :", JSON.stringify(payload, null, 2));
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/abonnes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.log("🔴 Réponse complète de Directus :", JSON.stringify(data, null, 2));
-      throw new Error(data.errors?.[0]?.message || "Erreur lors de l'inscription.");
+    if (consentement !== true) {
+      return NextResponse.json(
+        { message: "Consentement requis." },
+        { status: 400 }
+      );
     }
 
-    console.log("✅ Abonné ajouté avec succès :", data);
-    return NextResponse.json({ message: "Inscription réussie !" }, { status: 201 });
+    const listId = Number(process.env.BREVO_NEWSLETTER_LIST_ID);
+    if (!listId) {
+      return NextResponse.json(
+        { message: "Liste newsletter non configurée." },
+        { status: 500 }
+      );
+    }
 
+    await sendNewsletterConfirmation(email, [listId], getRequestOrigin(req));
+
+    return NextResponse.json(
+      { message: "Un email de confirmation vient de vous être envoyé." },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("❌ Erreur API abonnement :", error);
+    console.error("Erreur API abonnement :", error);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

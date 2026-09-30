@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 const API = process.env.NEXT_PUBLIC_DIRECTUS_API;
-const TOKEN = process.env.NEXT_PUBLIC_DIRECTUS_TOKEN;
+const TOKEN = process.env.DIRECTUS_TOKEN;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;

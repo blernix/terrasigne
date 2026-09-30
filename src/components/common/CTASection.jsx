@@ -37,7 +37,7 @@ export default function CTASection({ title, description }) {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage({ type: "success", text: "Vous êtes maintenant abonné à la newsletter !" });
+        setMessage({ type: "success", text: "Un email de confirmation vous a été envoyé. Cliquez sur le lien pour valider votre inscription." });
         
         setEmail("");
         setConsent(false);

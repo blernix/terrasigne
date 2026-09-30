@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
-  console.log("🔍 Requête API - Articles");
-
   try {
     const url = new URL(req.url);
     const category = url.searchParams.get("category") || "";
     const search = url.searchParams.get("search") || "";
     const featured = url.searchParams.get("featured") === "true";
-
-    console.log(
-      "🔎 Paramètres API -",
-      "Catégorie :", category,
-      "Recherche :", search,
-      "Mis en avant :", featured
-    );
 
     let filterQuery = "&filter[status][_eq]=published";
 
@@ -35,7 +26,7 @@ export async function GET(req: Request) {
       `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles?fields=id,titre,contenu,date_created,categorie_id.titre,photo_couverture.filename_disk${filterQuery}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
+          Authorization: `Bearer ${process.env.DIRECTUS_TOKEN}`,
         },
       }
     );

@@ -11,7 +11,7 @@ export async function GET(
       `${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/articles/${id}?fields=id,titre,contenu,categorie_id.titre,date_created,photo_couverture.filename_disk,status`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
+          Authorization: `Bearer ${process.env.DIRECTUS_TOKEN}`,
         },
       }
     );

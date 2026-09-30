@@ -14,13 +14,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useRef, Suspense } from "react";
+import { stripHtml, createSlug } from "@/lib/utils";
 
 
 function ServicesPageContent() {
   const [selectedService, setSelectedService] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serviceCategories, setServiceCategories] = useState([]);
-  const [agendaIframe, setAgendaIframe] = useState("");
   const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -67,19 +67,6 @@ function ServicesPageContent() {
        }
      }
      fetchServices();
-   }, []);
-
-  useEffect(() => {
-    async function fetchAgenda() {
-      try {
-        const res = await fetch("/api/agenda");
-        const data = await res.json();
-        setAgendaIframe(data?.code_integration || "");
-      } catch (e) {
-        console.error("Erreur récupération agenda :", e);
-      }
-    }
-    fetchAgenda();
    }, []);
 
    useEffect(() => {
@@ -134,24 +121,6 @@ function ServicesPageContent() {
     setSelectedService(null);
     setIsModalOpen(false);
   };
-   function decodeAndStrip(html) {
-     if (typeof document === "undefined") return html.replace(/<[^>]*>?/gm, "");
-     const txt = document.createElement("textarea");
-     txt.innerHTML = html;
-     return txt.value.replace(/<[^>]*>?/gm, "");
-   }
-
-   function createSlug(text: string): string {
-     return text
-       .normalize('NFKD')
-       .toLowerCase()
-       .replace(/\s+/g, '-')
-       .replace(/[^\w\-]+/g, '')
-       .replace(/\-\-+/g, '-')
-       .replace(/^-+/, '')
-       .replace(/-+$/, '');
-   }
-
    const [scrolled, setScrolled] = useState(false);
 
 useEffect(() => {
@@ -289,9 +258,9 @@ useEffect(() => {
   </p>
 
   <p className="text-xl text-gray-700 leading-relaxed text-center flex-1 overflow-hidden">
-    {decodeAndStrip(svc.description).length > 200
-      ? decodeAndStrip(svc.description).slice(0, 200) + "..."
-      : decodeAndStrip(svc.description) || "Aucune description."}
+    {stripHtml(svc.description).length > 200
+      ? stripHtml(svc.description).slice(0, 200) + "..."
+      : stripHtml(svc.description) || "Aucune description."}
   </p>
 
   <div className="mt-6 flex flex-col gap-2">
@@ -303,7 +272,7 @@ useEffect(() => {
     </button>
     {svc.rendez_vous ? (
       <a
-        href="/rendez-vous"
+        href={`/rendez-vous?service=${svc.id}`}
         className="w-full px-4 py-2 bg-brandSecondary text-white rounded-full text-sm hover:bg-brandSecondary/80 transition text-center"
       >
         Prendre rendez-vous
@@ -356,12 +325,6 @@ useEffect(() => {
         ))}
 
         <ServiceModal isOpen={isModalOpen} onClose={closeModal} service={selectedService} />
-
-        {agendaIframe && (
-          <section className="max-w-5xl mx-auto mt-20 shadow-xl rounded-xl overflow-hidden">
-            <div className="w-full" dangerouslySetInnerHTML={{ __html: agendaIframe }} />
-          </section>
-        )}
       </main>
       <Footer />
     </>

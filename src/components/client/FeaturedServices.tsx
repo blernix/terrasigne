@@ -1,24 +1,6 @@
 "use client";
 import Link from "next/link";
-
-function stripTagsAndDecode(html: string) {
-  const text = html.replace(/<[^>]+>/g, "");
-  if (typeof document === "undefined") return text;
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = text;
-  return textarea.value;
-}
-
-function createSlug(text: string): string {
-  return text
-    .normalize('NFKD')
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
-}
+import { stripHtml, createSlug } from "@/lib/utils";
 
 interface Service {
   id: number;
@@ -51,9 +33,9 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
               <div className="p-6 flex flex-col justify-between h-full">
                 <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
                 <p className="text-gray-700 text-lg mb-4">
-                  {stripTagsAndDecode(service.description).length > 160
-                    ? stripTagsAndDecode(service.description).substring(0, 160) + "..."
-                    : stripTagsAndDecode(service.description)}
+                  {stripHtml(service.description).length > 160
+                    ? stripHtml(service.description).substring(0, 160) + "..."
+                    : stripHtml(service.description)}
                 </p>
                 <p className="text-gray-500 mb-6">
                   <span className="font-bold">Prix :</span> {service.prix} €

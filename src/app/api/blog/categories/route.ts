@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  console.log("📂 Requête API - Catégories d'articles");
-
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_DIRECTUS_API}/items/categories_articles?fields=id,titre`, {
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIRECTUS_TOKEN}`,
+        Authorization: `Bearer ${process.env.DIRECTUS_TOKEN}`,
       },
     });
 
@@ -15,7 +13,6 @@ export async function GET() {
     }
 
     const data = await response.json();
-    console.log("📦 Catégories récupérées :", JSON.stringify(data, null, 2));
 
     return NextResponse.json(data.data);
   } catch (error) {
