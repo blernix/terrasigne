@@ -313,6 +313,7 @@ export interface OwnerNotificationEmailParams {
   dateLabel: string;
   price?: number | null;
   message?: string;
+  zoomLink?: string;
 }
 
 export function ownerNotificationEmailHtml(
@@ -330,6 +331,7 @@ export function ownerNotificationEmailHtml(
     dateLabel,
     price,
     message,
+    zoomLink,
   } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
@@ -350,6 +352,10 @@ export function ownerNotificationEmailHtml(
     ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Message du client :</strong><br>${escapeHtml(message)}</td></tr></table></td></tr>`
     : "";
 
+  const zoomHtml = zoomLink
+    ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#EEF2FF;border-left:4px solid ${BRAND.purple};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Rendez-vous en visioconférence — lien Zoom :</strong><br><a href="${escapeHtml(zoomLink)}" style="color:${BRAND.purple};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a></td></tr></table></td></tr>`
+    : "";
+
   const inner = `
   ${header("Nouveau rendez-vous")}
   <tr>
@@ -360,6 +366,7 @@ export function ownerNotificationEmailHtml(
     </td>
   </tr>
   ${card(rows)}
+  ${zoomHtml}
   ${messageHtml}
   <tr>
     <td style="padding:0 32px 32px;text-align:center;">

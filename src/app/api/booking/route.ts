@@ -138,6 +138,7 @@ export async function POST(req: Request) {
     const bookingToken = randomUUID();
     const siteUrl = getRequestOrigin(req);
     const consentAt = consent ? new Date().toISOString() : "";
+    const zoomLink = getZoomLink(meetingType);
 
     const event = await createBookingEvent({
       serviceName: service.titre,
@@ -148,6 +149,7 @@ export async function POST(req: Request) {
       pdf,
       bookingToken,
       consentAt,
+      zoomLink,
       start: startDate,
       end: endDate,
       clientTimezone,
@@ -180,7 +182,7 @@ export async function POST(req: Request) {
         timezoneLabel: getTimezoneLabel(clientTimezone),
         manageUrl,
         pdfNote: Boolean(pdf),
-        zoomLink: getZoomLink(meetingType),
+        zoomLink,
       }),
       attachments: pdf ? [{ url: pdf.url, name: pdf.name }] : undefined,
     });
@@ -202,6 +204,7 @@ export async function POST(req: Request) {
           typeSeance,
           price: prix,
           message,
+          zoomLink,
         }),
       });
     }

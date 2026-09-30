@@ -143,6 +143,7 @@ export interface BookingInput {
   bookingToken?: string;
   pdf?: { url: string; name: string } | null;
   consentAt?: string;
+  zoomLink?: string;
   start: Date;
   end: Date;
   clientTimezone?: string;
@@ -171,6 +172,7 @@ export async function createBookingEvent(input: BookingInput) {
     input.client.meetingType
       ? `Mode de rencontre : ${input.client.meetingType}`
       : null,
+    input.zoomLink ? `Lien visio (Zoom) : ${input.zoomLink}` : null,
     input.client.profession
       ? `Profession : ${input.client.profession}`
       : null,
@@ -193,6 +195,7 @@ export async function createBookingEvent(input: BookingInput) {
     requestBody: {
       summary: `RDV ${input.serviceName} - ${input.client.name}`,
       description,
+      location: input.zoomLink || undefined,
       start: { dateTime: input.start.toISOString(), timeZone: BUSINESS_TIMEZONE },
       end: { dateTime: input.end.toISOString(), timeZone: BUSINESS_TIMEZONE },
       extendedProperties: {
