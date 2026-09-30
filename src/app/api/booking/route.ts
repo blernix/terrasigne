@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { fetchService, getDirectusFileUrl } from "@/lib/directus";
-import { createBookingEvent, isSlotFree, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
+import {
+  createBookingEvent,
+  isSlotFree,
+  BUSINESS_TIMEZONE,
+  MIN_LEAD_HOURS,
+  MAX_AHEAD_DAYS,
+} from "@/lib/googleCalendar";
 import { sendBrevoEmail, addContactToList } from "@/lib/brevo";
 import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
 import {
   bookingConfirmationEmailHtml,
   ownerNotificationEmailHtml,
+  getZoomLink,
 } from "@/lib/emails";
 import {
   resolveTimezone,
@@ -101,9 +108,21 @@ export async function POST(req: Request) {
       );
     }
 
-    if (startDate.getTime() < Date.now()) {
+    const minStart = Date.now() + MIN_LEAD_HOURS * 3600000;
+    const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
+
+    if (startDate.getTime() < minStart) {
       return NextResponse.json(
-        { message: "Ce créneau est déjà passé" },
+        {
+          message: `Les réservations doivent être prises au moins ${MIN_LEAD_HOURS}h à l'avance`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (startDate.getTime() > maxStart) {
+      return NextResponse.json(
+        { message: "Les réservations sont possibles jusqu'à 3 mois à l'avance" },
         { status: 400 }
       );
     }
@@ -118,6 +137,7 @@ export async function POST(req: Request) {
 
     const bookingToken = randomUUID();
     const siteUrl = getRequestOrigin(req);
+    const consentAt = consent ? new Date().toISOString() : "";
 
     const event = await createBookingEvent({
       serviceName: service.titre,
@@ -127,6 +147,7 @@ export async function POST(req: Request) {
       prix,
       pdf,
       bookingToken,
+      consentAt,
       start: startDate,
       end: endDate,
       clientTimezone,
@@ -159,6 +180,7 @@ export async function POST(req: Request) {
         timezoneLabel: getTimezoneLabel(clientTimezone),
         manageUrl,
         pdfNote: Boolean(pdf),
+        zoomLink: getZoomLink(meetingType),
       }),
       attachments: pdf ? [{ url: pdf.url, name: pdf.name }] : undefined,
     });

@@ -5,7 +5,7 @@ import {
   BUSINESS_TIMEZONE,
 } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
-import { reminderEmailHtml } from "@/lib/emails";
+import { reminderEmailHtml, getZoomLink } from "@/lib/emails";
 import { formatDateLabel } from "@/lib/timezones";
 
 export async function GET(req: Request) {
@@ -40,6 +40,7 @@ export async function GET(req: Request) {
             service: b.serviceName,
             dateLabel,
             pdfNote: Boolean(b.pdfName),
+            zoomLink: getZoomLink(b.meetingType),
           }),
         });
 

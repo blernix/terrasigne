@@ -18,6 +18,25 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+export function getZoomLink(meetingType?: string): string | undefined {
+  if (!meetingType || !/visio/i.test(meetingType)) return undefined;
+  const link = process.env.ZOOM_LINK?.trim();
+  return link || undefined;
+}
+
+function zoomBlock(zoomLink: string, intro: string): string {
+  return `<tr>
+    <td style="padding:16px 32px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#EEF2FF;border-left:4px solid ${BRAND.purple};border-radius:8px;padding:12px 16px;">
+        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
+          <strong>${intro}</strong><br/>
+          Lien de la réunion Zoom : <a href="${escapeHtml(zoomLink)}" style="color:${BRAND.purple};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a>
+        </td></tr>
+      </table>
+    </td>
+  </tr>`;
+}
+
 function layout(inner: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -87,10 +106,11 @@ export interface BookingEmailParams {
   timezoneLabel?: string;
   manageUrl?: string;
   pdfNote?: boolean;
+  zoomLink?: string;
 }
 
 export function bookingConfirmationEmailHtml(params: BookingEmailParams): string {
-  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl, pdfNote } = params;
+  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl, pdfNote, zoomLink } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
@@ -132,6 +152,7 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
   </tr>
   ${card(rows)}
   ${pdfBlock}
+  ${zoomLink ? zoomBlock(zoomLink, "Votre rendez-vous se fera en visioconférence.") : ""}
   ${
     timezoneLabel
       ? `<tr><td style="padding:12px 32px 0;text-align:center;"><p style="margin:0;font-size:12px;color:${BRAND.muted};">Horaires affichés en heure de ${escapeHtml(timezoneLabel)}</p></td></tr>`
@@ -154,10 +175,11 @@ export interface ReminderEmailParams {
   service: string;
   dateLabel: string;
   pdfNote?: boolean;
+  zoomLink?: string;
 }
 
 export function reminderEmailHtml(params: ReminderEmailParams): string {
-  const { name, service, dateLabel, pdfNote } = params;
+  const { name, service, dateLabel, pdfNote, zoomLink } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
@@ -189,6 +211,7 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
   </tr>
   ${card(rows)}
   ${pdfBlock}
+  ${zoomLink ? zoomBlock(zoomLink, "Rappel : votre rendez-vous se fait en visioconférence.") : ""}
   <tr>
     <td style="padding:16px 32px 32px;text-align:center;">
       <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">

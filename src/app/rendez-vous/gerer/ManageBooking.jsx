@@ -108,7 +108,7 @@ function ManageContent({ token }) {
           text:
             data.message === "Ce créneau vient d'être réservé"
               ? "Désolé, ce créneau vient d'être réservé. Choisissez-en un autre."
-              : "Une erreur est survenue.",
+              : data.message || "Une erreur est survenue.",
         });
         startReschedule();
       }

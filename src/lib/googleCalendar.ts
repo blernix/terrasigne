@@ -5,6 +5,11 @@ import { randomUUID } from "crypto";
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const OPEN_MARKER = "dispo";
 
+const SLOT_STEP_MIN = 30;
+
+export const MIN_LEAD_HOURS = 48;
+export const MAX_AHEAD_DAYS = 90;
+
 export const BUSINESS_TIMEZONE =
   process.env.BUSINESS_TIMEZONE || "America/Guadeloupe";
 
@@ -75,12 +80,13 @@ function splitWindowIntoSlots(
 ): Slot[] {
   const slots: Slot[] = [];
   const durationMs = durationMin * 60000;
+  const stepMs = SLOT_STEP_MIN * 60000;
   let t = windowStart.getTime();
   const endMs = windowEnd.getTime();
 
   while (t + durationMs <= endMs) {
     slots.push({ start: new Date(t), end: new Date(t + durationMs) });
-    t += durationMs;
+    t += stepMs;
   }
 
   return slots;
@@ -110,10 +116,13 @@ export async function getAvailability(
   }
 
   const now = Date.now();
+  const minStart = now + MIN_LEAD_HOURS * 3600000;
+  const maxStart = now + MAX_AHEAD_DAYS * 86400000;
 
   return slots.filter(
     (slot) =>
-      slot.start.getTime() >= now &&
+      slot.start.getTime() >= minStart &&
+      slot.start.getTime() <= maxStart &&
       !busy.some((b) => {
         const bs = new Date(b.start);
         const be = new Date(b.end);
@@ -133,6 +142,7 @@ export interface BookingInput {
   prix?: number | null;
   bookingToken?: string;
   pdf?: { url: string; name: string } | null;
+  consentAt?: string;
   start: Date;
   end: Date;
   clientTimezone?: string;
@@ -168,7 +178,11 @@ export async function createBookingEvent(input: BookingInput) {
     input.client.typeSeance
       ? `Type de séance désirée : ${input.client.typeSeance}`
       : null,
-    input.client.consent ? "Consentement RGPD : Oui" : null,
+    input.client.consent
+      ? `Consentement RGPD : Oui${
+          input.consentAt ? ` (le ${input.consentAt})` : ""
+        }`
+      : null,
     input.client.message ? `Message : ${input.client.message}` : null,
   ]
     .filter(Boolean)
@@ -192,8 +206,10 @@ export async function createBookingEvent(input: BookingInput) {
           serviceName: input.serviceName,
           clientTimezone: input.clientTimezone || BUSINESS_TIMEZONE,
           clientPhone: input.client.phone || "",
+          meetingType: input.client.meetingType || "",
           pdfName: input.pdf?.name || "",
           pdfUrl: input.pdf?.url || "",
+          consentAt: input.consentAt || "",
           reminderSent: "false",
         },
       },
@@ -210,6 +226,7 @@ export interface ReminderBooking {
   clientName: string;
   serviceName: string;
   clientTimezone: string;
+  meetingType: string;
   pdfName: string;
   pdfUrl: string;
 }
@@ -240,6 +257,7 @@ export async function listPendingReminders(
         e.extendedProperties?.private?.serviceName || e.summary || "",
       clientTimezone:
         e.extendedProperties?.private?.clientTimezone || BUSINESS_TIMEZONE,
+      meetingType: e.extendedProperties?.private?.meetingType || "",
       pdfName: e.extendedProperties?.private?.pdfName || "",
       pdfUrl: e.extendedProperties?.private?.pdfUrl || "",
     }))

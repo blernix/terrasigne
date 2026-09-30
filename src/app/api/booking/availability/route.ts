@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { fetchService } from "@/lib/directus";
-import { getAvailability } from "@/lib/googleCalendar";
+import {
+  getAvailability,
+  MIN_LEAD_HOURS,
+  MAX_AHEAD_DAYS,
+} from "@/lib/googleCalendar";
 import {
   resolveTimezone,
   dateKeyInTimezone,
@@ -15,7 +19,10 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const serviceId = url.searchParams.get("serviceId");
-    const days = Number(url.searchParams.get("days") || 60);
+    const days = Math.min(
+      Number(url.searchParams.get("days") || MAX_AHEAD_DAYS),
+      MAX_AHEAD_DAYS
+    );
     const timeZone = resolveTimezone(url.searchParams.get("timezone"));
 
     if (!serviceId) {
@@ -47,7 +54,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const timeMin = new Date();
+    const timeMin = new Date(Date.now() + MIN_LEAD_HOURS * 3600000);
     const timeMax = new Date(Date.now() + days * 86400000);
 
     const slots = await getAvailability(duration, pause, timeMin, timeMax);

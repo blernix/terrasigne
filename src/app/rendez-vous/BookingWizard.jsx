@@ -326,7 +326,7 @@ function BookingContent({ targetServiceId }) {
           text:
             data.message === "Ce créneau vient d'être réservé"
               ? "Désolé, ce créneau vient d'être réservé. Choisissez-en un autre."
-              : "Une erreur est survenue lors de la réservation.",
+              : data.message || "Une erreur est survenue lors de la réservation.",
         });
         if (data.message === "Ce créneau vient d'être réservé") {
           selectService(selectedService);
@@ -382,6 +382,9 @@ function BookingContent({ targetServiceId }) {
               {availability?.timezoneLabel
                 ? ` (${availability.timezoneLabel})`
                 : ""}.
+            </p>
+            <p className="mt-2 text-xs text-gray-400">
+              Réservation possible de 48h à 3 mois à l&rsquo;avance.
             </p>
           </section>
         )}
@@ -1067,6 +1070,20 @@ function BookingContent({ targetServiceId }) {
                   {formData.meetingType}
                 </span>
               </div>
+              <p className="pt-3 border-t border-gray-100 text-xs text-gray-500 leading-relaxed">
+                En confirmant, j&rsquo;accepte que mes informations soient
+                utilisées pour le traitement de ma demande de rendez-vous,
+                conformément à la{" "}
+                <a
+                  href="/confidentialite"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brandPurple font-semibold underline hover:text-brandOrange transition"
+                >
+                  politique de confidentialité
+                </a>
+                .
+              </p>
             </div>
             <div className="px-6 pb-6 grid gap-3">
               <button

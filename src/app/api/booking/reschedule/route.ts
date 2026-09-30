@@ -4,6 +4,8 @@ import {
   rescheduleBooking,
   isSlotFree,
   BUSINESS_TIMEZONE,
+  MIN_LEAD_HOURS,
+  MAX_AHEAD_DAYS,
 } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
 import {
@@ -47,9 +49,21 @@ export async function POST(req: Request) {
       );
     }
 
-    if (newStart.getTime() < Date.now()) {
+    const minStart = Date.now() + MIN_LEAD_HOURS * 3600000;
+    const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
+
+    if (newStart.getTime() < minStart) {
       return NextResponse.json(
-        { message: "Ce créneau est déjà passé" },
+        {
+          message: `Les réservations doivent être prises au moins ${MIN_LEAD_HOURS}h à l'avance`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (newStart.getTime() > maxStart) {
+      return NextResponse.json(
+        { message: "Les réservations sont possibles jusqu'à 3 mois à l'avance" },
         { status: 400 }
       );
     }
