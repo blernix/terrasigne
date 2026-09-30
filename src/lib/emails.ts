@@ -37,6 +37,21 @@ function zoomBlock(zoomLink: string, intro: string): string {
   </tr>`;
 }
 
+function pdfNoticeBlock(title: string, body: string): string {
+  return `<tr>
+    <td style="padding:24px 32px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.orange};border-radius:12px;padding:20px 24px;">
+        <tr>
+          <td style="font-size:16px;font-weight:700;color:#ffffff;line-height:1.5;">
+            ${title}<br>
+            <span style="font-weight:400;font-size:14px;color:#ffffff;">${body}</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>`;
+}
+
 function layout(inner: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -127,15 +142,10 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
     : "";
 
   const pdfBlock = pdfNote
-    ? `<tr>
-    <td style="padding:16px 32px 0;">
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;">
-        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
-          <strong>Document à prévoir :</strong> veuillez prendre connaissance du document ci-joint avant votre rendez-vous, le signer et le renvoyer par email.
-        </td></tr>
-      </table>
-    </td>
-  </tr>`
+    ? pdfNoticeBlock(
+        "Document à remplir et signer",
+        "Merci de prendre connaissance du document ci-joint avant votre rendez-vous, de le signer et de le renvoyer par email."
+      )
     : "";
 
   const inner = `
@@ -186,15 +196,10 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
   ];
 
   const pdfBlock = pdfNote
-    ? `<tr>
-    <td style="padding:16px 32px 0;">
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;">
-        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
-          Vérifiez que tout est en ordre avant votre rendez-vous : avez-vous bien pris connaissance et signé le document ?
-        </td></tr>
-      </table>
-    </td>
-  </tr>`
+    ? pdfNoticeBlock(
+        "Document à signer",
+        "Vérifiez que tout est en ordre avant votre rendez-vous : avez-vous bien pris connaissance et signé le document ?"
+      )
     : "";
 
   const inner = `
