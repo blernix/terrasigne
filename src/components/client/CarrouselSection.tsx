@@ -18,9 +18,9 @@ export default function CarrouselSection({ images }: { images: CarrouselImage[] 
   
   if (imageArray.length === 0) {
     return (
-      <section className="relative w-full h-full overflow-hidden bg-gray-100">
+      <section className="relative w-full h-full overflow-hidden bg-forest">
         <div className="w-full h-full flex items-center justify-center">
-          <p className="text-gray-500">Aucune image disponible</p>
+          <p className="text-cream/70">Aucune image disponible</p>
         </div>
       </section>
     );

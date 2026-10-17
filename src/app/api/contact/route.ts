@@ -33,7 +33,7 @@ export async function POST(req: Request) {
             <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse:collapse;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
               <tr>
                 <td align="center" style="background-color:${brandColor};padding:30px 20px;color:#ffffff;">
-                  <h1 style="margin:0;font-size:24px;">Nouveau message de TerraSigne ✨</h1>
+                  <h1 style="margin:0;font-size:24px;">Nouveau message de Terrasigne ✨</h1>
                 </td>
               </tr>
               <tr>

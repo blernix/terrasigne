@@ -1,33 +1,48 @@
-import { Merriweather } from "next/font/google";
+import { Nunito, Fraunces } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import ClientOnlyParallaxProvider from '@/components/ClientOnlyParallaxProvider';
 
-const merriweather = Merriweather({
-  weight: ["300", "400", "700"],
+const nunito = Nunito({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-nunito",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-fraunces",
 });
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://terrasigne.fr/#business",
   name: "Terrasigne",
   image: "https://terrasigne.fr/images/logoterra.png",
-  description: "Cindy Guillaume, praticienne en soins holistiques à Terre de Bas, Guadeloupe. Accompagnement bien-être, soins énergétiques et relation d'aide.",
+  logo: "https://terrasigne.fr/images/logoterra.png",
+  description:
+    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, Guadeloupe. Accompagnement bien-être, soins énergétiques et relation d'aide.",
   url: "https://terrasigne.fr",
   telephone: "+590 690 51 68 51",
   email: "terrasigne971@gmail.com",
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Terre de Bas",
+    addressLocality: "Terre-de-Bas",
     addressRegion: "Guadeloupe",
     addressCountry: "FR",
   },
-  sameAs: [
-    "https://www.facebook.com",
-    "https://www.instagram.com",
-  ],
+  areaServed: {
+    "@type": "Place",
+    name: "Guadeloupe",
+  },
+  founder: {
+    "@type": "Person",
+    name: "Cindy Guillaume",
+    jobTitle: "Praticienne en soins holistiques",
+    url: "https://terrasigne.fr/propos",
+  },
   openingHoursSpecification: {
     "@type": "OpeningHoursSpecification",
     dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -40,10 +55,11 @@ const jsonLd = {
 export const metadata = {
   metadataBase: new URL("https://terrasigne.fr"),
   title: {
-    default: "Terrasigne",
+    default: "Terrasigne | Soins holistiques & bien-être en Guadeloupe",
     template: "%s | Terrasigne",
   },
-  description: "Cindy Guillaume, praticienne en soins holistiques à Terre de Bas en Guadeloupe. Accompagnement bien-être, soins énergétiques, relation d'aide et développement personnel.",
+  description:
+    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, Guadeloupe. Bien-être, soins énergétiques, relation d'aide et accompagnement personnalisé.",
   openGraph: {
     title: "Terrasigne",
     description: "Explore ton équilibre intérieur avec Terrasigne. Soins holistiques, accompagnement personnalisé et bien-être en Guadeloupe.",
@@ -62,7 +78,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="fr">
-      <body className={`${merriweather.className} antialiased`}>
+      <body className={`${nunito.variable} ${fraunces.variable} font-sans antialiased`}>
         <Script
           id="json-ld"
           type="application/ld+json"

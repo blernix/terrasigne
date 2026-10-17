@@ -1,340 +1,140 @@
-"use client";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Phone } from "lucide-react";
 import Navbar from "@/components/client/Navbar";
 import Footer from "@/components/client/Footer";
-import ServiceModal from "@/components/client/ServiceModal";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, EffectFade } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import { useMediaQuery } from "react-responsive";
-import { Parallax } from 'react-scroll-parallax';
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useRef, Suspense } from "react";
-import { stripHtml, createSlug } from "@/lib/utils";
+import JsonLd from "@/components/seo/JsonLd";
+import ServicesExplorer from "./ServicesExplorer";
+import { getServiceCategories } from "@/lib/directus";
+import { stripHtml } from "@/lib/utils";
 
+export const revalidate = 300;
 
-function ServicesPageContent() {
-  const [selectedService, setSelectedService] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [serviceCategories, setServiceCategories] = useState([]);
-  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const swiperRefs = useRef<{ [key: number]: any }>({});
-  const [serviceMap, setServiceMap] = useState<{ [key: string]: { catIndex: number; serviceIndex: number; catSlug: string } }>({});
-  const [hasNavigated, setHasNavigated] = useState(false);
-  const targetServiceId = searchParams.get('service');
+export const metadata = {
+  title: "Services & soins holistiques",
+  description:
+    "Explorez les prestations de Terrasigne : soins relationnels, corporels et énergétiques, adaptés à vos besoins. Séances à Terre-de-Bas, Guadeloupe.",
+  openGraph: {
+    title: "Services | Terrasigne",
+    description:
+      "Séances de bien-être, accompagnement personnalisé, énergies et écoute. Découvrez les services proposés.",
+    url: "https://terrasigne.fr/services",
+    type: "website",
+    images: [
+      {
+        url: "https://terrasigne.fr/images/hero_service.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Illustration Services Terrasigne",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Services | Terrasigne",
+    description: "Découvrez les accompagnements personnalisés proposés par Terrasigne.",
+    images: ["https://terrasigne.fr/images/hero_service.jpg"],
+  },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "https://terrasigne.fr/services" },
+};
 
-   useEffect(() => {
-     async function fetchServices() {
-       try {
-         const res = await fetch("/api/services");
-         const services = await res.json();
-         const grouped: { [key: string]: any } = {};
+export default async function ServicesPage() {
+  const serviceCategories = await getServiceCategories().catch(() => []);
 
-         services.forEach(s => {
-           const cat = s.categorie.titre;
-           if (!grouped[cat]) {
-             grouped[cat] = {
-               category: cat,
-               description: s.categorie.description || "Pas de description disponible.",
-               couverture: s.categorie.couverture || "/images/default-cover.jpg",
-               services: [],
-             };
-           }
-           grouped[cat].services.push(s);
-         });
-
-         const map: { [key: string]: { catIndex: number; serviceIndex: number; catSlug: string } } = {};
-         const categoriesArray = Object.keys(grouped).map((catTitle, catIndex) => {
-           const catSlug = createSlug(catTitle);
-           const catData = grouped[catTitle];
-           catData.slug = catSlug;
-           catData.services.forEach((svc: any, serviceIndex: number) => {
-             map[String(svc.id)] = { catIndex, serviceIndex, catSlug };
-           });
-           return catData;
-         });
-
-         setServiceMap(map);
-         setServiceCategories(categoriesArray);
-       } catch (e) {
-         console.error("Erreur récupération services :", e);
-       }
-     }
-     fetchServices();
-   }, []);
-
-   useEffect(() => {
-     if (targetServiceId) {
-       setHasNavigated(false);
-     }
-   }, [targetServiceId]);
-
-   useEffect(() => {
-     if (!targetServiceId || !serviceCategories.length || Object.keys(serviceMap).length === 0 || hasNavigated) return;
-
-     const mapping = serviceMap[targetServiceId];
-     if (!mapping) return;
-
-     const { catIndex, serviceIndex, catSlug } = mapping;
-     
-     const trySlide = (attempt = 0) => {
-       const swiper = swiperRefs.current[catIndex];
-       if (swiper) {
-         swiper.slideTo(serviceIndex);
-         setHasNavigated(true);
-         router.replace('/services#category-' + catSlug, { scroll: false });
-         
-          setTimeout(() => {
-            const serviceElement = document.getElementById('service-' + targetServiceId);
-            if (serviceElement) {
-              const yOffset = -80;
-              const y = serviceElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-              window.scrollTo({ top: y, behavior: 'smooth' });
-            } else {
-              const categoryElement = document.getElementById('category-' + catSlug);
-              if (categoryElement) {
-                const yOffset = -80;
-                const y = categoryElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                window.scrollTo({ top: y, behavior: 'smooth' });
-              }
-            }
-          }, 500);
-       } else if (attempt < 10) {
-         setTimeout(() => trySlide(attempt + 1), 200 * (attempt + 1));
-       }
-     };
-
-     trySlide();
-   }, [targetServiceId, serviceCategories, serviceMap, router, hasNavigated]);
-
-   const openModal = (svc: any) => {
-    setSelectedService(svc);
-    setIsModalOpen(true);
-  };
-  const closeModal = () => {
-    setSelectedService(null);
-    setIsModalOpen(false);
-  };
-   const [scrolled, setScrolled] = useState(false);
-
-useEffect(() => {
-  const handleScroll = () => {
-    setScrolled(window.scrollY > 10);
-  };
-  window.addEventListener("scroll", handleScroll);
-  return () => window.removeEventListener("scroll", handleScroll);
-}, []);
+  const serviceListJsonLd = serviceCategories.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        itemListElement: serviceCategories.flatMap((cat: any, catIndex: number) =>
+          cat.services.map((svc: any, serviceIndex: number) => ({
+            "@type": "ListItem",
+            position: catIndex * 100 + serviceIndex + 1,
+            item: {
+              "@type": "Service",
+              name: svc.titre,
+              description: stripHtml(svc.description || "").slice(0, 300),
+              serviceType: cat.category,
+              provider: { "@id": "https://terrasigne.fr/#business" },
+              areaServed: { "@type": "Place", name: "Guadeloupe" },
+              ...(svc.prix
+                ? {
+                    offers: {
+                      "@type": "Offer",
+                      price: String(svc.prix),
+                      priceCurrency: "EUR",
+                    },
+                  }
+                : {}),
+            },
+          }))
+        ),
+      }
+    : null;
 
   return (
     <>
       <Navbar />
-      <main id="main-content" className="bg-[var(--secondary)] min-h-screen">
-<section
-  className={`relative min-h-screen flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-center gap-12 bg-cover bg-center transition-all duration-1000 ${
-    scrolled ? "mx-5 rounded-3xl shadow-xl" : "mx-0"
-  }`}
-  style={{ backgroundImage: "url('/images/hero_service.jpg')" }}
->
-  <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-0" />
+      <main id="main-content" className="overflow-x-hidden bg-cream">
+        {serviceListJsonLd && <JsonLd data={serviceListJsonLd} />}
 
-  <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg px-8 lg:px-0 py-10 z-10">
-  <div className="w-full max-h-[450px] lg:max-h-[400px] aspect-[3/5] rounded-[180px] overflow-hidden ring-8 ring-white shadow-xl mx-auto">
-    <img
-      src="/images/hero_service.png"
-      alt="Photo de profil"
-      className="object-cover w-full h-full"
-    />
-  </div>
-</div>
+        <section className="relative flex min-h-[90svh] items-center overflow-hidden bg-forest">
+          <img
+            src="/images/hero_service.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-35"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-forest/95 via-forest/80 to-forest/50" />
 
-  <div className="max-w-xl px-6 md:px-8 py-10 text-center z-10">
-    <h1 className="text-4xl md:text-7xl font-bold text-gray-800 mt-14 mb-6 leading-tight">
-      Mes <span className="text-brandOrange">Services</span>
-    </h1>
- <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
-   Découvrez un ensemble de prestations alliant techniques relationnelles,
-   corporelles et énergétiques, adaptées à vos besoins.
-   <br className="hidden md:block" />
-   <br /><br />
-   Laisse toi guider, je te propose d&rsquo;évaluer la pratique qui te convient.
+          <div className="container-soft relative z-10 grid items-center gap-12 py-28 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="text-center lg:text-left">
+              <span className="eyebrow !bg-cream/15 !text-cream">
+                Prestations & accompagnements
+              </span>
+              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
+                Mes services de{" "}
+                <span className="italic text-terra">bien-être</span> en
+                Guadeloupe
+              </h1>
+              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
+                Découvrez un ensemble de prestations alliant techniques
+                relationnelles, corporelles et énergétiques, adaptées à vos
+                besoins.
+              </p>
+              <p className="mx-auto mt-4 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
+                Laisse toi guider, je te propose d&rsquo;évaluer la pratique qui
+                te convient.
+              </p>
+              <Link href="/contact" className="btn btn-terra mt-8">
+                <Phone size={17} />
+                Rendez-vous conseil gratuit
+              </Link>
+            </div>
 
-   <Link href="/contact" className="w-full block max-w-xs mx-auto">
-     <button
-       className="w-full px-4 py-2 border border-brandSecondary text-brandSecondary rounded-full text-sm hover:bg-brandSecondary hover:text-white focus:ring-2 focus:ring-brandSecondary focus:ring-offset-2 transition"
-     >
-       Rendez-vous conseil gratuit
-     </button>
-   </Link>
- </p>
-<div className="relative mx-auto max-w-2xl text-center mt-10 px-4">
-  <p className="text-lg italic text-gray-600 font-light leading-relaxed relative before:absolute before:content-['&ldquo;'] before:text-5xl before:-top-6 before:-left-4 before:text-brandOrange after:absolute after:content-['&rdquo;'] after:text-5xl after:-bottom-6 after:-right-4 after:text-brandOrange">
-    Chacun a la responsabilité de faire croître la paix en lui afin que la paix devienne générale.
-  </p>
-  <p className="text-sm text-gray-500 mt-2">– Le Dalaï Lama</p>
-</div>
-  </div>
-</section>
-        {serviceCategories.map((cat, idx) => (
+            <div className="justify-self-center">
+              <div className="aspect-[3/4] w-full max-w-xs overflow-hidden rounded-t-[180px] rounded-b-4xl ring-8 ring-cream/15 shadow-2xl sm:max-w-sm">
+                <img
+                  src="/images/hero_service.png"
+                  alt="Cindy, praticienne Terrasigne"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
 
- <motion.section
-  key={idx}
-  id={`category-${cat.slug}`}
-   className="min-h-screen w-full px-4 md:px-12 py-20 flex flex-col gap-12 scroll-mt-20"
-  initial={{ opacity: 0, y: 100 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8, ease: 'easeOut' }}
-  viewport={{ once: false, amount: 0.2 }}
->
-  <div className="max-w-4xl mx-auto text-center">
-    <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-      {cat.category}
-    </h2>
-    <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-      {cat.description && (
-        <span dangerouslySetInnerHTML={{ __html: cat.description }} />
-      )}
-    </p>
-  </div>
+        <section className="section bg-cream">
+          <div className="container-soft mx-auto max-w-2xl text-center">
+            <p className="font-display text-xl italic leading-relaxed text-forest md:text-2xl">
+              Chacun a la responsabilité de faire croître la paix en lui afin que
+              la paix devienne générale.
+            </p>
+            <p className="mt-3 text-sm text-muted">– Le Dalaï Lama</p>
+          </div>
+        </section>
 
-  <div
-    className={`flex flex-col md:flex-row items-center justify-center gap-12 ${
-      idx % 2 === 1 ? 'md:flex-row-reverse' : ''
-    }`}
-  >
-     <div className="w-full md:w-1/2 order-2 md:order-none">
-      <Parallax translateY={["-20px", "20px"]} speed={10} easing="easeOut">
-        <img
-          src={cat.couverture}
-          alt={`Couverture ${cat.category}`}
-          className="w-full h-auto max-h-[500px] object-cover rounded-2xl shadow-lg"
-        />
-      </Parallax>
-    </div>
-
-  <div className="w-full md:w-1/2 order-1 md:order-none">
-  <div className="relative w-full px-4 ">
-    <Swiper
-      modules={[Navigation, Pagination, EffectFade]}
-      spaceBetween={0}
-      navigation={{
-        nextEl: `.next-${idx}`,
-        prevEl: `.prev-${idx}`,
-      }}
-      pagination={{
-        el: `.pagination-${idx}`,
-        clickable: true,
-        dynamicBullets: true,
-      }}
-      breakpoints={{
-        320: { slidesPerView: 1 },
-        768: { slidesPerView: 1 },
-        1024: { slidesPerView: 1 },
-      }}
-       className="!pb-12 w-full max-w-xl mx-auto"
-       onSwiper={(swiper) => { swiperRefs.current[idx] = swiper }}
-    >
-      {cat.services.map((svc, sidx) => (
- <SwiperSlide
-  key={sidx}
-  id={`service-${svc.id}`}
-  className="fade-slide transition-opacity duration-3000 ease-in-out"
->
-         <div
-  key={svc.id || `${svc.titre}-${sidx}`}
-  className="aspect-square max-w-lg flex flex-col justify-between rounded-2xl bg-[#f9f9fb] shadow-inner border border-[#e6e6ec] hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 ease-out p-8 text-gray-800"
->
-  <h3 className="text-2xl font-bold text-brandPurple mb-2 text-center">
-    {svc.titre}
-  </h3>
-
-  <p className="text-center text-lg text-gray-600 font-semibold mb-4">
-    {svc.prix ? `${svc.prix} €` : ""}
-  </p>
-
-  <p className="text-xl text-gray-700 leading-relaxed text-center flex-1 overflow-hidden">
-    {stripHtml(svc.description).length > 200
-      ? stripHtml(svc.description).slice(0, 200) + "..."
-      : stripHtml(svc.description) || "Aucune description."}
-  </p>
-
-  <div className="mt-6 flex flex-col gap-2">
-    <button
-      onClick={() => openModal(svc)}
-      className="w-full px-4 py-2 border border-brandSecondary text-brandSecondary rounded-full text-sm hover:bg-brandSecondary hover:text-white focus:ring-2 focus:ring-brandSecondary focus:ring-offset-2 transition"
-    >
-      Voir les détails
-    </button>
-    {svc.rendez_vous ? (
-      <a
-        href={`/rendez-vous?service=${svc.id}`}
-        className="w-full px-4 py-2 bg-brandSecondary text-white rounded-full text-sm hover:bg-brandSecondary/80 transition text-center"
-      >
-        Prendre rendez-vous
-      </a>
-    ) : (
-      <a
-        href="/contact"
-        className="w-full px-4 py-2 bg-gray-700 text-white rounded-full text-sm hover:bg-black transition text-center"
-      >
-        Me contacter
-      </a>
-    )}
-  </div>
-</div>
-        </SwiperSlide>
-      ))}
-    </Swiper>
-
-        {!isMobile && (
-          <>
-            <button
-              className={` prev-${idx} absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
-              aria-label="Précédent"
-            >
-              <svg className="w-7 h-7 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              className={` next-${idx} absolute top-1/2 right-0 -translate-y-1/2 translate-x-full bg-white p-2 rounded-full shadow hover:scale-110 transition`}
-              aria-label="Suivant"
-            >
-              <svg className="w-7 h-7 text-brandPurple" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </>
-        )}
-
-        
-        <div
-  className={`swiper-pagination pagination-${idx} mt-4 flex justify-center w-full z-10`}
-  style={{ minHeight: "24px" }}
-/>
-        
-      </div>
-    </div>
-  </div>
-</motion.section>
-        ))}
-
-        <ServiceModal isOpen={isModalOpen} onClose={closeModal} service={selectedService} />
+        <ServicesExplorer initialCategories={serviceCategories} />
       </main>
       <Footer />
     </>
-  );
-}
-
-export default function ServicesPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
-      <ServicesPageContent />
-    </Suspense>
   );
 }

@@ -1,5 +1,5 @@
-"use client";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { stripHtml, createSlug } from "@/lib/utils";
 
 interface Service {
@@ -14,44 +14,55 @@ interface Service {
 
 export default function FeaturedServices({ services }: { services: Service[] }) {
   return (
-    <section className="max-w-6xl mx-auto my-28 min-h-screen w-full px-8 py-16" data-aos="fade-up">
-      <div className="flex justify-between items-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-800">Services Mis en Avant</h2>
-        <Link href="/services" className="text-brandOrange font-medium hover:underline">
-          Tous les services →
-        </Link>
-      </div>
-      <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+    <section className="section bg-sand/40">
+      <div className="container-soft">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <span className="eyebrow">Prestations</span>
+            <h2 className="mt-3 font-display text-3xl font-semibold text-forest md:text-4xl">
+              Services mis en avant
+            </h2>
+          </div>
+          <Link href="/services" className="link-underline inline-flex items-center gap-1.5">
+            Tous les services
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+
         {services.length > 0 ? (
-          services.map((service, index) => (
-            <div
-              key={service.id}
-              className="flex flex-col justify-between h-full bg-white/50 backdrop-blur-lg shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-shadow"
-              data-aos="fade-up"
-              data-aos-delay={index * 100}
-            >
-              <div className="p-6 flex flex-col justify-between h-full">
-                <h3 className="text-2xl font-bold text-brandPurple mb-3">{service.titre}</h3>
-                <p className="text-gray-700 text-lg mb-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="card flex flex-col p-7 transition hover:-translate-y-1 hover:shadow-soft"
+              >
+                <span className="eyebrow self-start">
+                  {service.categorie?.titre || "Service"}
+                </span>
+                <h3 className="mt-4 font-display text-2xl font-semibold text-forest">
+                  {service.titre}
+                </h3>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
                   {stripHtml(service.description).length > 160
-                    ? stripHtml(service.description).substring(0, 160) + "..."
+                    ? stripHtml(service.description).substring(0, 160) + "…"
                     : stripHtml(service.description)}
                 </p>
-                <p className="text-gray-500 mb-6">
-                  <span className="font-bold">Prix :</span> {service.prix} €
+                <p className="mt-5 font-display text-2xl font-semibold text-terra">
+                  {service.prix ? `${service.prix} €` : ""}
                 </p>
-                 <div className="mt-auto">
-                   <Link href={`/services?service=${service.id}#category-${createSlug(service.categorie.titre)}`}>
-                      <button className="w-full px-6 py-3 bg-brandSecondary text-white rounded-full hover:bg-brandSecondary/90 focus:ring-2 focus:ring-brandSecondary focus:ring-offset-2 transition-all">
-                       Détails
-                     </button>
-                   </Link>
-                 </div>
+                <Link
+                  href={`/services?service=${service.id}#category-${createSlug(
+                    service.categorie.titre
+                  )}`}
+                  className="btn btn-primary mt-5 w-full"
+                >
+                  Voir le détail
+                </Link>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
-          <p className="text-gray-500">Aucun service mis en avant pour le moment.</p>
+          <p className="text-ink-soft">Aucun service mis en avant pour le moment.</p>
         )}
       </div>
     </section>

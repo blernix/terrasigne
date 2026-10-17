@@ -10,10 +10,22 @@ import {
   groupSlots,
   buildMonthGrid,
 } from "@/lib/calendar";
+import {
+  ArrowRight,
+  Calendar,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Lock,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
+import styles from "./rdv.module.css";
 
-const STEPS = ["Service", "Date", "Horaire", "Vos infos"];
 const STORAGE_KEY = "terrasigne-booking";
 const PROFILE_KEY = "terrasigne-client-profile";
+const DEFAULT_MODES = ["Téléphone", "Visioconférence", "Présentiel"];
 
 function detectTimezone() {
   try {
@@ -46,6 +58,12 @@ function loadProfile() {
   }
 }
 
+function modesFor(service) {
+  return Array.isArray(service?.mode_rdv) && service.mode_rdv.length > 0
+    ? service.mode_rdv
+    : DEFAULT_MODES;
+}
+
 function BookingContent({ targetServiceId }) {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
@@ -73,11 +91,14 @@ function BookingContent({ targetServiceId }) {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [confirmed, setConfirmed] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [servicesError, setServicesError] = useState(null);
+  const [servicesReloadKey, setServicesReloadKey] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const availabilityRequestId = useRef(0);
   const selectedServiceRef = useRef(null);
-  const [hydrated, setHydrated] = useState(false);
+  const daySectionRef = useRef(null);
+  const slotSectionRef = useRef(null);
+  const formRef = useRef(null);
 
   useEffect(() => {
     const persisted = loadPersisted();
@@ -90,7 +111,7 @@ function BookingContent({ targetServiceId }) {
     }));
 
     if (persisted) {
-      let restoredStep = Number(persisted.step) || 1;
+      const restoredStep = Number(persisted.step) || 1;
 
       if (restoredStep >= 5) {
         localStorage.removeItem(STORAGE_KEY);
@@ -100,21 +121,21 @@ function BookingContent({ targetServiceId }) {
         const slot = persisted.selectedSlot || null;
         const formule = persisted.selectedFormule || null;
 
-        if (restoredStep >= 4 && (!slot || !day || !service || !formule)) restoredStep = 3;
-        if (restoredStep >= 3 && (!day || !service || !formule)) restoredStep = 2;
-        if (restoredStep >= 2 && (!service || !formule)) restoredStep = 1;
-
         if (service) {
           setSelectedService(service);
           selectedServiceRef.current = service;
         }
         if (formule) setSelectedFormule(formule);
-        if (service && formule && restoredStep >= 2) {
+        if (service && formule) {
           loadAvailability(service, formule, timezone);
         }
-        if (restoredStep >= 3 && day) setSelectedDay(day);
-        if (restoredStep >= 4 && slot) setSelectedSlot(slot);
-        setStep(restoredStep);
+        if (day) setSelectedDay(day);
+        if (slot) setSelectedSlot(slot);
+
+        let clamped = 1;
+        if (formule) clamped = 2;
+        if (formule && day) clamped = 3;
+        setStep(clamped);
       }
     }
     setHydrated(true);
@@ -140,7 +161,16 @@ function BookingContent({ targetServiceId }) {
     } catch {
       /* ignore */
     }
-  }, [hydrated, timezone, step, selectedService, selectedFormule, selectedDay, selectedSlot, formData]);
+  }, [
+    hydrated,
+    timezone,
+    step,
+    selectedService,
+    selectedFormule,
+    selectedDay,
+    selectedSlot,
+    formData,
+  ]);
 
   useEffect(() => {
     async function fetchServices() {
@@ -187,7 +217,7 @@ function BookingContent({ targetServiceId }) {
     }
     fetchServices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetServiceId]);
+  }, [targetServiceId, servicesReloadKey]);
 
   useEffect(() => {
     if (availability?.days?.length) {
@@ -197,6 +227,13 @@ function BookingContent({ targetServiceId }) {
       setViewMonth(months[0]);
     }
   }, [availability]);
+
+  function scrollToOnMobile(ref) {
+    if (typeof window === "undefined" || window.innerWidth >= 1024) return;
+    requestAnimationFrame(() =>
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  }
 
   async function loadAvailability(service, formule, tz) {
     const requestId = ++availabilityRequestId.current;
@@ -231,6 +268,11 @@ function BookingContent({ targetServiceId }) {
     setAvailability(null);
     setFeedback(null);
 
+    const modes = modesFor(service);
+    if (modes.length === 1) {
+      setFormData((prev) => ({ ...prev, meetingType: modes[0] }));
+    }
+
     if (service.formules && service.formules.length === 1) {
       selectFormule(service.formules[0]);
     } else {
@@ -246,6 +288,19 @@ function BookingContent({ targetServiceId }) {
     setFeedback(null);
     setStep(2);
     loadAvailability(selectedServiceRef.current, formule, timezone);
+    scrollToOnMobile(daySectionRef);
+  }
+
+  function selectDay(day) {
+    setSelectedDay(day);
+    setSelectedSlot(null);
+    setStep(3);
+    scrollToOnMobile(slotSectionRef);
+  }
+
+  function selectSlot(slot) {
+    setSelectedSlot(slot);
+    scrollToOnMobile(formRef);
   }
 
   function handleChange(e) {
@@ -258,7 +313,14 @@ function BookingContent({ targetServiceId }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    setShowConfirm(true);
+    if (!selectedService || !selectedFormule || !selectedSlot) {
+      setFeedback({
+        type: "error",
+        text: "Merci de choisir un soin, une date et un horaire avant de confirmer.",
+      });
+      return;
+    }
+    doSubmit();
   }
 
   async function doSubmit() {
@@ -297,7 +359,6 @@ function BookingContent({ targetServiceId }) {
 
       const data = await res.json();
       if (res.ok) {
-        setShowConfirm(false);
         setConfirmed(data);
         setStep(5);
         try {
@@ -319,22 +380,22 @@ function BookingContent({ targetServiceId }) {
         } catch {
           /* ignore */
         }
-      } else {
-        setShowConfirm(false);
+      } else if (data.message === "Ce créneau vient d'être réservé") {
         setFeedback({
           type: "error",
-          text:
-            data.message === "Ce créneau vient d'être réservé"
-              ? "Désolé, ce créneau vient d'être réservé. Choisissez-en un autre."
-              : data.message || "Une erreur est survenue lors de la réservation.",
+          text: "Désolé, ce créneau vient d'être réservé. Choisissez-en un autre.",
         });
-        if (data.message === "Ce créneau vient d'être réservé") {
-          selectService(selectedService);
-        }
+        setSelectedSlot(null);
+        setStep(3);
+        loadAvailability(selectedService, selectedFormule, timezone);
+      } else {
+        setFeedback({
+          type: "error",
+          text: data.message || "Une erreur est survenue lors de la réservation.",
+        });
       }
     } catch (error) {
       console.error("Erreur réservation :", error);
-      setShowConfirm(false);
       setFeedback({
         type: "error",
         text: "Une erreur inattendue est survenue.",
@@ -358,99 +419,121 @@ function BookingContent({ targetServiceId }) {
     : availMonths[0];
   const monthIndex = availMonths.indexOf(activeMonth);
 
-  const meetingModes =
-    Array.isArray(selectedService?.mode_rdv) &&
-    selectedService.mode_rdv.length > 0
-      ? selectedService.mode_rdv
-      : ["Téléphone", "Visioconférence", "Présentiel"];
+  const meetingModes = modesFor(selectedService);
+
+  const dateLabel = selectedDay
+    ? `${capitalize(selectedDay.weekday)} ${selectedDay.dayNum} ${capitalize(
+        selectedDay.month
+      )}`
+    : "";
+
+  const stepClass = (n) =>
+    n === step
+      ? `${styles.stepNum} ${styles.stepNumActive}`
+      : n < step
+      ? `${styles.stepNum} ${styles.stepNumDone}`
+      : styles.stepNum;
+
+  if (step === 5 && confirmed) {
+    return (
+      <>
+        <Navbar />
+        <main id="main-content" className={`mt-16 ${styles.theme}`}>
+          <section className={styles.successWrap}>
+            <div className={styles.successIcon}>
+              <Check size={32} strokeWidth={2.5} />
+            </div>
+            <h2 className={styles.successTitle}>Rendez-vous confirmé&nbsp;!</h2>
+            <p className={styles.successLead}>
+              Un email de confirmation vient de vous être envoyé. Vous pourrez le
+              gérer ou l&rsquo;annuler directement depuis ce message.
+            </p>
+
+            <div className={styles.recapBox}>
+              <dl className={styles.rows}>
+                <Row
+                  icon={<Sparkles size={16} className={styles.iconTerra} />}
+                  label="Service"
+                  value={selectedService?.titre || "—"}
+                />
+                <Row
+                  icon={<Calendar size={16} className={styles.iconSage} />}
+                  label="Date"
+                  value={confirmed.dateLabel || dateLabel}
+                />
+                <Row
+                  icon={<Clock size={16} className={styles.iconSage} />}
+                  label="Heure"
+                  value={selectedSlot?.timeLabel || "—"}
+                />
+                <Row
+                  icon={<Clock size={16} className={styles.iconSage} />}
+                  label="Durée"
+                  value={
+                    selectedFormule ? `${selectedFormule.duree} min` : "—"
+                  }
+                />
+                <Row
+                  icon={<MapPin size={16} className={styles.iconSage} />}
+                  label="Rencontre"
+                  value={formData.meetingType || "—"}
+                />
+              </dl>
+            </div>
+
+            <div className={styles.actions}>
+              <a href="/" className={styles.btnPrimary}>
+                Retour à l&rsquo;accueil
+              </a>
+              <a href="/services" className={styles.btnGhost}>
+                Voir les autres services
+              </a>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen mt-16 bg-[var(--secondary)]">
-        {step < 5 && (
-          <section className="text-center max-w-3xl mx-auto px-4 pt-12 pb-6">
-            <span className="inline-block text-brandOrange text-sm font-semibold uppercase tracking-widest mb-3">
+      <main id="main-content" className={`mt-16 ${styles.theme}`}>
+        <section className={styles.hero}>
+          <div className={styles.container}>
+            <span className={styles.chip}>
+              <Calendar size={14} />
               Réservation en ligne
             </span>
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-800 leading-tight mb-4">
-              Prendre <span className="text-brandOrange">rendez-vous</span>
+            <h1 className={styles.title}>
+              Prendre <span className={styles.titleAccent}>rendez-vous</span> en
+              ligne
             </h1>
-
-            <p className="mt-4 text-sm text-gray-500">
+            <p className={styles.lead}>
+              Choisissez votre service, votre date et votre horaire en quelques
+              instants. Vous recevrez une confirmation par email.
+            </p>
+            <p className={styles.note}>
               Les horaires sont affichés dans votre fuseau horaire
               {availability?.timezoneLabel
                 ? ` (${availability.timezoneLabel})`
-                : ""}.
+                : ""}
+              .
             </p>
-            <p className="mt-2 text-xs text-gray-400">
+            <p className={styles.note}>
               Réservation possible de 48h à 3 mois à l&rsquo;avance.
             </p>
-          </section>
-        )}
-
-        {step < 5 && (
-          <div className="max-w-2xl mx-auto mb-8 px-4">
-            {/* Stepper desktop / tablette */}
-            <div className="hidden sm:flex bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 items-center justify-center gap-2">
-              {STEPS.map((label, i) => {
-                const n = i + 1;
-                return (
-                  <div key={label} className="flex items-center gap-2">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition ${
-                        n === step
-                          ? "bg-brandOrange text-white"
-                          : n < step
-                          ? "bg-brandSecondary text-white"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      {n < step ? "✓" : n}
-                    </div>
-                    <span
-                      className={`text-sm ${
-                        n === step
-                          ? "text-brandPurple font-semibold"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {label}
-                    </span>
-                    {n < STEPS.length && (
-                      <span className="w-8 h-px bg-gray-200" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Stepper mobile */}
-            <div className="sm:hidden flex items-center justify-between bg-white rounded-2xl shadow-sm border border-gray-100 px-5 py-3">
-              <span className="text-sm font-semibold text-brandPurple">
-                Étape {step} sur {STEPS.length} · {STEPS[step - 1]}
-              </span>
-              <span className="flex gap-1.5">
-                {STEPS.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`w-2 h-2 rounded-full ${
-                      i + 1 <= step ? "bg-brandOrange" : "bg-gray-200"
-                    }`}
-                  />
-                ))}
-              </span>
-            </div>
           </div>
-        )}
+        </section>
 
         {feedback && (
-          <div className="max-w-3xl mx-auto px-4 mb-6">
+          <div className={`${styles.container} ${styles.alertWrap}`}>
             <div
-              className={`p-4 text-center font-medium rounded-xl ${
+              className={`${styles.alert} ${
                 feedback.type === "success"
-                  ? "text-green-800 bg-green-100"
-                  : "text-red-800 bg-red-100"
+                  ? styles.alertInfo
+                  : styles.alertError
               }`}
             >
               {feedback.text}
@@ -458,659 +541,487 @@ function BookingContent({ targetServiceId }) {
           </div>
         )}
 
-        {step === 1 && !selectedService && (
-          <section className="max-w-4xl mx-auto px-4 pb-24">
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
-              Choisissez un service
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {services.map((s) => {
-                const desc = stripHtml(s.description);
-                const formules = s.formules || [];
-                const prixFormules = formules
-                  .filter((f) => f.prix != null)
-                  .map((f) => f.prix);
-                const minPrix = prixFormules.length
-                  ? Math.min(...prixFormules)
-                  : null;
-                const hasMultiple = formules.length > 1;
-                return (
+        <div className={`${styles.container} ${styles.grid}`}>
+          <div className={`${styles.card} ${styles.pad}`}>
+            <div className={styles.block}>
+              <div className={styles.stepHead}>
+                <span className={stepClass(1)}>1</span>
+                <h2 className={styles.stepTitle}>Choisissez votre soin</h2>
+              </div>
+
+              {servicesError ? (
+                <div className={styles.placeholder}>
+                  <p>{servicesError}</p>
                   <button
-                    key={s.id}
-                    onClick={() => selectService(s)}
-                    className="group text-left p-5 md:p-6 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-gray-100"
+                    type="button"
+                    className="btn btn-primary mt-4"
+                    onClick={() => setServicesReloadKey((k) => k + 1)}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-base md:text-lg font-bold text-gray-800 leading-snug">
-                        {s.titre}
-                      </h3>
-                      <span className="ml-3 shrink-0 w-8 h-8 rounded-full bg-brandOrange/10 text-brandOrange flex items-center justify-center group-hover:bg-brandOrange group-hover:text-white transition">
-                        →
-                      </span>
-                    </div>
-                    {desc && (
-                      <p className="text-sm text-gray-500 mb-3 line-clamp-2">
-                        {desc}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-3 text-sm">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-brandSecondary/10 text-brandSecondary font-semibold">
-                        {hasMultiple
-                          ? `${formules.length} durées`
-                          : formules[0]
-                          ? `${formules[0].duree} min`
-                          : ""}
-                      </span>
-                      {minPrix != null ? (
-                        <span className="text-gray-700 font-semibold">
-                          {hasMultiple ? `dès ${minPrix} €` : `${minPrix} €`}
-                        </span>
-                      ) : null}
-                    </div>
+                    Réessayer
                   </button>
-                );
-              })}
-            </div>
-            {servicesError ? (
-              <p className="text-center text-red-600 bg-red-50 rounded-xl p-4">
-                {servicesError}
-              </p>
-            ) : services.length === 0 ? (
-              <p className="text-center text-gray-500">
-                Aucun service réservable pour le moment.
-              </p>
-            ) : null}
-          </section>
-        )}
+                </div>
+              ) : services.length === 0 ? (
+                <p className={styles.placeholder}>
+                  Aucun soin réservable pour le moment.
+                </p>
+              ) : (
+                <div className={styles.serviceGrid}>
+                  {services.map((s) => {
+                    const active =
+                      String(selectedService?.id) === String(s.id);
+                    const formules = s.formules || [];
+                    const prices = formules
+                      .filter((f) => f.prix != null)
+                      .map((f) => f.prix);
+                    const minPrix = prices.length ? Math.min(...prices) : null;
+                    const desc = stripHtml(s.description);
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => selectService(s)}
+                        className={`${styles.serviceBtn} ${
+                          active ? styles.serviceBtnActive : ""
+                        }`}
+                      >
+                        <span>
+                          <span className={styles.serviceName}>{s.titre}</span>
+                          <span className={styles.serviceDesc}>
+                            {formules.length > 1
+                              ? `${formules.length} durées disponibles`
+                              : formules[0]
+                              ? `${formules[0].duree} min`
+                              : ""}
+                            {desc ? ` · ${desc}` : ""}
+                          </span>
+                        </span>
+                        <span className={styles.servicePrice}>
+                          {minPrix != null ? `dès ${minPrix} €` : ""}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
-        {step === 1 && selectedService && !selectedFormule && (
-          <section className="max-w-2xl mx-auto px-4 pb-24">
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => {
-                  setSelectedService(null);
-                  selectedServiceRef.current = null;
-                  setSelectedFormule(null);
-                  setAvailability(null);
-                }}
-                className="text-brandPurple hover:underline text-sm font-medium"
-              >
-                ← Changer de service
-              </button>
-              <span className="text-gray-600 font-medium text-sm">
-                {selectedService.titre}
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
-              Choisissez une durée
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {(selectedService.formules || []).map((f) => (
-                <button
-                  key={f.id || `${f.duree}-${f.prix}`}
-                  onClick={() => selectFormule(f)}
-                  className="group text-left p-5 bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-bold text-gray-800">
-                      {f.titre || `${f.duree} min`}
-                    </span>
-                    <span className="w-8 h-8 rounded-full bg-brandOrange/10 text-brandOrange flex items-center justify-center group-hover:bg-brandOrange group-hover:text-white transition">
-                      →
-                    </span>
+              {selectedService && selectedService.formules?.length > 0 && (
+                <>
+                  <p className={styles.subLabel}>
+                    Durée de la séance
+                    {selectedService.formules.length > 1 ? "" : " (unique)"}
+                  </p>
+                  <div className={styles.durRow}>
+                    {selectedService.formules.map((f) => {
+                      const active = selectedFormule
+                        ? selectedFormule.id != null
+                          ? selectedFormule.id === f.id
+                          : selectedFormule.duree === f.duree &&
+                            selectedFormule.prix === f.prix
+                        : false;
+                      return (
+                        <button
+                          key={f.id || `${f.duree}-${f.prix}`}
+                          type="button"
+                          onClick={() => selectFormule(f)}
+                          className={`${styles.durBtn} ${
+                            active ? styles.durBtnActive : ""
+                          }`}
+                        >
+                          {f.titre || `${f.duree} min`}
+                          {f.prix != null ? ` · ${f.prix} €` : ""}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="flex items-center gap-3 text-sm mt-2">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-brandSecondary/10 text-brandSecondary font-semibold">
-                      {f.duree} min
-                    </span>
-                    {f.prix != null ? (
-                      <span className="text-gray-700 font-semibold">
-                        {f.prix} €
-                      </span>
-                    ) : null}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {step === 2 && (
-          <section className="max-w-xl mx-auto px-4 pb-24">
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => {
-                  setStep(1);
-                  setSelectedService(null);
-                  setSelectedFormule(null);
-                  setAvailability(null);
-                }}
-                className="text-brandPurple hover:underline text-sm font-medium"
-              >
-                ← Changer de service
-              </button>
-              {selectedService && (
-                <span className="text-gray-600 font-medium text-sm">
-                  {selectedService.titre}
-                </span>
+                </>
               )}
             </div>
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
-              Choisissez une date
-            </h2>
 
-            {availability ? (
-              availMonths.length > 0 ? (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
-                  <div className="flex items-center justify-between mb-4">
+            <div className={styles.block} ref={daySectionRef}>
+              <div className={styles.stepHead}>
+                <span className={stepClass(2)}>2</span>
+                <h2 className={styles.stepTitle}>Choisissez une date</h2>
+              </div>
+
+              {!selectedFormule ? (
+                <p className={styles.placeholder}>
+                  Sélectionnez d&rsquo;abord un soin et une durée pour afficher
+                  le calendrier.
+                </p>
+              ) : !availability ? (
+                <p className={styles.mutedCenter}>Chargement des créneaux…</p>
+              ) : availMonths.length === 0 ? (
+                <p className={styles.placeholder}>
+                  Aucune disponibilité pour ce soin. Réessayez plus tard ou
+                  choisissez une autre durée.
+                </p>
+              ) : (
+                <div className={styles.cal}>
+                  <div className={styles.calHead}>
                     <button
                       type="button"
-                      onClick={() =>
-                        setViewMonth(availMonths[monthIndex - 1])
-                      }
+                      onClick={() => setViewMonth(availMonths[monthIndex - 1])}
                       disabled={monthIndex <= 0}
-                      className="w-9 h-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      className={styles.calNav}
+                      aria-label="Mois précédent"
                     >
-                      ‹
+                      <ChevronLeft size={18} />
                     </button>
-                    <h3 className="font-semibold text-gray-800">
+                    <p className={styles.calMonth}>
                       {monthLabel(activeMonth)}
-                    </h3>
+                    </p>
                     <button
                       type="button"
-                      onClick={() =>
-                        setViewMonth(availMonths[monthIndex + 1])
-                      }
+                      onClick={() => setViewMonth(availMonths[monthIndex + 1])}
                       disabled={monthIndex >= availMonths.length - 1}
-                      className="w-9 h-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                      className={styles.calNav}
+                      aria-label="Mois suivant"
                     >
-                      ›
+                      <ChevronRight size={18} />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-7 gap-1 text-center">
+                  <div className={styles.calGrid}>
                     {WEEKDAYS.map((w) => (
-                      <div
-                        key={w}
-                        className="text-xs font-semibold text-gray-400 uppercase py-1"
-                      >
+                      <span key={w} className={styles.weekday}>
                         {w}
-                      </div>
+                      </span>
                     ))}
-                    {buildMonthGrid(activeMonth, availableDates).map((cell, i) =>
-                      cell === null ? (
-                        <div key={i} />
-                      ) : cell.available ? (
-                        <button
-                          key={cell.dateKey}
-                          type="button"
-                          onClick={() => {
-                            setSelectedDay(daysByKey[cell.dateKey]);
-                            setSelectedSlot(null);
-                            setStep(3);
-                          }}
-                          className="aspect-square rounded-lg bg-brandPurple/5 text-brandPurple font-semibold hover:bg-brandPurple hover:text-white transition flex flex-col items-center justify-center"
-                        >
-                          <span>{cell.day}</span>
-                          <span className="text-[9px] text-brandSecondary mt-0.5">
-                            {daysByKey[cell.dateKey]?.slots.length}
+                    {buildMonthGrid(activeMonth, availableDates).map(
+                      (cell, i) =>
+                        cell === null ? (
+                          <span key={`e${i}`} />
+                        ) : cell.available ? (
+                          <button
+                            key={cell.dateKey}
+                            type="button"
+                            onClick={() => selectDay(daysByKey[cell.dateKey])}
+                            className={`${styles.day} ${styles.dayAvail} ${
+                              selectedDay?.date === cell.dateKey
+                                ? styles.dayActive
+                                : ""
+                            }`}
+                          >
+                            <span>{cell.day}</span>
+                            <span className={styles.dayCount}>
+                              {daysByKey[cell.dateKey]?.slots.length}
+                            </span>
+                          </button>
+                        ) : (
+                          <span key={cell.dateKey} className={`${styles.day} ${styles.dayOff}`}>
+                            {cell.day}
                           </span>
-                        </button>
-                      ) : (
-                        <div
-                          key={cell.dateKey}
-                          className="aspect-square rounded-lg text-gray-300 flex items-center justify-center"
-                        >
-                          {cell.day}
-                        </div>
-                      )
+                        )
                     )}
                   </div>
+                  <p className={styles.calHint}>
+                    Les jours en vert disposent de créneaux libres.
+                  </p>
                 </div>
-              ) : (
-                <p className="text-center text-gray-500">
-                  Aucune disponibilité pour ce service. Réessayez plus tard.
+              )}
+            </div>
+
+            <div className={styles.block} ref={slotSectionRef}>
+              <div className={styles.stepHead}>
+                <span className={stepClass(3)}>3</span>
+                <h2 className={styles.stepTitle}>Choisissez un horaire</h2>
+              </div>
+
+              {!selectedDay ? (
+                <p className={styles.placeholder}>
+                  Sélectionnez une date pour voir les horaires disponibles.
                 </p>
-              )
-            ) : (
-              <p className="text-center text-gray-500">Chargement...</p>
-            )}
-          </section>
-        )}
-
-        {step === 3 && selectedDay && (
-          <section className="max-w-xl mx-auto px-4 pb-24">
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => setStep(2)}
-                className="text-brandPurple hover:underline text-sm font-medium"
-              >
-                ← Changer de date
-              </button>
-              <span className="text-gray-600 font-medium text-sm text-right">
-                {selectedService && (
-                  <span className="block text-brandPurple font-semibold">
-                    {selectedService.titre}
-                  </span>
-                )}
-                {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
-                {capitalize(selectedDay.month)}
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
-              Choisissez un horaire
-            </h2>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
-              {groupSlots(selectedDay.slots).map((group) => (
-                <div key={group.label} className="mb-6 last:mb-0">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                    {group.label}
-                  </h3>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                    {group.slots.map((slot) => (
-                      <button
-                        key={slot.start}
-                        onClick={() => {
-                          setSelectedSlot(slot);
-                          setStep(4);
-                        }}
-                        className="py-3 bg-gray-50 border border-gray-100 rounded-xl font-medium text-gray-700 hover:bg-brandSecondary hover:text-white hover:border-brandSecondary transition"
-                      >
-                        {slot.timeLabel}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {step === 4 && selectedSlot && selectedService && selectedFormule && (
-          <section className="max-w-xl mx-auto px-4 pb-24">
-            <button
-              onClick={() => setStep(3)}
-              className="text-brandPurple hover:underline text-sm font-medium mb-6"
-            >
-              ← Changer d'horaire
-            </button>
-
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
-              Vos informations
-            </h2>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-              <div className="bg-brandPurple/5 px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-bold text-brandPurple">
-                  Récapitulatif
-                </h3>
-              </div>
-              <div className="px-6 py-5 space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Service</span>
-                  <span className="text-gray-800 font-semibold text-right">
-                    {selectedService.titre}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Date</span>
-                  <span className="text-gray-800 font-semibold">
-                    {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
-                    {capitalize(selectedDay.month)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Horaire</span>
-                  <span className="text-gray-800 font-semibold">
-                    {selectedSlot.timeLabel}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Durée</span>
-                  <span className="text-gray-800 font-semibold">
-                    {selectedFormule?.duree} min
-                  </span>
-                </div>
-                {selectedFormule?.prix ? (
-                  <div className="flex justify-between border-t border-gray-100 pt-3">
-                    <span className="text-gray-500">Tarif</span>
-                    <span className="text-brandOrange font-bold">
-                      {selectedFormule.prix} €
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              ) : (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Prénom *
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    required
-                    autoComplete="given-name"
-                    placeholder="Prénom"
-                    className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nom *
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    required
-                    autoComplete="family-name"
-                    placeholder="Nom"
-                    className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Adresse email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  autoComplete="email"
-                  placeholder="votre@email.com"
-                  className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Comment vous rencontrer *
-                </label>
-                <select
-                  name="meetingType"
-                  value={formData.meetingType}
-                  onChange={handleChange}
-                  required
-                  className="w-full border border-gray-200 p-3 rounded-xl bg-white focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                >
-                  <option value="" disabled>
-                    Choisir...
-                  </option>
-                  {meetingModes.map((mode) => (
-                    <option key={mode} value={mode}>
-                      {mode}
-                    </option>
+                  {groupSlots(selectedDay.slots).map((group) => (
+                    <div key={group.label}>
+                      <p className={styles.groupLabel}>{group.label}</p>
+                      <div className={styles.slotGrid}>
+                        {group.slots.map((slot) => (
+                          <button
+                            key={slot.start}
+                            type="button"
+                            onClick={() => selectSlot(slot)}
+                            className={`${styles.slot} ${
+                              selectedSlot?.start === slot.start
+                                ? styles.slotActive
+                                : ""
+                            }`}
+                          >
+                            {slot.timeLabel}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Téléphone
-                </label>
-                <div className="grid grid-cols-[90px_1fr] gap-2">
-                  <input
-                    type="text"
-                    name="countryCode"
-                    value={formData.countryCode}
-                    onChange={handleChange}
-                    placeholder="+590"
-                    className="border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                  />
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    autoComplete="tel"
-                    placeholder="Numéro de téléphone"
-                    className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Profession *
-                </label>
-                <input
-                  type="text"
-                  name="profession"
-                  value={formData.profession}
-                  onChange={handleChange}
-                  required
-                  placeholder="Votre profession"
-                  className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Suivi psychologique ou psychiatrique en cours *
-                </label>
-                <input
-                  type="text"
-                  name="suivi"
-                  value={formData.suivi}
-                  onChange={handleChange}
-                  required
-                  placeholder="Oui / Non / Précisez"
-                  className="w-full border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Informations utiles pour préparer notre rencontre
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="Veuillez partager toute information qui pourrait aider à préparer notre rencontre..."
-                  className="w-full border border-gray-200 p-3 rounded-xl h-24 focus:ring-2 focus:ring-brandOrange focus:border-brandOrange outline-none transition"
-                />
-              </div>
-
-              <label className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="consent"
-                  checked={formData.consent}
-                  onChange={handleChange}
-                  required
-                  className="mt-0.5 w-4 h-4 accent-brandPurple"
-                />
-                <span className="text-sm text-gray-600">
-                  J'accepte que mes informations soient utilisées pour le
-                  traitement de ma demande de rendez-vous, conformément à la{" "}
-                  <a
-                    href="/confidentialite"
-                    className="text-brandPurple font-semibold underline hover:text-brandOrange transition"
-                  >
-                    politique de confidentialité
-                  </a>
-                  . *
-                </span>
-              </label>
-
-              <label className="flex items-start gap-3 p-3 bg-white rounded-xl border border-gray-100 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="newsletter"
-                  checked={formData.newsletter}
-                  onChange={handleChange}
-                  className="mt-0.5 w-4 h-4 accent-brandPurple"
-                />
-                <span className="text-sm text-gray-600">
-                  Je souhaite recevoir la newsletter de TerraSigne (actualités,
-                  conseils bien-être, offres).
-                </span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="bg-brandOrange text-white py-3.5 px-6 rounded-xl font-semibold hover:bg-brandOrange/90 focus:ring-2 focus:ring-brandOrange focus:ring-offset-2 transition-all disabled:opacity-60"
-              >
-                {submitting
-                  ? "Réservation en cours..."
-                  : "Confirmer la réservation"}
-              </button>
-            </form>
-          </section>
-        )}
-
-        {step === 5 && confirmed && (
-          <section className="max-w-xl mx-auto px-4 pb-24 text-center">
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-10">
-              <div className="w-20 h-20 rounded-full bg-brandSecondary/10 text-brandSecondary flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-10 h-10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.5}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-                Rendez-vous confirmé !
-              </h2>
-              <p className="text-gray-700 text-lg font-medium capitalize">
-                {confirmed.dateLabel}
-              </p>
-              <p className="text-gray-500 mt-3">
-                Un email de confirmation vient de vous être envoyé.
-              </p>
-              <a
-                href="/"
-                className="inline-block mt-8 bg-brandSecondary text-white py-3 px-8 rounded-full font-semibold hover:bg-brandSecondary/90 transition"
-              >
-                Retour à l'accueil
-              </a>
-            </div>
-          </section>
-        )}
-      </main>
-
-      {showConfirm && selectedService && selectedFormule && selectedDay && selectedSlot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden">
-            <div className="bg-brandPurple/5 px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-bold text-brandPurple">
-                Confirmer votre réservation
-              </h3>
-            </div>
-            <div className="px-6 py-5 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Service</span>
-                <span className="text-gray-800 font-semibold text-right">
-                  {selectedService.titre}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Date</span>
-                <span className="text-gray-800 font-semibold">
-                  {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
-                  {capitalize(selectedDay.month)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Horaire</span>
-                <span className="text-gray-800 font-semibold">
-                  {selectedSlot.timeLabel}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Durée</span>
-                <span className="text-gray-800 font-semibold">
-                  {selectedFormule.duree} min
-                </span>
-              </div>
-              {selectedFormule.prix ? (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Tarif</span>
-                  <span className="text-brandOrange font-bold">
-                    {selectedFormule.prix} €
-                  </span>
-                </div>
-              ) : null}
-              <div className="flex justify-between">
-                <span className="text-gray-500">Nom</span>
-                <span className="text-gray-800 font-semibold">
-                  {formData.firstName} {formData.lastName}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Email</span>
-                <span className="text-gray-800 font-semibold">
-                  {formData.email}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Rencontre</span>
-                <span className="text-gray-800 font-semibold">
-                  {formData.meetingType}
-                </span>
-              </div>
-              <p className="pt-3 border-t border-gray-100 text-xs text-gray-500 leading-relaxed">
-                En confirmant, j&rsquo;accepte que mes informations soient
-                utilisées pour le traitement de ma demande de rendez-vous,
-                conformément à la{" "}
-                <a
-                  href="/confidentialite"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-brandPurple font-semibold underline hover:text-brandOrange transition"
-                >
-                  politique de confidentialité
-                </a>
-                .
-              </p>
-            </div>
-            <div className="px-6 pb-6 grid gap-3">
-              <button
-                type="button"
-                onClick={doSubmit}
-                disabled={submitting}
-                className="bg-brandOrange text-white py-3.5 rounded-xl font-semibold hover:bg-brandOrange/90 transition disabled:opacity-60"
-              >
-                {submitting
-                  ? "Réservation en cours..."
-                  : "Confirmer la réservation"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowConfirm(false)}
-                disabled={submitting}
-                className="bg-white text-gray-700 py-3.5 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 transition disabled:opacity-60"
-              >
-                Modifier mes informations
-              </button>
+              )}
             </div>
           </div>
-        </div>
-      )}
 
+          <aside className={styles.aside}>
+            <div className={`${styles.card} ${styles.pad}`}>
+              <h3 className={styles.recapTitle}>Votre récapitulatif</h3>
+
+              <dl className={styles.rows}>
+                <Row
+                  icon={<Sparkles size={16} className={styles.iconTerra} />}
+                  label="Service"
+                  value={selectedService?.titre || "Non choisi"}
+                />
+                <Row
+                  icon={<Clock size={16} className={styles.iconSage} />}
+                  label="Durée"
+                  value={selectedFormule ? `${selectedFormule.duree} min` : "—"}
+                />
+                <Row
+                  icon={<Calendar size={16} className={styles.iconSage} />}
+                  label="Date"
+                  value={dateLabel || "Non choisie"}
+                />
+                <Row
+                  icon={<Clock size={16} className={styles.iconSage} />}
+                  label="Heure"
+                  value={selectedSlot?.timeLabel || "Non choisie"}
+                />
+                <Row
+                  icon={<MapPin size={16} className={styles.iconSage} />}
+                  label="Rencontre"
+                  value={formData.meetingType || "À préciser"}
+                />
+              </dl>
+
+              <div className={styles.totalBox}>
+                <span className={styles.totalLabel}>Tarif de la séance</span>
+                <span className={styles.totalValue}>
+                  {selectedFormule?.prix != null
+                    ? `${selectedFormule.prix} €`
+                    : "—"}
+                </span>
+              </div>
+
+              <form className={styles.form} onSubmit={handleSubmit} ref={formRef}>
+                <div className={styles.two}>
+                  <div>
+                    <label className={styles.label} htmlFor="firstName">
+                      Prénom *
+                    </label>
+                    <input
+                      id="firstName"
+                      className={styles.input}
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      autoComplete="given-name"
+                      placeholder="Prénom"
+                    />
+                  </div>
+                  <div>
+                    <label className={styles.label} htmlFor="lastName">
+                      Nom *
+                    </label>
+                    <input
+                      id="lastName"
+                      className={styles.input}
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      autoComplete="family-name"
+                      placeholder="Nom"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="email">
+                    Adresse email *
+                  </label>
+                  <input
+                    id="email"
+                    className={styles.input}
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    autoComplete="email"
+                    placeholder="votre@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="phone">
+                    Téléphone
+                  </label>
+                  <div className={styles.phoneGrid}>
+                    <input
+                      className={styles.input}
+                      type="text"
+                      name="countryCode"
+                      value={formData.countryCode}
+                      onChange={handleChange}
+                      placeholder="+590"
+                      aria-label="Indicatif pays"
+                    />
+                    <input
+                      id="phone"
+                      className={styles.input}
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      autoComplete="tel"
+                      placeholder="Numéro de téléphone"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="meetingType">
+                    Comment vous rencontrer *
+                  </label>
+                  <select
+                    id="meetingType"
+                    className={styles.select}
+                    name="meetingType"
+                    value={formData.meetingType}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="" disabled>
+                      Choisir…
+                    </option>
+                    {meetingModes.map((mode) => (
+                      <option key={mode} value={mode}>
+                        {mode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="profession">
+                    Profession *
+                  </label>
+                  <input
+                    id="profession"
+                    className={styles.input}
+                    type="text"
+                    name="profession"
+                    value={formData.profession}
+                    onChange={handleChange}
+                    required
+                    placeholder="Votre profession"
+                  />
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="suivi">
+                    Suivi psychologique ou psychiatrique en cours *
+                  </label>
+                  <input
+                    id="suivi"
+                    className={styles.input}
+                    type="text"
+                    name="suivi"
+                    value={formData.suivi}
+                    onChange={handleChange}
+                    required
+                    placeholder="Oui / Non / Précisez"
+                  />
+                </div>
+
+                <div>
+                  <label className={styles.label} htmlFor="message">
+                    Informations utiles (optionnel)
+                  </label>
+                  <textarea
+                    id="message"
+                    className={styles.textarea}
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    placeholder="Partagez toute information qui pourrait aider à préparer notre rencontre…"
+                  />
+                </div>
+
+                <label className={styles.check} htmlFor="consent">
+                  <input
+                    id="consent"
+                    type="checkbox"
+                    name="consent"
+                    checked={formData.consent}
+                    onChange={handleChange}
+                    required
+                  />
+                  <span className={styles.checkText}>
+                    <span className={styles.checkIcon}>
+                      <Lock size={13} />
+                    </span>{" "}
+                    J&rsquo;accepte que mes informations soient utilisées pour le
+                    traitement de ma demande, conformément à la{" "}
+                    <a href="/confidentialite" className={styles.checkLink}>
+                      politique de confidentialité
+                    </a>
+                    . *
+                  </span>
+                </label>
+
+                <label className={styles.check} htmlFor="newsletter">
+                  <input
+                    id="newsletter"
+                    type="checkbox"
+                    name="newsletter"
+                    checked={formData.newsletter}
+                    onChange={handleChange}
+                  />
+                  <span className={styles.checkText}>
+                    Je souhaite recevoir la newsletter de Terrasigne (actualités,
+                    conseils bien-être, offres).
+                  </span>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={!selectedSlot || submitting}
+                  className={styles.submit}
+                >
+                  {submitting ? (
+                    "Réservation en cours…"
+                  ) : (
+                    <>
+                      Confirmer la réservation
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+                <p className={styles.submitHint}>
+                  Confirmation immédiate par email · aucune donnée bancaire
+                  demandée.
+                </p>
+              </form>
+            </div>
+          </aside>
+        </div>
+      </main>
       <Footer />
     </>
+  );
+}
+
+function Row({ label, value, icon }) {
+  return (
+    <div className={styles.row}>
+      <dt className={styles.rowLabel}>
+        {icon}
+        {label}
+      </dt>
+      <dd className={styles.rowValue}>{value}</dd>
+    </div>
   );
 }
 

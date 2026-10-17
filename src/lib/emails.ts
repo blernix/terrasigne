@@ -65,7 +65,7 @@ function layout(inner: string): string {
           <tr>
             <td align="center" style="padding:24px 16px 8px;">
               <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
-                TerraSigne — Terre de Bas, Guadeloupe<br>
+                Terrasigne — Terre de Bas, Guadeloupe<br>
                 <a href="https://terrasigne.fr" style="color:${BRAND.purple};text-decoration:none;">terrasigne.fr</a>
               </p>
             </td>
@@ -81,7 +81,7 @@ function layout(inner: string): string {
 function header(badgeText: string): string {
   return `<tr>
   <td style="background:linear-gradient(135deg,${BRAND.purple} 0%,${BRAND.purpleDark} 100%);border-radius:16px 16px 0 0;padding:36px 32px;text-align:center;">
-    <div style="display:inline-block;background-color:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:999px;padding:6px 16px;margin-bottom:16px;">TerraSigne</div>
+    <div style="display:inline-block;background-color:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:999px;padding:6px 16px;margin-bottom:16px;">Terrasigne</div>
     <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:700;line-height:1.3;">${badgeText}</h1>
   </td>
 </tr>`;
@@ -220,7 +220,7 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
   <tr>
     <td style="padding:16px 32px 32px;text-align:center;">
       <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
-        À très bientôt chez TerraSigne.
+        À très bientôt chez Terrasigne.
       </p>
     </td>
   </tr>`;
@@ -479,7 +479,7 @@ export function newsletterConfirmationEmailHtml(
         Bonjour,
       </p>
       <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
-        Merci de vous être inscrit(e) à la newsletter TerraSigne. Pour finaliser votre inscription, merci de confirmer votre adresse email en cliquant sur le bouton ci-dessous :
+        Merci de vous être inscrit(e) à la newsletter Terrasigne. Pour finaliser votre inscription, merci de confirmer votre adresse email en cliquant sur le bouton ci-dessous :
       </p>
     </td>
   </tr>

@@ -33,7 +33,7 @@ export async function sendBrevoEmail({
 
   const senderEmail =
     process.env.BREVO_SENDER_EMAIL || "votre-rendez-vous@terrasigne.fr";
-  const senderName = process.env.BREVO_SENDER_NAME || "TerraSigne";
+  const senderName = process.env.BREVO_SENDER_NAME || "Terrasigne";
 
   const res = await fetch(BREVO_API_URL, {
     method: "POST",
