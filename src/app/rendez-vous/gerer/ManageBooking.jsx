@@ -10,6 +10,13 @@ import {
   buildMonthGrid,
 } from "@/lib/calendar";
 
+const CARD =
+  "bg-white rounded-2xl border border-sand-200 shadow-soft";
+const BTN_PRIMARY =
+  "inline-flex items-center justify-center bg-forest text-cream py-3.5 px-6 rounded-full font-bold hover:bg-forest-700 transition";
+const BTN_ACCENT =
+  "inline-flex items-center justify-center bg-violet text-white py-3.5 px-6 rounded-full font-bold hover:bg-violet/90 transition";
+
 function ManageContent({ token }) {
   const [status, setStatus] = useState("loading");
   const [booking, setBooking] = useState(null);
@@ -154,73 +161,76 @@ function ManageContent({ token }) {
     : availMonths[0];
   const monthIndex = availMonths.indexOf(activeMonth);
 
+  const feedbackBox = feedback && (
+    <div
+      className={`px-5 py-4 text-center font-semibold rounded-xl mb-6 border ${
+        feedback.type === "success"
+          ? "text-forest border-sage-200 bg-sage-100"
+          : "text-[#8c3b34] border-[#eed3ce] bg-[#fbeeec]"
+      }`}
+    >
+      {feedback.text}
+    </div>
+  );
+
   return (
     <>
       <Navbar />
-      <main className="min-h-screen mt-16 bg-[var(--secondary)]">
+      <main className="min-h-screen mt-16 bg-cream">
         <section className="max-w-xl mx-auto px-4 py-12">
           {status === "loading" && (
-            <p className="text-center text-gray-500">Chargement...</p>
+            <p className="text-center text-muted">Chargement…</p>
           )}
 
           {status === "notfound" && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
-              <h1 className="text-2xl font-bold text-gray-800 mb-3">
+            <div className={`${CARD} p-10 text-center`}>
+              <h1 className="font-display text-2xl text-forest-700 mb-3">
                 Rendez-vous introuvable
               </h1>
-              <p className="text-gray-500 mb-6">
+              <p className="text-muted mb-6">
                 Ce lien est invalide ou ce rendez-vous n'existe plus.
               </p>
-              <a
-                href="/rendez-vous"
-                className="inline-block bg-violet text-white py-3 px-6 rounded-full font-semibold hover:bg-violet/90 transition"
-              >
+              <a href="/rendez-vous" className={BTN_ACCENT}>
                 Prendre rendez-vous
               </a>
             </div>
           )}
 
           {status === "cancelled" && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
-              <div className="text-5xl mb-4">🗑️</div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-3">
+            <div className={`${CARD} p-10 text-center`}>
+              <div className="text-4xl mb-4">🗑️</div>
+              <h1 className="font-display text-2xl text-forest-700 mb-3">
                 Rendez-vous annulé
               </h1>
-              <p className="text-gray-500 mb-6">
+              <p className="text-muted mb-6">
                 Votre rendez-vous a bien été annulé. Un email de confirmation
                 vient de vous être envoyé.
               </p>
-              <a
-                href="/rendez-vous"
-                className="inline-block bg-forest text-white py-3 px-6 rounded-full font-semibold hover:bg-forest/90 transition"
-              >
+              <a href="/rendez-vous" className={BTN_PRIMARY}>
                 Prendre un nouveau rendez-vous
               </a>
             </div>
           )}
 
           {status === "rescheduled" && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
-              <div className="text-5xl mb-4">✅</div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-3">
+            <div className={`${CARD} p-10 text-center`}>
+              <div className="text-4xl mb-4">✅</div>
+              <h1 className="font-display text-2xl text-forest-700 mb-3">
                 Rendez-vous modifié
               </h1>
-              <p className="text-gray-700 text-lg font-medium capitalize">
+              <p className="text-ink font-semibold text-lg capitalize">
                 {newDateLabel}
               </p>
-              <p className="text-gray-500 mt-2 mb-6">
+              <p className="text-muted mt-2 mb-6">
                 Un email de confirmation vient de vous être envoyé.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  onClick={loadBooking}
-                  className="inline-block bg-violet text-white py-3 px-6 rounded-full font-semibold hover:bg-violet/90 transition"
-                >
+                <button onClick={loadBooking} className={BTN_ACCENT}>
                   Modifier ou annuler à nouveau
                 </button>
                 <a
                   href="/"
-                  className="inline-block bg-sage text-white py-3 px-6 rounded-full font-semibold hover:bg-sage/90 transition"
+                  className="inline-flex items-center justify-center border border-forest/25 text-forest py-3.5 px-6 rounded-full font-bold hover:bg-sage-100 transition"
                 >
                   Retour à l'accueil
                 </a>
@@ -230,68 +240,55 @@ function ManageContent({ token }) {
 
           {status === "ready" && mode === "view" && booking && (
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
-                Gérer mon <span className="text-forest">rendez-vous</span>
+              <h1 className="font-display text-2xl md:text-3xl text-forest-700 mb-6 text-center">
+                Gérer mon <span className="text-violet">rendez-vous</span>
               </h1>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div className="bg-violet/5 px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-violet">
+              <div className={`${CARD} overflow-hidden mb-6`}>
+                <div className="bg-sage-100 px-6 py-4 border-b border-sand-200">
+                  <h2 className="font-display text-lg text-forest-700">
                     {booking.serviceName}
                   </h2>
                 </div>
                 <div className="px-6 py-5 space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Client</span>
-                    <span className="text-gray-800 font-semibold">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted">Client</span>
+                    <span className="text-ink font-semibold text-right">
                       {booking.clientName}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Date & heure</span>
-                    <span className="text-gray-800 font-semibold capitalize">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted">Date &amp; heure</span>
+                    <span className="text-ink font-semibold capitalize text-right">
                       {dateLabel}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Durée</span>
-                    <span className="text-gray-800 font-semibold">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted">Durée</span>
+                    <span className="text-ink font-semibold">
                       {booking.durationMin} min
                     </span>
                   </div>
                 </div>
               </div>
 
-              {feedback && (
-                <div
-                  className={`p-4 text-center font-medium rounded-xl mb-6 ${
-                    feedback.type === "success"
-                      ? "text-green-800 bg-green-100"
-                      : "text-red-800 bg-red-100"
-                  }`}
-                >
-                  {feedback.text}
-                </div>
-              )}
+              {feedbackBox}
 
               <div className="grid gap-3">
-                <button
-                  onClick={startReschedule}
-                  className="bg-violet text-white py-3.5 rounded-xl font-semibold hover:bg-violet/90 transition"
-                >
+                <button onClick={startReschedule} className={BTN_ACCENT}>
                   Modifier la date ou l'heure
                 </button>
 
                 {!confirmCancel ? (
                   <button
                     onClick={() => setConfirmCancel(true)}
-                    className="text-red-600 border border-red-200 py-3.5 rounded-xl font-semibold hover:bg-red-50 transition"
+                    className="border border-[#eed3ce] text-[#8c3b34] py-3.5 rounded-full font-bold hover:bg-[#fbeeec] transition"
                   >
                     Annuler ce rendez-vous
                   </button>
                 ) : (
-                  <div className="border border-red-200 bg-red-50 rounded-xl p-4">
-                    <p className="text-red-700 text-sm mb-3">
+                  <div className="border border-[#eed3ce] bg-[#fbeeec] rounded-2xl p-4">
+                    <p className="text-[#8c3b34] text-sm mb-3">
                       Êtes-vous sûr de vouloir annuler ce rendez-vous ? Cette
                       action est définitive.
                     </p>
@@ -299,13 +296,13 @@ function ManageContent({ token }) {
                       <button
                         onClick={doCancel}
                         disabled={submitting}
-                        className="flex-1 bg-red-600 text-white py-2.5 rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-60"
+                        className="flex-1 bg-[#8c3b34] text-white py-2.5 rounded-full font-semibold hover:bg-[#74302b] transition disabled:opacity-60"
                       >
-                        {submitting ? "..." : "Oui, annuler"}
+                        {submitting ? "…" : "Oui, annuler"}
                       </button>
                       <button
                         onClick={() => setConfirmCancel(false)}
-                        className="flex-1 bg-white text-gray-700 py-2.5 rounded-lg font-semibold border border-gray-200 hover:bg-gray-50 transition"
+                        className="flex-1 bg-white text-ink-soft py-2.5 rounded-full font-semibold border border-sand-200 hover:bg-sand transition"
                       >
                         Non, garder
                       </button>
@@ -320,46 +317,36 @@ function ManageContent({ token }) {
             <div>
               <button
                 onClick={() => setMode("view")}
-                className="text-violet hover:underline text-sm font-medium mb-6"
+                className="text-violet hover:text-forest transition text-sm font-semibold mb-6"
               >
                 ← Retour
               </button>
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6 text-center">
+              <h2 className="font-display text-xl md:text-2xl text-forest-700 mb-6 text-center">
                 Choisissez une nouvelle date
               </h2>
 
-              {feedback && (
-                <div
-                  className={`p-4 text-center font-medium rounded-xl mb-6 ${
-                    feedback.type === "success"
-                      ? "text-green-800 bg-green-100"
-                      : "text-red-800 bg-red-100"
-                  }`}
-                >
-                  {feedback.text}
-                </div>
-              )}
+              {feedbackBox}
 
               {!selectedDay && availability ? (
                 availMonths.length > 0 ? (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
+                  <div className={`${CARD} p-4 md:p-6`}>
                     <div className="flex items-center justify-between mb-4">
                       <button
                         type="button"
                         onClick={() => setViewMonth(availMonths[monthIndex - 1])}
                         disabled={monthIndex <= 0}
-                        className="w-9 h-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                        className="w-9 h-9 rounded-full border border-sand-200 text-ink-soft hover:bg-sand disabled:opacity-30 disabled:cursor-not-allowed transition"
                       >
                         ‹
                       </button>
-                      <h3 className="font-semibold text-gray-800">
+                      <h3 className="font-semibold text-forest-700 capitalize">
                         {monthLabel(activeMonth)}
                       </h3>
                       <button
                         type="button"
                         onClick={() => setViewMonth(availMonths[monthIndex + 1])}
                         disabled={monthIndex >= availMonths.length - 1}
-                        className="w-9 h-9 rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                        className="w-9 h-9 rounded-full border border-sand-200 text-ink-soft hover:bg-sand disabled:opacity-30 disabled:cursor-not-allowed transition"
                       >
                         ›
                       </button>
@@ -369,7 +356,7 @@ function ManageContent({ token }) {
                       {WEEKDAYS.map((w) => (
                         <div
                           key={w}
-                          className="text-xs font-semibold text-gray-400 uppercase py-1"
+                          className="text-xs font-bold text-muted uppercase py-1"
                         >
                           {w}
                         </div>
@@ -386,14 +373,14 @@ function ManageContent({ token }) {
                                 setSelectedDay(daysByKey[cell.dateKey]);
                                 setSelectedSlot(null);
                               }}
-                              className="aspect-square rounded-lg bg-violet/5 text-violet font-semibold hover:bg-violet hover:text-white transition"
+                              className="aspect-square rounded-xl bg-sage-100 text-forest-700 font-semibold hover:bg-forest hover:text-cream transition"
                             >
                               {cell.day}
                             </button>
                           ) : (
                             <div
                               key={cell.dateKey}
-                              className="aspect-square rounded-lg text-gray-300 flex items-center justify-center"
+                              className="aspect-square rounded-xl text-muted/40 flex items-center justify-center"
                             >
                               {cell.day}
                             </div>
@@ -402,32 +389,32 @@ function ManageContent({ token }) {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-center text-gray-500">
+                  <p className="text-center text-muted">
                     Aucune disponibilité pour le moment.
                   </p>
                 )
               ) : availability ? (
-                <p className="text-center text-gray-500">Chargement...</p>
+                <p className="text-center text-muted">Chargement…</p>
               ) : null}
 
               {selectedDay && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
-                  <div className="flex items-center justify-between mb-4">
+                <div className={`${CARD} p-4 md:p-6`}>
+                  <div className="flex items-center justify-between mb-4 gap-3">
                     <button
                       type="button"
                       onClick={() => setSelectedDay(null)}
-                      className="text-violet hover:underline text-sm"
+                      className="text-violet hover:text-forest transition text-sm font-semibold"
                     >
                       ← Autre date
                     </button>
-                    <span className="text-gray-700 font-medium text-sm capitalize">
+                    <span className="text-ink-soft font-semibold text-sm capitalize">
                       {capitalize(selectedDay.weekday)} {selectedDay.dayNum}{" "}
                       {capitalize(selectedDay.month)}
                     </span>
                   </div>
                   {groupSlots(selectedDay.slots).map((group) => (
                     <div key={group.label} className="mb-5 last:mb-0">
-                      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                      <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
                         {group.label}
                       </h3>
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -436,10 +423,10 @@ function ManageContent({ token }) {
                             key={slot.start}
                             type="button"
                             onClick={() => setSelectedSlot(slot)}
-                            className={`py-3 rounded-xl font-medium transition border ${
+                            className={`py-3 rounded-xl font-semibold transition border ${
                               selectedSlot?.start === slot.start
-                                ? "bg-sage text-white border-sage"
-                                : "bg-gray-50 text-gray-700 border-gray-100 hover:bg-sage hover:text-white hover:border-sage"
+                                ? "bg-forest text-cream border-forest"
+                                : "bg-sand text-ink-soft border-sand-200 hover:border-forest/40"
                             }`}
                           >
                             {slot.timeLabel}
@@ -452,10 +439,10 @@ function ManageContent({ token }) {
                   <button
                     onClick={confirmReschedule}
                     disabled={!selectedSlot || submitting}
-                    className="w-full mt-6 bg-forest text-white py-3.5 rounded-xl font-semibold hover:bg-forest/90 transition disabled:opacity-50"
+                    className="w-full mt-6 bg-forest text-cream py-3.5 rounded-full font-bold hover:bg-forest-700 transition disabled:opacity-50"
                   >
                     {submitting
-                      ? "Modification en cours..."
+                      ? "Modification en cours…"
                       : "Confirmer la nouvelle date"}
                   </button>
                 </div>

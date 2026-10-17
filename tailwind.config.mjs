@@ -33,9 +33,15 @@ const config = {
         sans: ["var(--font-nunito)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-fraunces)", "Georgia", "serif"],
       },
+      // Deux rayons seulement : 12px pour les petits éléments, 16px pour les
+      // cartes, 24px pour les grands blocs. Les boutons restent en pastille.
       borderRadius: {
+        DEFAULT: "0.75rem",
+        lg: "0.75rem",
         xl: "1rem",
-        "4xl": "2rem",
+        "2xl": "1rem",
+        "3xl": "1rem",
+        "4xl": "1.5rem",
       },
       boxShadow: {
         soft: "0 10px 30px -12px rgba(46, 89, 64, 0.2)",
