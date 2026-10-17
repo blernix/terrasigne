@@ -412,7 +412,7 @@ function ManageContent({ token }) {
                       {capitalize(selectedDay.month)}
                     </span>
                   </div>
-                  {groupSlots(selectedDay.slots).map((group) => (
+                  {groupSlots(selectedDay.slots.filter((slot) => !slot.early)).map((group) => (
                     <div key={group.label} className="mb-5 last:mb-0">
                       <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
                         {group.label}

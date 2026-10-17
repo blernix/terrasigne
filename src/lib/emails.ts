@@ -118,6 +118,7 @@ export interface BookingEmailParams {
   dateLabel: string;
   durationMin: number;
   price?: number | null;
+  supplement?: number | null;
   timezoneLabel?: string;
   manageUrl?: string;
   pdfNote?: boolean;
@@ -125,13 +126,18 @@ export interface BookingEmailParams {
 }
 
 export function bookingConfirmationEmailHtml(params: BookingEmailParams): string {
-  const { name, service, dateLabel, durationMin, price, timezoneLabel, manageUrl, pdfNote, zoomLink } = params;
+  const { name, service, dateLabel, durationMin, price, supplement, timezoneLabel, manageUrl, pdfNote, zoomLink } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
     { label: "Durée", value: `${durationMin} min` },
   ];
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
+  if (supplement)
+    rows.push({
+      label: "Créneau anticipé (+1 h)",
+      value: `+${supplement} € (à régler sur place, non facturé)`,
+    });
 
   const manageBlock = manageUrl
     ? `<tr>
@@ -317,6 +323,7 @@ export interface OwnerNotificationEmailParams {
   service: string;
   dateLabel: string;
   price?: number | null;
+  supplement?: number | null;
   message?: string;
   zoomLink?: string;
 }
@@ -335,6 +342,7 @@ export function ownerNotificationEmailHtml(
     service,
     dateLabel,
     price,
+    supplement,
     message,
     zoomLink,
   } = params;
@@ -352,6 +360,11 @@ export function ownerNotificationEmailHtml(
   if (typeSeance)
     rows.push({ label: "Type de séance", value: escapeHtml(typeSeance) });
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
+  if (supplement)
+    rows.push({
+      label: "Créneau anticipé (+1 h)",
+      value: `+${supplement} € à encaisser sur place`,
+    });
 
   const messageHtml = message
     ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f0f6eb;border-left:4px solid ${BRAND.accent};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Message du client :</strong><br>${escapeHtml(message)}</td></tr></table></td></tr>`

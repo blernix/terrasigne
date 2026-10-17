@@ -727,6 +727,11 @@ function BookingContent({ targetServiceId }) {
                 <h2 className={styles.stepTitle}>Choisissez un horaire</h2>
               </div>
 
+              <p className={styles.calHint}>
+                Un créneau marqué +20 € commence 1 h avant l&rsquo;ouverture
+                habituelle (supplément réglé sur place).
+              </p>
+
               {!selectedDay ? (
                 <p className={styles.placeholder}>
                   Sélectionnez une date pour voir les horaires disponibles.
@@ -749,6 +754,9 @@ function BookingContent({ targetServiceId }) {
                             }`}
                           >
                             {slot.timeLabel}
+                            {slot.early && (
+                              <span className={styles.slotBadge}>+20 €</span>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -784,6 +792,13 @@ function BookingContent({ targetServiceId }) {
                   label="Heure"
                   value={selectedSlot?.timeLabel || "Non choisie"}
                 />
+                {selectedSlot?.early && (
+                  <Row
+                    icon={<Sparkles size={16} className={styles.iconTerra} />}
+                    label="Créneau anticipé"
+                    value="+20 € (à régler sur place)"
+                  />
+                )}
                 <Row
                   icon={<MapPin size={16} className={styles.iconSage} />}
                   label="Rencontre"

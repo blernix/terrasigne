@@ -402,6 +402,15 @@
   border-color: var(--rv-sage);
 }
 
+.slotBadge {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--rv-violet);
+}
+
 .aside {
   align-self: start;
 }

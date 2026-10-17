@@ -1,6 +1,10 @@
 import { google } from "googleapis";
 import path from "path";
 import { randomUUID } from "crypto";
+import {
+  EARLY_SLOT_MIN_BEFORE,
+  EARLY_SLOT_SUPPLEMENT,
+} from "@/lib/bookingOptions";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const OPEN_MARKER = "dispo";
@@ -71,6 +75,8 @@ export async function listEvents(
 export interface Slot {
   start: Date;
   end: Date;
+  /** Créneau proposé avant l'ouverture, avec supplément. */
+  early?: boolean;
 }
 
 function splitWindowIntoSlots(
@@ -113,13 +119,30 @@ export async function getAvailability(
     const end = new Date(w.end);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) continue;
     slots.push(...splitWindowIntoSlots(start, end, durationMin));
+
+    // Créneaux anticipés : ils commencent avant l'ouverture de la plage et
+    // débordent dedans, d'où le +20 €. On ne remonte jamais plus d'une heure.
+    for (let m = EARLY_SLOT_MIN_BEFORE; m >= SLOT_STEP_MIN; m -= SLOT_STEP_MIN) {
+      const s = new Date(start.getTime() - m * 60000);
+      const e = new Date(s.getTime() + durationMin * 60000);
+      if (e.getTime() <= start.getTime()) continue;
+      slots.push({ start: s, end: e, early: true });
+    }
   }
 
   const now = Date.now();
   const minStart = now + MIN_LEAD_HOURS * 3600000;
   const maxStart = now + MAX_AHEAD_DAYS * 86400000;
 
-  return slots.filter(
+  const seen = new Set<number>();
+  const unique = slots.filter((slot) => {
+    const key = slot.start.getTime();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const free = unique.filter(
     (slot) =>
       slot.start.getTime() >= minStart &&
       slot.start.getTime() <= maxStart &&
@@ -132,6 +155,10 @@ export async function getAvailability(
         return overlaps(slot, bs, new Date(be.getTime() + pauseMs));
       })
   );
+
+  // Les creneaux anticipes sont ajoutes apres la plage : on retrie pour
+  // garder un affichage chronologique.
+  return free.sort((a, b) => a.start.getTime() - b.start.getTime());
 }
 
 export interface BookingInput {
@@ -142,6 +169,7 @@ export interface BookingInput {
   prix?: number | null;
   bookingToken?: string;
   pdf?: { url: string; name: string } | null;
+  supplement?: number;
   consentAt?: string;
   zoomLink?: string;
   start: Date;
@@ -166,6 +194,9 @@ export async function createBookingEvent(input: BookingInput) {
   const description = [
     `Service : ${input.serviceName}`,
     input.prix ? `Prix : ${input.prix} €` : null,
+    input.supplement
+      ? `Supplément créneau anticipé (+${EARLY_SLOT_MIN_BEFORE / 60} h) : ${input.supplement} € (à régler sur place, non facturé)`
+      : null,
     `Client : ${input.client.name}`,
     `Email : ${input.client.email}`,
     input.client.phone ? `Téléphone : ${input.client.phone}` : null,
@@ -204,6 +235,7 @@ export async function createBookingEvent(input: BookingInput) {
           serviceId: input.serviceId || "",
           durationMin: String(input.durationMin || 0),
           pauseMin: String(input.pauseMin || 0),
+          supplement: String(input.supplement || 0),
           clientEmail: input.client.email,
           clientName: input.client.name,
           serviceName: input.serviceName,
@@ -401,3 +433,30 @@ export async function rescheduleBooking(
     end: newEnd.toISOString(),
   };
 }
+
+/**
+ * Vérifie qu'un créneau demandé correspond bien à une plage ouverte de l'agenda,
+ * ou à sa marge anticipée (EARLY_SLOT_MIN_BEFORE, avec supplément).
+ * Sans ce contrôle, l'API acceptait n'importe quelle heure libre du calendrier.
+ */
+export async function getSlotAllowance(
+  start: Date,
+  end: Date
+): Promise<{ allowed: boolean; early: boolean }> {
+  const lookback = new Date(start.getTime() - 24 * 3600000);
+  const events = await listEvents(lookback, end);
+  const windows = events.filter((e) => isOpenWindow(e.summary));
+
+  for (const w of windows) {
+    const ws = new Date(w.start);
+    const we = new Date(w.end);
+    if (Number.isNaN(ws.getTime()) || Number.isNaN(we.getTime())) continue;
+    const earliest = ws.getTime() - EARLY_SLOT_MIN_BEFORE * 60000;
+    if (start.getTime() >= earliest && end.getTime() <= we.getTime()) {
+      return { allowed: true, early: start.getTime() < ws.getTime() };
+    }
+  }
+  return { allowed: false, early: false };
+}
+
+export { EARLY_SLOT_SUPPLEMENT };

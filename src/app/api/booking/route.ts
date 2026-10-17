@@ -3,10 +3,12 @@ import { fetchService, getDirectusFileUrl } from "@/lib/directus";
 import {
   createBookingEvent,
   isSlotFree,
+  getSlotAllowance,
   BUSINESS_TIMEZONE,
   MIN_LEAD_HOURS,
   MAX_AHEAD_DAYS,
 } from "@/lib/googleCalendar";
+import { EARLY_SLOT_SUPPLEMENT } from "@/lib/bookingOptions";
 import { sendBrevoEmail, addContactToList } from "@/lib/brevo";
 import { sendNewsletterConfirmation, getRequestOrigin } from "@/lib/newsletter";
 import {
@@ -118,6 +120,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // Le créneau doit tomber dans une plage ouverte de l'agenda, ou dans sa
+    // marge anticipée (+1 h, supplément de 20 €).
+    const allowance = await getSlotAllowance(startDate, endDate);
+    if (!allowance.allowed) {
+      return NextResponse.json(
+        { message: "Ce créneau n'est pas proposé à la réservation." },
+        { status: 400 }
+      );
+    }
+    const supplement = allowance.early ? EARLY_SLOT_SUPPLEMENT : 0;
+
     const minStart = Date.now() + MIN_LEAD_HOURS * 3600000;
     const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
 
@@ -157,6 +170,7 @@ export async function POST(req: Request) {
       pauseMin: pause,
       prix,
       pdf,
+      supplement,
       bookingToken,
       consentAt,
       zoomLink,
@@ -193,6 +207,7 @@ export async function POST(req: Request) {
         manageUrl,
         pdfNote: Boolean(pdf),
         zoomLink,
+        supplement,
       }),
       attachments: pdf ? [{ url: pdf.url, name: pdf.name }] : undefined,
     });
@@ -213,6 +228,7 @@ export async function POST(req: Request) {
           suivi,
           typeSeance,
           price: prix,
+          supplement,
           message,
           zoomLink,
         }),

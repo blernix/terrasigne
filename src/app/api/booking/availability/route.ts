@@ -5,6 +5,7 @@ import {
   MIN_LEAD_HOURS,
   MAX_AHEAD_DAYS,
 } from "@/lib/googleCalendar";
+import { EARLY_SLOT_SUPPLEMENT } from "@/lib/bookingOptions";
 import {
   resolveTimezone,
   dateKeyInTimezone,
@@ -88,6 +89,8 @@ export async function GET(req: Request) {
         start: slot.start.toISOString(),
         end: slot.end.toISOString(),
         timeLabel: timeFmt.format(d),
+        early: Boolean(slot.early),
+        supplement: slot.early ? EARLY_SLOT_SUPPLEMENT : 0,
       });
     }
 
