@@ -49,7 +49,7 @@ export default function FeaturedArticles({ articles }: { articles: Article[] }) 
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
                     {stripHtml(article.contenu).slice(0, 120)}…
                   </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-terra">
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-violet">
                     Lire l&rsquo;article
                     <ArrowRight size={15} />
                   </span>

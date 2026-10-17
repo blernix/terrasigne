@@ -92,7 +92,7 @@ export default async function ServicesPage() {
               </span>
               <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
                 Mes services de{" "}
-                <span className="italic text-terra">bien-être</span> en
+                <span className="italic text-violet">bien-être</span> en
                 Guadeloupe
               </h1>
               <p className="mx-auto mt-6 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
@@ -104,7 +104,7 @@ export default async function ServicesPage() {
                 Laisse toi guider, je te propose d&rsquo;évaluer la pratique qui
                 te convient.
               </p>
-              <Link href="/contact" className="btn btn-terra mt-8">
+              <Link href="/contact" className="btn btn-violet mt-8">
                 <Phone size={17} />
                 Rendez-vous conseil gratuit
               </Link>

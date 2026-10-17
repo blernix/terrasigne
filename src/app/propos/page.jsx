@@ -55,7 +55,7 @@ export default function Propos() {
             <span className="eyebrow">À propos</span>
             <h1 className="mt-4 font-display text-4xl font-semibold leading-tight text-forest md:text-5xl">
               À la découverte de{" "}
-              <span className="italic text-terra">Cindy</span>, praticienne
+              <span className="italic text-violet">Cindy</span>, praticienne
               bien-être en Guadeloupe
             </h1>
           </header>
@@ -251,7 +251,7 @@ export default function Propos() {
           </section>
 
           {/* Citation avec photo */}
-          <section className="mt-20 overflow-hidden rounded-4xl bg-terra text-white shadow-soft">
+          <section className="mt-20 overflow-hidden rounded-4xl bg-violet text-white shadow-soft">
             <div className="flex flex-col items-center md:flex-row">
               <img
                 src="/images/photoCitation.jpeg"

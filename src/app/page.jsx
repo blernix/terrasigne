@@ -38,7 +38,7 @@ export default async function Page() {
 
         <section className="section bg-cream">
           <div className="container-soft mx-auto max-w-3xl text-center">
-            <span className="font-display text-4xl text-terra">&ldquo;</span>
+            <span className="font-display text-4xl text-violet">&ldquo;</span>
             <p className="font-display text-xl italic leading-relaxed text-forest md:text-2xl">
               La satisfaction intérieure est en vérité ce que nous pouvons espérer
               de plus grand.

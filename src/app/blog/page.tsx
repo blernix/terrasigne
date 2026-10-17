@@ -69,7 +69,7 @@ export default async function BlogPage() {
             <div className="text-center lg:text-left">
               <span className="eyebrow !bg-cream/15 !text-cream">Le journal</span>
               <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
-                Blog <span className="italic text-terra">Terrasigne</span> :
+                Blog <span className="italic text-violet">Terrasigne</span> :
                 bien-être &amp; équilibre intérieur
               </h1>
               <p className="mx-auto mt-6 max-w-xl leading-relaxed text-cream/85 lg:mx-0">

@@ -1,18 +1,18 @@
 .theme {
-  --rv-cream: #fbf7f0;
-  --rv-sand: #f2e8d8;
-  --rv-sand-200: #e9dcc6;
-  --rv-ink: #22302a;
-  --rv-ink-soft: #4c5b52;
-  --rv-muted: #7c8a80;
-  --rv-forest: #1f4a3f;
-  --rv-forest-700: #193d34;
-  --rv-forest-50: #eef4f0;
-  --rv-sage: #6e9c86;
-  --rv-sage-100: #e3ede6;
-  --rv-sage-200: #d2e2d7;
-  --rv-terra: #c97b5a;
-  --rv-terra-100: #f6e1d5;
+  --rv-cream: #f8fbf5;
+  --rv-sand: #eef5e9;
+  --rv-sand-200: #ddebd7;
+  --rv-ink: #1f2a24;
+  --rv-ink-soft: #45534b;
+  --rv-muted: #66706a;
+  --rv-forest: #2e5940;
+  --rv-forest-700: #234530;
+  --rv-forest-50: #f0f6eb;
+  --rv-sage: #79a97d;
+  --rv-sage-100: #e5f1df;
+  --rv-sage-200: #cde4c6;
+  --rv-violet: #6e5498;
+  --rv-violet-100: #efebf7;
   --rv-gold: #d9a441;
 
   min-height: 100vh;
@@ -58,7 +58,7 @@
 }
 
 .titleAccent {
-  color: var(--rv-terra);
+  color: var(--rv-violet);
   font-style: italic;
 }
 
@@ -169,7 +169,7 @@
   background: var(--rv-forest);
   color: var(--rv-cream);
   border-color: var(--rv-forest);
-  box-shadow: 0 10px 22px rgba(31, 74, 63, 0.18);
+  box-shadow: 0 10px 22px rgba(46, 89, 64, 0.2);
 }
 
 .serviceName {
@@ -232,9 +232,9 @@
 }
 
 .durBtnActive {
-  background: var(--rv-terra);
+  background: var(--rv-violet);
   color: #ffffff;
-  border-color: var(--rv-terra);
+  border-color: var(--rv-violet);
   box-shadow: 0 8px 18px rgba(201, 123, 90, 0.28);
 }
 
@@ -334,7 +334,7 @@
 }
 
 .dayActive {
-  background: var(--rv-terra);
+  background: var(--rv-violet);
   color: #ffffff;
   box-shadow: 0 6px 14px rgba(201, 123, 90, 0.3);
 }
@@ -447,7 +447,7 @@
 }
 
 .iconTerra {
-  color: var(--rv-terra);
+  color: var(--rv-violet);
   flex-shrink: 0;
 }
 

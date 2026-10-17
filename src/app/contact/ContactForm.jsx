@@ -94,7 +94,7 @@ export default function ContactForm() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow">Prenons contact</span>
             <h1 className="mt-4 font-display text-4xl font-semibold text-forest md:text-5xl">
-              Contactez <span className="italic text-terra">Cindy</span>,
+              Contactez <span className="italic text-violet">Cindy</span>,
               praticienne bien-être en Guadeloupe
             </h1>
             <p className="mt-4 text-ink-soft">
@@ -299,7 +299,7 @@ export default function ContactForm() {
 
               <a
                 href="/rendez-vous"
-                className="btn btn-terra mt-8 w-full"
+                className="btn btn-violet mt-8 w-full"
               >
                 <MessageCircle size={17} />
                 Prendre rendez-vous en ligne

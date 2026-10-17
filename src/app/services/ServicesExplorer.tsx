@@ -171,7 +171,7 @@ export default function ServicesExplorer({
                             {svc.titre}
                           </h3>
 
-                          <p className="mt-2 text-center font-display text-xl font-semibold text-terra">
+                          <p className="mt-2 text-center font-display text-xl font-semibold text-violet">
                             {svc.prix ? `${svc.prix} €` : ""}
                           </p>
 

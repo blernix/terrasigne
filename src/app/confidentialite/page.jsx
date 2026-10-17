@@ -17,7 +17,7 @@ export default function Confidentialite() {
         <div className="container-soft max-w-3xl">
           <span className="eyebrow">Mentions légales</span>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-forest md:text-4xl">
-            Politique de <span className="italic text-terra">confidentialité</span>
+            Politique de <span className="italic text-violet">confidentialité</span>
           </h1>
 
           <p className="mt-4 text-sm text-muted">

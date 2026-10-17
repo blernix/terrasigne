@@ -128,7 +128,7 @@ export default async function ServiceDetail({
                 </span>
               ) : null}
               {service.prix ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-terra-100 px-3 py-1 font-semibold text-forest">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 font-semibold text-forest">
                   {service.prix} €
                 </span>
               ) : null}

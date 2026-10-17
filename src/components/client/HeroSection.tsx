@@ -32,7 +32,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
         </span>
 
         <h1 className="mt-6 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
-          Bienvenue sur <span className="italic text-terra">Terrasigne</span>,
+          Bienvenue sur <span className="italic text-violet">Terrasigne</span>,
           votre espace bien-être en Guadeloupe
         </h1>
 
@@ -41,7 +41,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
         </p>
 
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/rendez-vous" className="btn btn-terra">
+          <Link href="/rendez-vous" className="btn btn-violet">
             <Calendar size={18} />
             Prendre rendez-vous
           </Link>

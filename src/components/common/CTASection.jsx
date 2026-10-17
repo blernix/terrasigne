@@ -81,7 +81,7 @@ export default function CTASection({ title, description }) {
             <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-cream/80">
               {description}
             </p>
-            <button className="btn btn-terra mt-8" onClick={() => setShowModal(true)}>
+            <button className="btn btn-violet mt-8" onClick={() => setShowModal(true)}>
               S&rsquo;abonner à la newsletter
             </button>
           </div>

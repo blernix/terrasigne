@@ -22,7 +22,7 @@ export default function Navbar() {
   const linkClass = (href) =>
     `text-sm font-semibold transition rounded px-0.5 ${
       pathname === href
-        ? "text-terra"
+        ? "text-violet"
         : "text-ink-soft hover:text-forest"
     }`;
 

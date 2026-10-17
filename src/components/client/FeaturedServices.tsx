@@ -47,7 +47,7 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
                     ? stripHtml(service.description).substring(0, 160) + "…"
                     : stripHtml(service.description)}
                 </p>
-                <p className="mt-5 font-display text-2xl font-semibold text-terra">
+                <p className="mt-5 font-display text-2xl font-semibold text-violet">
                   {service.prix ? `${service.prix} €` : ""}
                 </p>
                 <Link

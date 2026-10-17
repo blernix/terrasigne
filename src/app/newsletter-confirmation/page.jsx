@@ -17,7 +17,7 @@ export default async function NewsletterConfirmation({ searchParams }) {
         <div className="card w-full max-w-md p-10 text-center">
           <span
             className={`mx-auto grid h-16 w-16 place-items-center rounded-full ${
-              ok ? "bg-sage-100 text-forest" : "bg-terra-100 text-terra"
+              ok ? "bg-sage-100 text-forest" : "bg-violet-100 text-violet"
             }`}
           >
             {ok ? <Check size={30} /> : <X size={30} />}

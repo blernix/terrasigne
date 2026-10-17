@@ -3,29 +3,27 @@
 @tailwind utilities;
 
 :root {
-  /* DA bien-être : crème, vert forêt, sauge, terre cuite */
-  --cream: #fbf7f0;
-  --sand: #f2e8d8;
-  --sand-200: #e9dcc6;
-  --ink: #22302a;
-  --ink-soft: #4c5b52;
-  --muted: #7c8a80;
-  --forest: #1f4a3f;
-  --forest-700: #193d34;
-  --forest-50: #eef4f0;
-  --sage: #6e9c86;
-  --sage-100: #e3ede6;
-  --sage-200: #d2e2d7;
-  --teal: #2e7d74;
-  --terra: #c97b5a;
-  --terra-100: #f6e1d5;
-  --gold: #d9a441;
+  /* DA : vert clair dominant (nature), violet (spiritualité), neutres chauds */
+  --cream: #f8fbf5;
+  --sand: #eef5e9;
+  --sand-200: #ddebd7;
+  --ink: #1f2a24;
+  --ink-soft: #45534b;
+  --muted: #66706a;
+  --forest: #2e5940;
+  --forest-700: #234530;
+  --forest-50: #f0f6eb;
+  --sage: #79a97d;
+  --sage-100: #e5f1df;
+  --sage-200: #cde4c6;
+  --violet: #6e5498;
+  --violet-100: #efebf7;
 
   --background: var(--cream);
   --foreground: var(--ink);
   --primary: var(--forest);
   --secondary: var(--forest-50);
-  --accent: var(--terra);
+  --accent: var(--violet);
   --highlight: var(--sage-200);
 }
 
@@ -53,8 +51,8 @@ body {
   .btn-primary {
     @apply bg-forest text-cream shadow-lg shadow-forest/20 hover:bg-forest-700 hover:-translate-y-0.5;
   }
-  .btn-terra {
-    @apply bg-terra text-white shadow-lg shadow-terra/25 hover:brightness-105 hover:-translate-y-0.5;
+  .btn-violet {
+    @apply bg-violet text-white shadow-lg shadow-violet/25 hover:brightness-105 hover:-translate-y-0.5;
   }
   .btn-ghost {
     @apply border border-forest/20 bg-white/70 text-forest hover:bg-white hover:border-forest/40;
@@ -84,7 +82,7 @@ body {
   }
 
   .link-underline {
-    @apply font-semibold text-forest underline decoration-sage/50 underline-offset-2 transition hover:text-terra hover:decoration-terra;
+    @apply font-semibold text-forest underline decoration-sage/50 underline-offset-2 transition hover:text-violet hover:decoration-violet;
   }
 }
 
@@ -467,7 +465,7 @@ body {
   text-indent: 0 !important;
 }
 .service-richtext a {
-  color: var(--terra) !important;
+  color: var(--violet) !important;
   text-decoration: underline !important;
   font-weight: 600;
 }

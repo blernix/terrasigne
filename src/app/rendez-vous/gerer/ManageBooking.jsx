@@ -173,7 +173,7 @@ function ManageContent({ token }) {
               </p>
               <a
                 href="/rendez-vous"
-                className="inline-block bg-brandPurple text-white py-3 px-6 rounded-full font-semibold hover:bg-brandPurple/90 transition"
+                className="inline-block bg-violet text-white py-3 px-6 rounded-full font-semibold hover:bg-violet/90 transition"
               >
                 Prendre rendez-vous
               </a>
@@ -192,7 +192,7 @@ function ManageContent({ token }) {
               </p>
               <a
                 href="/rendez-vous"
-                className="inline-block bg-brandOrange text-white py-3 px-6 rounded-full font-semibold hover:bg-brandOrange/90 transition"
+                className="inline-block bg-forest text-white py-3 px-6 rounded-full font-semibold hover:bg-forest/90 transition"
               >
                 Prendre un nouveau rendez-vous
               </a>
@@ -214,13 +214,13 @@ function ManageContent({ token }) {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={loadBooking}
-                  className="inline-block bg-brandPurple text-white py-3 px-6 rounded-full font-semibold hover:bg-brandPurple/90 transition"
+                  className="inline-block bg-violet text-white py-3 px-6 rounded-full font-semibold hover:bg-violet/90 transition"
                 >
                   Modifier ou annuler à nouveau
                 </button>
                 <a
                   href="/"
-                  className="inline-block bg-brandSecondary text-white py-3 px-6 rounded-full font-semibold hover:bg-brandSecondary/90 transition"
+                  className="inline-block bg-sage text-white py-3 px-6 rounded-full font-semibold hover:bg-sage/90 transition"
                 >
                   Retour à l'accueil
                 </a>
@@ -231,12 +231,12 @@ function ManageContent({ token }) {
           {status === "ready" && mode === "view" && booking && (
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
-                Gérer mon <span className="text-brandOrange">rendez-vous</span>
+                Gérer mon <span className="text-forest">rendez-vous</span>
               </h1>
 
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-                <div className="bg-brandPurple/5 px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-brandPurple">
+                <div className="bg-violet/5 px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-lg font-bold text-violet">
                     {booking.serviceName}
                   </h2>
                 </div>
@@ -277,7 +277,7 @@ function ManageContent({ token }) {
               <div className="grid gap-3">
                 <button
                   onClick={startReschedule}
-                  className="bg-brandPurple text-white py-3.5 rounded-xl font-semibold hover:bg-brandPurple/90 transition"
+                  className="bg-violet text-white py-3.5 rounded-xl font-semibold hover:bg-violet/90 transition"
                 >
                   Modifier la date ou l'heure
                 </button>
@@ -320,7 +320,7 @@ function ManageContent({ token }) {
             <div>
               <button
                 onClick={() => setMode("view")}
-                className="text-brandPurple hover:underline text-sm font-medium mb-6"
+                className="text-violet hover:underline text-sm font-medium mb-6"
               >
                 ← Retour
               </button>
@@ -386,7 +386,7 @@ function ManageContent({ token }) {
                                 setSelectedDay(daysByKey[cell.dateKey]);
                                 setSelectedSlot(null);
                               }}
-                              className="aspect-square rounded-lg bg-brandPurple/5 text-brandPurple font-semibold hover:bg-brandPurple hover:text-white transition"
+                              className="aspect-square rounded-lg bg-violet/5 text-violet font-semibold hover:bg-violet hover:text-white transition"
                             >
                               {cell.day}
                             </button>
@@ -416,7 +416,7 @@ function ManageContent({ token }) {
                     <button
                       type="button"
                       onClick={() => setSelectedDay(null)}
-                      className="text-brandPurple hover:underline text-sm"
+                      className="text-violet hover:underline text-sm"
                     >
                       ← Autre date
                     </button>
@@ -438,8 +438,8 @@ function ManageContent({ token }) {
                             onClick={() => setSelectedSlot(slot)}
                             className={`py-3 rounded-xl font-medium transition border ${
                               selectedSlot?.start === slot.start
-                                ? "bg-brandSecondary text-white border-brandSecondary"
-                                : "bg-gray-50 text-gray-700 border-gray-100 hover:bg-brandSecondary hover:text-white hover:border-brandSecondary"
+                                ? "bg-sage text-white border-sage"
+                                : "bg-gray-50 text-gray-700 border-gray-100 hover:bg-sage hover:text-white hover:border-sage"
                             }`}
                           >
                             {slot.timeLabel}
@@ -452,7 +452,7 @@ function ManageContent({ token }) {
                   <button
                     onClick={confirmReschedule}
                     disabled={!selectedSlot || submitting}
-                    className="w-full mt-6 bg-brandOrange text-white py-3.5 rounded-xl font-semibold hover:bg-brandOrange/90 transition disabled:opacity-50"
+                    className="w-full mt-6 bg-forest text-white py-3.5 rounded-xl font-semibold hover:bg-forest/90 transition disabled:opacity-50"
                   >
                     {submitting
                       ? "Modification en cours..."
