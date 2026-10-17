@@ -32,7 +32,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
         </span>
 
         <h1 className="mt-6 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
-          Bienvenue sur <span className="italic text-violet">Terrasigne</span>,
+          Bienvenue sur <span className="italic">Terrasigne</span>,
           votre espace bien-être en Guadeloupe
         </h1>
 
