@@ -115,7 +115,7 @@ export default function BlogExplorer({
               onClick={() => setSelectedCategory("")}
               className={`rounded-full px-4 py-2 text-sm font-bold transition ${
                 selectedCategory === ""
-                  ? "bg-forest text-cream"
+                  ? "bg-mint text-forest"
                   : "border border-sand-200 bg-white text-ink-soft hover:border-sage"
               }`}
             >
@@ -127,7 +127,7 @@ export default function BlogExplorer({
                 onClick={() => setSelectedCategory(cat.titre)}
                 className={`rounded-full px-4 py-2 text-sm font-bold transition ${
                   selectedCategory === cat.titre
-                    ? "bg-forest text-cream"
+                    ? "bg-mint text-forest"
                     : "border border-sand-200 bg-white text-ink-soft hover:border-sage"
                 }`}
               >
@@ -204,7 +204,7 @@ export default function BlogExplorer({
                 onClick={() => setPaginationPage(page)}
                 className={`mx-1 h-10 w-10 rounded-full text-sm font-bold transition ${
                   paginationPage === page
-                    ? "bg-forest text-cream"
+                    ? "bg-mint text-forest"
                     : "border border-sand-200 bg-white text-ink-soft hover:border-sage"
                 }`}
               >

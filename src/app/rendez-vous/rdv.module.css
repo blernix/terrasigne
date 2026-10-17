@@ -11,6 +11,7 @@
   --rv-sage: #79a97d;
   --rv-sage-100: #e5f1df;
   --rv-sage-200: #cde4c6;
+  --rv-mint: #def1e4;
   --rv-violet: #6e5498;
   --rv-violet-100: #efebf7;
   --rv-gold: #d9a441;
@@ -125,13 +126,13 @@
 }
 
 .stepNumActive {
-  background: var(--rv-forest);
-  color: var(--rv-cream);
+  background: var(--rv-mint);
+  color: var(--rv-forest);
 }
 
 .stepNumDone {
-  background: var(--rv-sage);
-  color: #ffffff;
+  background: var(--rv-sage-200);
+  color: var(--rv-forest);
 }
 
 .stepTitle {
@@ -166,10 +167,10 @@
 }
 
 .serviceBtnActive {
-  background: var(--rv-forest);
-  color: var(--rv-cream);
-  border-color: var(--rv-forest);
-  box-shadow: 0 10px 22px rgba(46, 89, 64, 0.2);
+  background: var(--rv-mint);
+  color: var(--rv-forest);
+  border-color: var(--rv-sage);
+  box-shadow: 0 6px 16px rgba(46, 89, 64, 0.12);
 }
 
 .serviceName {
@@ -396,9 +397,9 @@
 }
 
 .slotActive {
-  background: var(--rv-forest);
-  color: var(--rv-cream);
-  border-color: var(--rv-forest);
+  background: var(--rv-mint);
+  color: var(--rv-forest);
+  border-color: var(--rv-sage);
 }
 
 .aside {
@@ -595,16 +596,16 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: var(--rv-forest);
-  color: var(--rv-cream);
-  border: none;
+  background: var(--rv-mint);
+  color: var(--rv-forest);
+  border: 1px solid rgba(46, 89, 64, 0.25);
   border-radius: 999px;
   padding: 1rem 1.5rem;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   transition: 0.2s;
-  box-shadow: 0 10px 24px rgba(31, 74, 63, 0.2);
+  box-shadow: 0 6px 18px rgba(46, 89, 64, 0.12);
 }
 
 .submit:hover:not(:disabled) {
@@ -697,7 +698,7 @@
 .btnPrimary {
   background: var(--rv-forest);
   color: var(--rv-cream);
-  box-shadow: 0 10px 24px rgba(31, 74, 63, 0.2);
+  box-shadow: 0 6px 18px rgba(46, 89, 64, 0.12);
 }
 
 .btnPrimary:hover {

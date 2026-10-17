@@ -13,7 +13,7 @@ import {
 const CARD =
   "bg-white rounded-2xl border border-sand-200 shadow-soft";
 const BTN_PRIMARY =
-  "inline-flex items-center justify-center bg-forest text-cream py-3.5 px-6 rounded-full font-bold hover:bg-forest-700 transition";
+  "inline-flex items-center justify-center bg-mint text-forest border border-forest/25 py-3.5 px-6 rounded-full font-bold hover:bg-sage-200 transition";
 const BTN_ACCENT =
   "inline-flex items-center justify-center bg-violet text-white py-3.5 px-6 rounded-full font-bold hover:bg-violet/90 transition";
 
@@ -373,7 +373,7 @@ function ManageContent({ token }) {
                                 setSelectedDay(daysByKey[cell.dateKey]);
                                 setSelectedSlot(null);
                               }}
-                              className="aspect-square rounded-xl bg-sage-100 text-forest-700 font-semibold hover:bg-forest hover:text-cream transition"
+                              className="aspect-square rounded-xl bg-sage-100 text-forest-700 font-semibold hover:bg-sage-200 transition"
                             >
                               {cell.day}
                             </button>
@@ -425,7 +425,7 @@ function ManageContent({ token }) {
                             onClick={() => setSelectedSlot(slot)}
                             className={`py-3 rounded-xl font-semibold transition border ${
                               selectedSlot?.start === slot.start
-                                ? "bg-forest text-cream border-forest"
+                                ? "bg-mint text-forest border-sage"
                                 : "bg-sand text-ink-soft border-sand-200 hover:border-forest/40"
                             }`}
                           >
@@ -439,7 +439,7 @@ function ManageContent({ token }) {
                   <button
                     onClick={confirmReschedule}
                     disabled={!selectedSlot || submitting}
-                    className="w-full mt-6 bg-forest text-cream py-3.5 rounded-full font-bold hover:bg-forest-700 transition disabled:opacity-50"
+                    className="w-full mt-6 bg-mint text-forest border border-forest/25 py-3.5 rounded-full font-bold hover:bg-sage-200 transition disabled:opacity-50"
                   >
                     {submitting
                       ? "Modification en cours…"
