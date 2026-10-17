@@ -18,6 +18,16 @@ import { getRequestOrigin } from "@/lib/newsletter";
 export async function POST(req: Request) {
   try {
     const { token, start, end } = await req.json();
+
+    // Préprod (terra.killian-lecrut.com) : aucune écriture réelle — ni agenda,
+    // ni email — tant que PREPROD_MODE=1. La production n'est pas concernée.
+    if (process.env.PREPROD_MODE === "1") {
+      return NextResponse.json(
+        { message: "Modification désactivée sur la préprod." },
+        { status: 403 }
+      );
+    }
+
     if (!token || !start || !end) {
       return NextResponse.json(
         { message: "Paramètres manquants" },

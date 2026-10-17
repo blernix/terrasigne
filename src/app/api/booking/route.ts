@@ -24,6 +24,16 @@ import { randomUUID } from "crypto";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Préprod (terra.killian-lecrut.com) : aucune écriture réelle — ni agenda,
+    // ni email — tant que PREPROD_MODE=1. La production n'est pas concernée.
+    if (process.env.PREPROD_MODE === "1") {
+      return NextResponse.json(
+        { message: "Réservation désactivée sur la préprod : aucun rendez-vous n'est créé ici." },
+        { status: 403 }
+      );
+    }
+
     const {
       serviceId,
       start,

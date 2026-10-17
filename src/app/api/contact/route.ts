@@ -5,6 +5,16 @@ import { escapeHtml } from "@/lib/emails";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Préprod (terra.killian-lecrut.com) : aucune écriture réelle — ni agenda,
+    // ni email — tant que PREPROD_MODE=1. La production n'est pas concernée.
+    if (process.env.PREPROD_MODE === "1") {
+      return NextResponse.json(
+        { message: "Formulaire de contact désactivé sur la préprod." },
+        { status: 403 }
+      );
+    }
+
     const { name, email, phone, service, message, consent } = body;
 
     if (!name || !email || !service || !message || !consent) {
@@ -14,7 +24,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const brandColor = "#6a2c70";
+    const brandColor = "#2e5940";
 
     const escName = escapeHtml(name);
     const escEmail = escapeHtml(email);
@@ -26,7 +36,7 @@ export async function POST(req: Request) {
     <!DOCTYPE html>
     <html lang="fr">
     <head><meta charset="UTF-8"></head>
-    <body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,sans-serif;">
+    <body style="margin:0;padding:0;background-color:#f8fbf5;font-family:Arial,sans-serif;">
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="padding:20px 0;">
