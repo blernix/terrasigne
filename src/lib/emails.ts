@@ -1,12 +1,12 @@
+// Palette alignee sur le site : vert dominant, violet = spiritualite.
 const BRAND = {
-  purple: "#6B46C1",
-  purpleDark: "#553C9A",
-  orange: "#ED8936",
-  green: "#38A169",
-  cream: "#F6E8D6",
-  greenLight: "#def1e4",
-  text: "#3E3E3E",
-  muted: "#8A8A8A",
+  primary: "#2e5940",
+  primaryDark: "#234530",
+  accent: "#6e5498",
+  paper: "#f8fbf5",
+  soft: "#e5f1df",
+  text: "#2b3530",
+  muted: "#66706a",
 };
 
 export function escapeHtml(value: string): string {
@@ -27,10 +27,10 @@ export function getZoomLink(meetingType?: string): string | undefined {
 function zoomBlock(zoomLink: string, intro: string): string {
   return `<tr>
     <td style="padding:16px 32px 0;">
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#EEF2FF;border-left:4px solid ${BRAND.purple};border-radius:8px;padding:12px 16px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#efebf7;border-left:4px solid ${BRAND.primary};border-radius:8px;padding:12px 16px;">
         <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;">
           <strong>${intro}</strong><br/>
-          Lien de la réunion Zoom : <a href="${escapeHtml(zoomLink)}" style="color:${BRAND.purple};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a>
+          Lien de la réunion Zoom : <a href="${escapeHtml(zoomLink)}" style="color:${BRAND.primary};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a>
         </td></tr>
       </table>
     </td>
@@ -40,7 +40,7 @@ function zoomBlock(zoomLink: string, intro: string): string {
 function pdfNoticeBlock(title: string, body: string): string {
   return `<tr>
     <td style="padding:24px 32px 0;">
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.orange};border-radius:12px;padding:20px 24px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.accent};border-radius:12px;padding:20px 24px;">
         <tr>
           <td style="font-size:16px;font-weight:700;color:#ffffff;line-height:1.5;">
             ${title}<br>
@@ -56,8 +56,8 @@ function layout(inner: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background-color:${BRAND.cream};font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.cream};">
+<body style="margin:0;padding:0;background-color:${BRAND.paper};font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.paper};">
     <tr>
       <td align="center" style="padding:32px 16px;">
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;width:100%;">
@@ -66,7 +66,7 @@ function layout(inner: string): string {
             <td align="center" style="padding:24px 16px 8px;">
               <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
                 Terrasigne — Terre de Bas, Guadeloupe<br>
-                <a href="https://terrasigne.fr" style="color:${BRAND.purple};text-decoration:none;">terrasigne.fr</a>
+                <a href="https://terrasigne.fr" style="color:${BRAND.primary};text-decoration:none;">terrasigne.fr</a>
               </p>
             </td>
           </tr>
@@ -80,7 +80,7 @@ function layout(inner: string): string {
 
 function header(badgeText: string): string {
   return `<tr>
-  <td style="background:linear-gradient(135deg,${BRAND.purple} 0%,${BRAND.purpleDark} 100%);border-radius:16px 16px 0 0;padding:36px 32px;text-align:center;">
+  <td style="background:linear-gradient(135deg,${BRAND.primary} 0%,${BRAND.primaryDark} 100%);border-radius:16px 16px 0 0;padding:36px 32px;text-align:center;">
     <div style="display:inline-block;background-color:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:999px;padding:6px 16px;margin-bottom:16px;">Terrasigne</div>
     <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:700;line-height:1.3;">${badgeText}</h1>
   </td>
@@ -105,7 +105,7 @@ function card(rows: { label: string; value: string }[]): string {
 
   return `<tr>
   <td style="padding:0 32px;">
-    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.greenLight};border-radius:12px;padding:8px 20px;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.soft};border-radius:12px;padding:8px 20px;">
       ${rowsHtml}
     </table>
   </td>
@@ -136,7 +136,7 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
   const manageBlock = manageUrl
     ? `<tr>
     <td style="padding:24px 32px 4px;text-align:center;">
-      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
     </td>
   </tr>`
     : "";
@@ -256,7 +256,7 @@ export function cancellationEmailHtml(params: CancellationEmailParams): string {
   ${card(rows)}
   <tr>
     <td style="padding:24px 32px 32px;text-align:center;">
-      <a href="https://terrasigne.fr/rendez-vous" style="display:inline-block;background-color:${BRAND.orange};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Prendre un nouveau rendez-vous</a>
+      <a href="https://terrasigne.fr/rendez-vous" style="display:inline-block;background-color:${BRAND.accent};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Prendre un nouveau rendez-vous</a>
     </td>
   </tr>`;
 
@@ -282,7 +282,7 @@ export function rescheduleEmailHtml(params: RescheduleEmailParams): string {
   const manageBlock = manageUrl
     ? `<tr>
     <td style="padding:24px 32px 32px;text-align:center;">
-      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
     </td>
   </tr>`
     : "";
@@ -354,11 +354,11 @@ export function ownerNotificationEmailHtml(
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
 
   const messageHtml = message
-    ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#FFF7EE;border-left:4px solid ${BRAND.orange};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Message du client :</strong><br>${escapeHtml(message)}</td></tr></table></td></tr>`
+    ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f0f6eb;border-left:4px solid ${BRAND.accent};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Message du client :</strong><br>${escapeHtml(message)}</td></tr></table></td></tr>`
     : "";
 
   const zoomHtml = zoomLink
-    ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#EEF2FF;border-left:4px solid ${BRAND.purple};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Rendez-vous en visioconférence — lien Zoom :</strong><br><a href="${escapeHtml(zoomLink)}" style="color:${BRAND.purple};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a></td></tr></table></td></tr>`
+    ? `<tr><td style="padding:0 32px 24px;"><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#efebf7;border-left:4px solid ${BRAND.primary};border-radius:8px;padding:12px 16px;"><tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Rendez-vous en visioconférence — lien Zoom :</strong><br><a href="${escapeHtml(zoomLink)}" style="color:${BRAND.primary};font-weight:600;word-break:break-all;">${escapeHtml(zoomLink)}</a></td></tr></table></td></tr>`
     : "";
 
   const inner = `
@@ -375,7 +375,7 @@ export function ownerNotificationEmailHtml(
   ${messageHtml}
   <tr>
     <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
     </td>
   </tr>`;
 
@@ -414,7 +414,7 @@ export function ownerCancellationEmailHtml(
   ${card(rows)}
   <tr>
     <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
     </td>
   </tr>`;
 
@@ -455,7 +455,7 @@ export function ownerRescheduleEmailHtml(
   ${card(rows)}
   <tr>
     <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
     </td>
   </tr>`;
 
@@ -485,7 +485,7 @@ export function newsletterConfirmationEmailHtml(
   </tr>
   <tr>
     <td style="padding:8px 32px 32px;text-align:center;">
-      <a href="${escapeHtml(confirmUrl)}" style="display:inline-block;background-color:${BRAND.purple};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Confirmer mon inscription</a>
+      <a href="${escapeHtml(confirmUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Confirmer mon inscription</a>
     </td>
   </tr>`;
 

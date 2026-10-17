@@ -340,7 +340,7 @@ body {
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 18px !important;
-  color: #6B46C1;
+  color: #6e5498;
 }
 
 @media (max-width: 768px) {
