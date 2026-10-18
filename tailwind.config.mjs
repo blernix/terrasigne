@@ -27,6 +27,7 @@ const config = {
         "sage-200": "#cde4c6",
         "sage-300": "#aed4a8",
         eau: "#b4d9c8",
+        hero: "#8ccab0",
         mint: "#def1e4",
         violet: "#6e5498",
         "violet-100": "#efebf7",

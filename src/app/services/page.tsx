@@ -77,30 +77,30 @@ export default async function ServicesPage() {
       <main id="main-content" className="overflow-x-hidden bg-cream">
         {serviceListJsonLd && <JsonLd data={serviceListJsonLd} />}
 
-        <section className="relative flex min-h-[90svh] items-center overflow-hidden bg-forest">
+        <section className="relative flex min-h-[90svh] items-center overflow-hidden bg-hero">
           <img
             src="/images/hero_service.jpg"
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-35"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-forest/95 via-forest/80 to-forest/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-hero/95 via-hero/90 to-hero/75" />
 
           <div className="container-soft relative z-10 grid items-center gap-12 py-28 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="text-center lg:text-left">
-              <span className="eyebrow !bg-cream/15 !text-cream">
+              <span className="eyebrow !bg-white/60 !text-forest-700">
                 Prestations & accompagnements
               </span>
-              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
+              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-forest-700 md:text-6xl">
                 Mes services de{" "}
                 <span className="italic text-violet">bien-être</span> en
                 Guadeloupe
               </h1>
-              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
+              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
                 Découvrez un ensemble de prestations alliant techniques
                 relationnelles, corporelles et énergétiques, adaptées à vos
                 besoins.
               </p>
-              <p className="mx-auto mt-4 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
+              <p className="mx-auto mt-4 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
                 Laisse toi guider, je te propose d&rsquo;évaluer la pratique qui
                 te convient.
               </p>
@@ -111,7 +111,7 @@ export default async function ServicesPage() {
             </div>
 
             <div className="justify-self-center">
-              <div className="aspect-[3/4] w-full max-w-xs overflow-hidden rounded-t-[180px] rounded-b-4xl ring-8 ring-cream/15 shadow-2xl sm:max-w-sm">
+              <div className="aspect-[3/4] w-full max-w-xs overflow-hidden rounded-t-[180px] rounded-b-4xl ring-8 ring-white/50 shadow-2xl sm:max-w-sm">
                 <img
                   src="/images/hero_service.png"
                   alt="Cindy, praticienne Terrasigne"

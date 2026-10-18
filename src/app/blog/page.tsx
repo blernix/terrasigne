@@ -57,22 +57,22 @@ export default async function BlogPage() {
           }}
         />
 
-        <section className="relative flex min-h-[70svh] items-center overflow-hidden bg-forest">
+        <section className="relative flex min-h-[70svh] items-center overflow-hidden bg-hero">
           <img
             src="/images/hero_blog.jpg"
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-30"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-forest/95 via-forest/80 to-forest/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-hero/95 via-hero/90 to-hero/75" />
 
           <div className="container-soft relative z-10 grid items-center gap-12 py-28 lg:grid-cols-[1fr_0.8fr]">
             <div className="text-center lg:text-left">
-              <span className="eyebrow !bg-cream/15 !text-cream">Le journal</span>
-              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-cream md:text-6xl">
+              <span className="eyebrow !bg-white/60 !text-forest-700">Le journal</span>
+              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-forest-700 md:text-6xl">
                 Blog <span className="italic text-violet">Terrasigne</span> :
                 bien-être &amp; équilibre intérieur
               </h1>
-              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-cream/85 lg:mx-0">
+              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
                 Retrouvez des articles, témoignages pour partager, découvrir,
                 mieux se connaître SOI et évoluer ensemble vers plus
                 d&rsquo;équiLIBRE.
@@ -80,7 +80,7 @@ export default async function BlogPage() {
             </div>
 
             <div className="justify-self-center">
-              <div className="aspect-[3/4] w-full max-w-[240px] overflow-hidden rounded-t-[140px] rounded-b-4xl ring-8 ring-cream/15 shadow-2xl sm:max-w-xs">
+              <div className="aspect-[3/4] w-full max-w-[240px] overflow-hidden rounded-t-[140px] rounded-b-4xl ring-8 ring-white/50 shadow-2xl sm:max-w-xs">
                 <img
                   src="/images/hero_blog.png"
                   alt="Illustration du blog Terrasigne"
