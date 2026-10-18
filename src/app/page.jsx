@@ -9,14 +9,14 @@ import { getCarrousel, getFeaturedServices, getArticles } from "@/lib/directus";
 export const revalidate = 300;
 
 export const metadata = {
-  title: { absolute: "Terrasigne | Soins holistiques & bien-être en Guadeloupe" },
+  title: { absolute: "Reiki et soins énergétiques en Guadeloupe | Terrasigne" },
   description:
-    "Terrasigne, espace bien-être à Terre-de-Bas (Guadeloupe) : soins holistiques, relation d'aide et accompagnement personnalisé pour retrouver votre équilibre.",
+    "Praticienne en soins holistiques à Terre-de-Bas, en Guadeloupe : reiki, massage bien-être, access bars et accompagnement. Séances en présentiel ou à distance, en visio.",
   alternates: { canonical: "https://terrasigne.fr" },
   openGraph: {
-    title: "Terrasigne | Soins holistiques & bien-être en Guadeloupe",
+    title: "Reiki et soins énergétiques en Guadeloupe | Terrasigne",
     description:
-      "Explore ton équilibre intérieur avec Terrasigne. Soins holistiques, accompagnement personnalisé et bien-être en Guadeloupe.",
+      "Séances de reiki et de soins holistiques à Terre-de-Bas, en Guadeloupe, et à distance en visio.",
     url: "https://terrasigne.fr",
     type: "website",
   },
