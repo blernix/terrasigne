@@ -23,7 +23,7 @@ const jsonLd = {
   image: "https://terrasigne.fr/images/logoterra.png",
   logo: "https://terrasigne.fr/images/logoterra.png",
   description:
-    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, Guadeloupe. Accompagnement bien-être, soins énergétiques et relation d'aide.",
+    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, en Guadeloupe. Séances en présentiel et à distance, en visio.",
   url: "https://terrasigne.fr",
   telephone: "+590 690 51 68 51",
   email: "terrasigne971@gmail.com",
@@ -33,10 +33,10 @@ const jsonLd = {
     addressRegion: "Guadeloupe",
     addressCountry: "FR",
   },
-  areaServed: {
-    "@type": "Place",
-    name: "Guadeloupe",
-  },
+  areaServed: [
+    { "@type": "Place", name: "Guadeloupe" },
+    { "@type": "Place", name: "France" },
+  ],
   founder: {
     "@type": "Person",
     name: "Cindy Guillaume",
@@ -55,14 +55,14 @@ const jsonLd = {
 export const metadata = {
   metadataBase: new URL("https://terrasigne.fr"),
   title: {
-    default: "Terrasigne | Soins holistiques & bien-être en Guadeloupe",
+    default: "Reiki et soins énergétiques en Guadeloupe | Terrasigne",
     template: "%s | Terrasigne",
   },
   description:
-    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, Guadeloupe. Bien-être, soins énergétiques, relation d'aide et accompagnement personnalisé.",
+    "Cindy Guillaume, praticienne en soins holistiques à Terre-de-Bas, en Guadeloupe. Séances de reiki, massage bien-être et accompagnement holistique, en présentiel ou à distance en visio.",
   openGraph: {
-    title: "Terrasigne",
-    description: "Explore ton équilibre intérieur avec Terrasigne. Soins holistiques, accompagnement personnalisé et bien-être en Guadeloupe.",
+    title: "Reiki et soins énergétiques en Guadeloupe | Terrasigne",
+    description: "Séances de reiki et de soins holistiques à Terre-de-Bas, en Guadeloupe, et à distance en visio. Accompagnement personnalisé avec Cindy Guillaume.",
     type: "website",
     siteName: "Terrasigne",
     images: [{ url: "https://terrasigne.fr/images/logoterra.png", width: 500, height: 500, alt: "Terrasigne" }],
@@ -70,7 +70,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Terrasigne",
-    description: "Accompagnement bien-être et développement personnel en Guadeloupe.",
+    description: "Séances de reiki et de soins holistiques en Guadeloupe et à distance, en visio.",
     images: ["https://terrasigne.fr/images/logoterra.png"],
   },
 };

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Clock,
   Lock,
+  ShieldCheck,
   MapPin,
   Sparkles,
 } from "lucide-react";
@@ -964,6 +965,24 @@ function BookingContent({ targetServiceId }) {
                   />
                 </div>
 
+                <div className={styles.notice}>
+                  <p className={styles.noticeTitle}>
+                    <ShieldCheck size={15} />
+                    Cadre des séances
+                  </p>
+                  <p className={styles.noticeText}>
+                    Les séances proposées sont des pratiques de bien-être et de
+                    relaxation. Elles ne constituent ni un acte médical, ni un
+                    diagnostic, ni un traitement, et ne se substituent en aucun cas à
+                    un avis, un suivi ou un traitement médical. Je ne demande jamais
+                    d&rsquo;interrompre ou de modifier un traitement en cours. En cas de
+                    symptôme, de doute ou de pathologie, consultez votre médecin.{" "}
+                    <a href="/cadre-de-la-pratique" className={styles.checkLink}>
+                      En savoir plus
+                    </a>
+                  </p>
+                </div>
+
                 <label className={styles.check} htmlFor="consent">
                   <input
                     id="consent"
@@ -977,7 +996,8 @@ function BookingContent({ targetServiceId }) {
                     <span className={styles.checkIcon}>
                       <Lock size={13} />
                     </span>{" "}
-                    J&rsquo;accepte que mes informations soient utilisées pour le
+                    J&rsquo;ai pris connaissance du cadre des séances ci-dessus et
+                    j&rsquo;accepte que mes informations soient utilisées pour le
                     traitement de ma demande, conformément à la{" "}
                     <a href="/confidentialite" className={styles.checkLink}>
                       politique de confidentialité

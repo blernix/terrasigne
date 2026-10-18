@@ -31,6 +31,9 @@ export default function Footer() {
             <Link href="/services" className="text-forest transition hover:text-forest-700 hover:underline">
               Services & prestations
             </Link>
+            <Link href="/seances-a-distance" className="text-forest transition hover:text-forest-700 hover:underline">
+              Séances à distance
+            </Link>
             <Link href="/rendez-vous" className="text-forest transition hover:text-forest-700 hover:underline">
               Prendre rendez-vous
             </Link>
@@ -39,6 +42,9 @@ export default function Footer() {
             </Link>
             <Link href="/propos" className="text-forest transition hover:text-forest-700 hover:underline">
               À propos
+            </Link>
+            <Link href="/cadre-de-la-pratique" className="text-forest transition hover:text-forest-700 hover:underline">
+              Cadre de la pratique
             </Link>
             <Link href="/confidentialite" className="text-forest transition hover:text-forest-700 hover:underline">
               Confidentialité

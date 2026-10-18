@@ -28,12 +28,12 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
       >
         <span className="eyebrow !bg-cream/15 !text-cream backdrop-blur-sm">
           <Sparkles size={14} />
-          Bien-être & harmonie · Guadeloupe
+          Bienvenue sur Terrasigne
         </span>
 
         <h1 className="mt-6 font-display text-4xl font-semibold leading-tight text-cream [text-shadow:0_2px_18px_rgba(0,0,0,0.6)] md:text-6xl">
-          Bienvenue sur <span className="italic">Terrasigne</span>,
-          votre espace bien-être en Guadeloupe
+          Soins holistiques en Guadeloupe, en présentiel et{" "}
+          <span className="italic">à distance</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-cream/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.55)]">
@@ -52,6 +52,15 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
             Découvrir mes services
           </Link>
         </div>
+
+        <p className="mt-6 text-sm text-cream/85">
+          <Link
+            href="/seances-a-distance"
+            className="underline decoration-cream/40 underline-offset-4 transition hover:text-cream hover:decoration-cream"
+          >
+            Ou découvrez les séances à distance, en visio
+          </Link>
+        </p>
       </motion.div>
     </section>
   );

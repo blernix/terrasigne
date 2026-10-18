@@ -750,3 +750,27 @@
     top: 6rem;
   }
 }
+
+.notice {
+  border: 1px solid rgba(46, 89, 64, 0.28);
+  background: #f3f9f1;
+  border-radius: 1rem;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.35rem;
+}
+
+.noticeTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #234530;
+}
+
+.noticeText {
+  margin-top: 0.4rem;
+  font-size: 0.79rem;
+  line-height: 1.65;
+  color: #3c4a41;
+}
