@@ -16,6 +16,7 @@
   --sage: #79a97d;
   --sage-100: #e5f1df;
   --sage-200: #cde4c6;
+  --sage-300: #aed4a8;
   --eau: #b4d9c8;
   --mint: #def1e4;
   --violet: #6e5498;
@@ -51,7 +52,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40;
   }
   .btn-primary {
-    @apply bg-mint text-forest border border-forest/25 shadow-sm hover:bg-sage-200 hover:-translate-y-0.5;
+    @apply bg-mint text-forest border border-forest/25 shadow-sm hover:bg-sage-300 hover:-translate-y-0.5;
   }
   .btn-violet {
     @apply bg-violet text-white shadow-lg shadow-violet/25 hover:brightness-105 hover:-translate-y-0.5;
