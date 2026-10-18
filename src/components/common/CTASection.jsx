@@ -68,7 +68,7 @@ export default function CTASection({ title, description }) {
 
   return (
     <>
-      <section className="section bg-sage">
+      <section className="section bg-eau">
         <div className="container-soft">
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow !bg-white/55 !text-ink">

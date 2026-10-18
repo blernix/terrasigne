@@ -5,7 +5,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-eau text-forest-700">
+    <footer className="bg-sage-200 text-forest-700">
       <div className="container-soft grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <p className="font-display text-2xl font-semibold">Terrasigne</p>
