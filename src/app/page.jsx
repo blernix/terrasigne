@@ -52,7 +52,7 @@ export default async function Page() {
 
         <CTASection
           title="Explorez votre véritable potentiel"
-          description="Reconnecte-toi à toi-même et vis l’équilibre naturel de ton être. Commence ta transformation avec Terrasigne."
+          description={"Reconnecte-toi à toi-même et vis l’équilibre naturel de ton être.\nCommence ta transformation avec Terrasigne."}
         />
       </main>
 

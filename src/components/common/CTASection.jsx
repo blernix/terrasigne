@@ -68,17 +68,17 @@ export default function CTASection({ title, description }) {
 
   return (
     <>
-      <section className="section bg-forest">
+      <section className="section bg-sage">
         <div className="container-soft">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="eyebrow !bg-cream/15 !text-cream">
+            <span className="eyebrow !bg-white/55 !text-ink">
               <Mail size={13} />
               Newsletter
             </span>
-            <h2 className="mt-5 font-display text-3xl font-semibold text-cream md:text-4xl">
+            <h2 className="mt-5 font-display text-3xl font-semibold text-ink md:text-4xl">
               {title}
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-cream/80">
+            <p className="mx-auto mt-4 max-w-2xl whitespace-pre-line leading-relaxed text-ink/85">
               {description}
             </p>
             <button className="btn btn-violet mt-8" onClick={() => setShowModal(true)}>
