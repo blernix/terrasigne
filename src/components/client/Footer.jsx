@@ -28,19 +28,19 @@ export default function Footer() {
             <Link href="/" className="text-forest transition hover:text-forest-700 hover:underline">
               Accueil
             </Link>
-            <Link href="/services" className="text-cream/85 transition hover:text-white">
+            <Link href="/services" className="text-forest transition hover:text-forest-700 hover:underline">
               Services & prestations
             </Link>
-            <Link href="/rendez-vous" className="text-cream/85 transition hover:text-white">
+            <Link href="/rendez-vous" className="text-forest transition hover:text-forest-700 hover:underline">
               Prendre rendez-vous
             </Link>
-            <Link href="/blog" className="text-cream/85 transition hover:text-white">
+            <Link href="/blog" className="text-forest transition hover:text-forest-700 hover:underline">
               Blog
             </Link>
-            <Link href="/propos" className="text-cream/85 transition hover:text-white">
+            <Link href="/propos" className="text-forest transition hover:text-forest-700 hover:underline">
               À propos
             </Link>
-            <Link href="/confidentialite" className="text-cream/85 transition hover:text-white">
+            <Link href="/confidentialite" className="text-forest transition hover:text-forest-700 hover:underline">
               Confidentialité
             </Link>
           </div>
@@ -66,7 +66,7 @@ export default function Footer() {
               href="https://wa.me/590690516851"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 text-cream/85 transition hover:text-white"
+              className="inline-flex items-center gap-2.5 text-forest transition hover:text-forest-700 hover:underline"
             >
               <Phone size={16} className="text-forest" />
               +590 690 51 68 51
