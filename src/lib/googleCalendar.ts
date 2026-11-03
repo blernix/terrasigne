@@ -5,6 +5,7 @@ import {
   EARLY_SLOT_MIN_BEFORE,
   EARLY_SLOT_SUPPLEMENT,
 } from "@/lib/bookingOptions";
+import { buildEventDescription } from "@/lib/eventDescription";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const OPEN_MARKER = "dispo";
@@ -172,6 +173,8 @@ export interface BookingInput {
   supplement?: number;
   consentAt?: string;
   zoomLink?: string;
+  /** Lien signé de la page praticienne, ajouté à la description de l'événement. */
+  ownerManageUrl?: string;
   start: Date;
   end: Date;
   clientTimezone?: string;
@@ -191,35 +194,16 @@ export interface BookingInput {
 export async function createBookingEvent(input: BookingInput) {
   const calendar = await getCalendarClient();
 
-  const description = [
-    `Service : ${input.serviceName}`,
-    input.prix ? `Prix : ${input.prix} €` : null,
-    input.supplement
-      ? `Supplément créneau anticipé (+${EARLY_SLOT_MIN_BEFORE / 60} h) : ${input.supplement} € (à régler sur place, non facturé)`
-      : null,
-    `Client : ${input.client.name}`,
-    `Email : ${input.client.email}`,
-    input.client.phone ? `Téléphone : ${input.client.phone}` : null,
-    input.client.meetingType
-      ? `Mode de rencontre : ${input.client.meetingType}`
-      : null,
-    input.zoomLink ? `Lien visio (Zoom) : ${input.zoomLink}` : null,
-    input.client.profession
-      ? `Profession : ${input.client.profession}`
-      : null,
-    input.client.suivi ? `Suivi psy en cours : ${input.client.suivi}` : null,
-    input.client.typeSeance
-      ? `Type de séance désirée : ${input.client.typeSeance}`
-      : null,
-    input.client.consent
-      ? `Consentement RGPD : Oui${
-          input.consentAt ? ` (le ${input.consentAt})` : ""
-        }`
-      : null,
-    input.client.message ? `Message : ${input.client.message}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const description = buildEventDescription({
+    serviceName: input.serviceName,
+    prix: input.prix,
+    supplement: input.supplement,
+    earlySlotMinBefore: EARLY_SLOT_MIN_BEFORE,
+    zoomLink: input.zoomLink,
+    consentAt: input.consentAt,
+    ownerManageUrl: input.ownerManageUrl,
+    client: input.client,
+  });
 
   const res = await calendar.events.insert({
     calendarId: getCalendarId(),
@@ -317,6 +301,69 @@ export async function markReminderSent(eventId: string) {
   });
 }
 
+export interface OwnerRecapBooking {
+  id: string;
+  start: string;
+  serviceName: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  bookingToken: string;
+}
+
+/**
+ * Rendez-vous d'une plage destinés au récap quotidien de la praticienne.
+ * Marqueur distinct de `reminderSent` (rappel client) : sinon envoyer le récap
+ * empêcherait le rappel de la cliente, et inversement.
+ */
+export async function listOwnerRecap(
+  timeMin: Date,
+  timeMax: Date
+): Promise<OwnerRecapBooking[]> {
+  const calendar = await getCalendarClient();
+  const res = await calendar.events.list({
+    calendarId: getCalendarId(),
+    timeMin: timeMin.toISOString(),
+    timeMax: timeMax.toISOString(),
+    singleEvents: true,
+    orderBy: "startTime",
+    maxResults: 2500,
+  });
+
+  return (res.data.items || [])
+    .filter((e) => !isOpenWindow(e.summary || ""))
+    .filter((e) => e.extendedProperties?.private?.ownerReminderSent !== "true")
+    .map((e) => ({
+      id: e.id || "",
+      start: e.start?.dateTime || e.start?.date || "",
+      serviceName:
+        e.extendedProperties?.private?.serviceName || e.summary || "",
+      clientName: e.extendedProperties?.private?.clientName || "",
+      clientEmail: e.extendedProperties?.private?.clientEmail || "",
+      clientPhone: e.extendedProperties?.private?.clientPhone || "",
+      bookingToken: e.extendedProperties?.private?.bookingToken || "",
+    }))
+    .filter((e) => e.clientEmail && e.start);
+}
+
+export async function markOwnerReminderSent(eventId: string) {
+  const calendar = await getCalendarClient();
+  const existing = await calendar.events.get({
+    calendarId: getCalendarId(),
+    eventId,
+  });
+  const privateProps = existing.data.extendedProperties?.private || {};
+  await calendar.events.patch({
+    calendarId: getCalendarId(),
+    eventId,
+    requestBody: {
+      extendedProperties: {
+        private: { ...privateProps, ownerReminderSent: "true" },
+      },
+    },
+  });
+}
+
 export async function isSlotFree(
   start: Date,
   end: Date,
@@ -382,6 +429,7 @@ export async function findBookingByToken(
     clientName: p.clientName || "",
     clientEmail: p.clientEmail || "",
     clientTimezone: p.clientTimezone || BUSINESS_TIMEZONE,
+    meetingType: p.meetingType || "",
     phone: p.clientPhone || "",
   };
 }
@@ -422,7 +470,13 @@ export async function rescheduleBooking(
       start: { dateTime: newStart.toISOString(), timeZone: BUSINESS_TIMEZONE },
       end: { dateTime: newEnd.toISOString(), timeZone: BUSINESS_TIMEZONE },
       extendedProperties: {
-        private: { ...privateProps, reminderSent: "false" },
+        private: {
+          ...privateProps,
+          reminderSent: "false",
+          // Réarmé aussi : sinon un rendez-vous reporté après le récap de la
+          // veille n'apparaît plus jamais dans le récap de Cindy.
+          ownerReminderSent: "false",
+        },
       },
     },
   });

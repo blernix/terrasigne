@@ -37,17 +37,49 @@ function zoomBlock(zoomLink: string, intro: string): string {
   </tr>`;
 }
 
-function pdfNoticeBlock(title: string, body: string): string {
+function pdfNoticeBlock(title: string, body: string, url?: string): string {
+  const link = url
+    ? `<br><a href="${escapeHtml(url)}" style="display:inline-block;margin-top:12px;background-color:#ffffff;color:${BRAND.accent};font-size:14px;font-weight:700;text-decoration:none;border-radius:999px;padding:10px 22px;">Ouvrir le document</a>`
+    : "";
   return `<tr>
     <td style="padding:24px 32px 0;">
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.accent};border-radius:12px;padding:20px 24px;">
         <tr>
           <td style="font-size:16px;font-weight:700;color:#ffffff;line-height:1.5;">
             ${title}<br>
-            <span style="font-weight:400;font-size:14px;color:#ffffff;">${body}</span>
+            <span style="font-weight:400;font-size:14px;color:#ffffff;">${body}</span>${link}
           </td>
         </tr>
       </table>
+    </td>
+  </tr>`;
+}
+
+// Bouton "Gérer ce rendez-vous" des mails destinés à la praticienne : il porte
+// le lien signé qui ouvre la page praticienne (déplacer / annuler + motif).
+function ownerManageBlock(manageUrl?: string): string {
+  if (!manageUrl) return "";
+  return `<tr>
+    <td style="padding:24px 32px 0;text-align:center;">
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.accent};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Gérer ce rendez-vous</a>
+      <p style="margin:10px 0 0;font-size:12px;color:${BRAND.muted};line-height:1.5;">Déplacer ou annuler depuis cette page prévient la cliente par email.<br>N'annulez pas l'événement à la main dans l'agenda : personne ne serait prévenu.</p>
+    </td>
+  </tr>`;
+}
+
+// Pied des mails praticienne : bouton agenda quand aucun lien de gestion
+// n'existe (fonctionnalité désactivée), simple lien texte sinon.
+function ownerAgendaBlock(manageUrl?: string): string {
+  if (manageUrl) {
+    return `<tr>
+    <td style="padding:12px 32px 32px;text-align:center;">
+      <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">Ou consultez <a href="https://calendar.google.com" style="color:${BRAND.primary};font-weight:600;text-decoration:none;">votre agenda</a>.</p>
+    </td>
+  </tr>`;
+  }
+  return `<tr>
+    <td style="padding:0 32px 32px;text-align:center;">
+      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
     </td>
   </tr>`;
 }
@@ -191,11 +223,12 @@ export interface ReminderEmailParams {
   service: string;
   dateLabel: string;
   pdfNote?: boolean;
+  documentUrl?: string;
   zoomLink?: string;
 }
 
 export function reminderEmailHtml(params: ReminderEmailParams): string {
-  const { name, service, dateLabel, pdfNote, zoomLink } = params;
+  const { name, service, dateLabel, pdfNote, documentUrl, zoomLink } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
@@ -204,7 +237,8 @@ export function reminderEmailHtml(params: ReminderEmailParams): string {
   const pdfBlock = pdfNote
     ? pdfNoticeBlock(
         "Document à signer",
-        "Vérifiez que tout est en ordre avant votre rendez-vous : avez-vous bien pris connaissance et signé le document ?"
+        "Vérifiez que tout est en ordre avant votre rendez-vous : avez-vous bien pris connaissance et signé le document ?",
+        documentUrl
       )
     : "";
 
@@ -326,6 +360,7 @@ export interface OwnerNotificationEmailParams {
   supplement?: number | null;
   message?: string;
   zoomLink?: string;
+  manageUrl?: string;
 }
 
 export function ownerNotificationEmailHtml(
@@ -345,6 +380,7 @@ export function ownerNotificationEmailHtml(
     supplement,
     message,
     zoomLink,
+    manageUrl,
   } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
@@ -386,11 +422,8 @@ export function ownerNotificationEmailHtml(
   ${card(rows)}
   ${zoomHtml}
   ${messageHtml}
-  <tr>
-    <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
-    </td>
-  </tr>`;
+  ${ownerManageBlock(manageUrl)}
+  ${ownerAgendaBlock(manageUrl)}`;
 
   return layout(inner);
 }
@@ -401,12 +434,13 @@ export interface OwnerCancellationEmailParams {
   phone?: string;
   service: string;
   dateLabel: string;
+  manageUrl?: string;
 }
 
 export function ownerCancellationEmailHtml(
   params: OwnerCancellationEmailParams
 ): string {
-  const { name, email, phone, service, dateLabel } = params;
+  const { name, email, phone, service, dateLabel, manageUrl } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Date & heure", value: escapeHtml(dateLabel) },
@@ -425,11 +459,8 @@ export function ownerCancellationEmailHtml(
     </td>
   </tr>
   ${card(rows)}
-  <tr>
-    <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
-    </td>
-  </tr>`;
+  ${ownerManageBlock(manageUrl)}
+  ${ownerAgendaBlock(manageUrl)}`;
 
   return layout(inner);
 }
@@ -441,12 +472,14 @@ export interface OwnerRescheduleEmailParams {
   service: string;
   oldDateLabel: string;
   newDateLabel: string;
+  manageUrl?: string;
 }
 
 export function ownerRescheduleEmailHtml(
   params: OwnerRescheduleEmailParams
 ): string {
-  const { name, email, phone, service, oldDateLabel, newDateLabel } = params;
+  const { name, email, phone, service, oldDateLabel, newDateLabel, manageUrl } =
+    params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
@@ -466,11 +499,8 @@ export function ownerRescheduleEmailHtml(
     </td>
   </tr>
   ${card(rows)}
-  <tr>
-    <td style="padding:0 32px 32px;text-align:center;">
-      <a href="https://calendar.google.com" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Ouvrir mon agenda</a>
-    </td>
-  </tr>`;
+  ${ownerManageBlock(manageUrl)}
+  ${ownerAgendaBlock(manageUrl)}`;
 
   return layout(inner);
 }
@@ -499,6 +529,207 @@ export function newsletterConfirmationEmailHtml(
   <tr>
     <td style="padding:8px 32px 32px;text-align:center;">
       <a href="${escapeHtml(confirmUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Confirmer mon inscription</a>
+    </td>
+  </tr>`;
+
+  return layout(inner);
+}
+
+/* ------------------------------------------------------------------------- *
+ * Mails déclenchés par la praticienne (annulation / déplacement + récap)
+ * ------------------------------------------------------------------------- */
+
+function reasonBlock(reason?: string): string {
+  if (!reason) return "";
+  return `<tr>
+    <td style="padding:0 32px 16px;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f0f6eb;border-left:4px solid ${BRAND.accent};border-radius:8px;padding:12px 16px;">
+        <tr><td style="font-size:14px;color:${BRAND.text};line-height:1.6;"><strong>Motif indiqué :</strong><br>${escapeHtml(reason)}</td></tr>
+      </table>
+    </td>
+  </tr>`;
+}
+
+function ctaBlock(url: string, label: string, tone: "primary" | "accent" = "primary"): string {
+  const bg = tone === "accent" ? BRAND.accent : BRAND.primary;
+  return `<tr>
+    <td style="padding:24px 32px 32px;text-align:center;">
+      <a href="${escapeHtml(url)}" style="display:inline-block;background-color:${bg};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">${label}</a>
+    </td>
+  </tr>`;
+}
+
+export interface ClientCancelledByOwnerParams {
+  name: string;
+  service: string;
+  dateLabel: string;
+  reason?: string;
+  rebookUrl?: string;
+}
+
+/**
+ * Mail envoyé à la cliente quand la praticienne annule le rendez-vous depuis
+ * sa page. Distinct de `cancellationEmailHtml` (annulation par la cliente) :
+ * ici on dit qui a annulé, et le motif s'il y en a un.
+ */
+export function clientCancelledByOwnerEmailHtml(
+  params: ClientCancelledByOwnerParams
+): string {
+  const { name, service, dateLabel, reason, rebookUrl } = params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Date & heure", value: escapeHtml(dateLabel) },
+  ];
+
+  const inner = `
+  ${header("Rendez-vous annulé")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 8px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour <strong>${escapeHtml(name)}</strong>,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Cindy a dû annuler votre rendez-vous. Toutes nos excuses pour ce contretemps :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  ${reasonBlock(reason)}
+  ${
+    rebookUrl
+      ? ctaBlock(rebookUrl, "Reprendre un rendez-vous", "accent")
+      : ""
+  }`;
+
+  return layout(inner);
+}
+
+export interface ClientRescheduledByOwnerParams {
+  name: string;
+  service: string;
+  oldDateLabel: string;
+  newDateLabel: string;
+  reason?: string;
+  manageUrl?: string;
+}
+
+/**
+ * Mail envoyé à la cliente quand la praticienne déplace le rendez-vous.
+ * L'ancienne et la nouvelle date sont affichées, dans le fuseau de la cliente.
+ */
+export function clientRescheduledByOwnerEmailHtml(
+  params: ClientRescheduledByOwnerParams
+): string {
+  const { name, service, oldDateLabel, newDateLabel, reason, manageUrl } =
+    params;
+  const rows = [
+    { label: "Service", value: escapeHtml(service) },
+    { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
+    { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
+  ];
+
+  const manageBlock = manageUrl
+    ? `<tr>
+    <td style="padding:24px 32px 32px;text-align:center;">
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+    </td>
+  </tr>`
+    : "";
+
+  const inner = `
+  ${header("Rendez-vous déplacé")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 8px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour <strong>${escapeHtml(name)}</strong>,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Cindy a déplacé votre rendez-vous. Voici les nouvelles informations :
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  ${reasonBlock(reason)}
+  ${manageBlock}`;
+
+  return layout(inner);
+}
+
+export interface OwnerRecapItem {
+  timeLabel: string;
+  service: string;
+  clientName: string;
+  email: string;
+  phone?: string;
+  manageUrl?: string;
+}
+
+export interface OwnerDailyRecapParams {
+  /** Libellé du jour, ex. « mercredi 5 novembre ». */
+  dateLabel: string;
+  items: OwnerRecapItem[];
+}
+
+/**
+ * Récap quotidien de la praticienne : les rendez-vous du lendemain, avec les
+ * coordonnées de chaque cliente et son lien de gestion.
+ */
+export function ownerDailyRecapEmailHtml(
+  params: OwnerDailyRecapParams
+): string {
+  const { dateLabel, items } = params;
+
+  const blocks = items
+    .map((it) => {
+      const rows = [
+        { label: "Prestation", value: escapeHtml(it.service) },
+        { label: "Cliente", value: escapeHtml(it.clientName) },
+        ...(it.phone ? [{ label: "Téléphone", value: escapeHtml(it.phone) }] : []),
+        { label: "Email", value: escapeHtml(it.email) },
+      ]
+        .map(
+          (r) => `<tr>
+            <td style="font-size:13px;color:${BRAND.muted};width:110px;vertical-align:top;padding-right:12px;">${r.label}</td>
+            <td style="font-size:14px;color:${BRAND.text};font-weight:600;text-align:right;word-break:break-word;">${r.value}</td>
+          </tr>`
+        )
+        .join("");
+
+      return `<tr>
+        <td style="padding:0 32px 16px;">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:${BRAND.soft};border-radius:12px;padding:16px 20px;">
+            <tr>
+              <td style="padding-bottom:10px;">
+                <span style="font-size:20px;font-weight:700;color:${BRAND.primary};">${escapeHtml(it.timeLabel)}</span>
+              </td>
+            </tr>
+            ${rows}
+            ${
+              it.manageUrl
+                ? `<tr><td style="padding-top:12px;text-align:center;"><a href="${escapeHtml(it.manageUrl)}" style="display:inline-block;background-color:${BRAND.accent};color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;border-radius:999px;padding:9px 20px;">Gérer ce rendez-vous</a></td></tr>`
+                : ""
+            }
+          </table>
+        </td>
+      </tr>`;
+    })
+    .join("");
+
+  const inner = `
+  ${header("Rendez-vous de demain")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        Voici les rendez-vous prévus pour <strong style="color:${BRAND.text};">${escapeHtml(dateLabel)}</strong> :
+      </p>
+    </td>
+  </tr>
+  ${blocks}
+  <tr>
+    <td style="padding:8px 32px 32px;text-align:center;">
+      <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
+        ${items.length} rendez-vous au total. Pour annuler ou déplacer, passez par le lien de gestion : la cliente est prévenue automatiquement.
+      </p>
     </td>
   </tr>`;
 

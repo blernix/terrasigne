@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:booking": "node --env-file=.env scripts/simulate-booking.mjs"
+    "test:booking": "node --env-file=.env scripts/simulate-booking.mjs",
+    "test:mails": "node --experimental-strip-types scripts/test-mails-rdv.mjs",
+    "backfill:owner-links": "node --experimental-strip-types --env-file=.env scripts/backfill-owner-links.mjs"
   },
   "dependencies": {
     "aos": "^2.3.4",

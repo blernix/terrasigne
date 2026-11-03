@@ -22,6 +22,7 @@ import {
   formatDateLabel,
 } from "@/lib/timezones";
 import { randomUUID } from "crypto";
+import { buildOwnerUrl, ownerLinkAvailable } from "@/lib/ownerLink";
 
 export async function POST(req: Request) {
   try {
@@ -160,6 +161,12 @@ export async function POST(req: Request) {
 
     const bookingToken = randomUUID();
     const siteUrl = getRequestOrigin(req);
+    // Lien signé de la page praticienne : présent dans la description de
+    // l'événement Google et dans le mail reçu par Cindy. Vide si le secret
+    // n'est pas configuré → on n'envoie pas de lien mort.
+    const ownerManageUrl = ownerLinkAvailable()
+      ? buildOwnerUrl(siteUrl, bookingToken)
+      : "";
     const consentAt = consent ? new Date().toISOString() : "";
     const zoomLink = getZoomLink(meetingType);
 
@@ -172,6 +179,7 @@ export async function POST(req: Request) {
       pdf,
       supplement,
       bookingToken,
+      ownerManageUrl: ownerManageUrl || undefined,
       consentAt,
       zoomLink,
       start: startDate,
@@ -231,6 +239,7 @@ export async function POST(req: Request) {
           supplement,
           message,
           zoomLink,
+          manageUrl: ownerManageUrl || undefined,
         }),
       });
     }
