@@ -58,7 +58,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
             href="/seances-a-distance"
             className="underline decoration-cream/40 underline-offset-4 transition hover:text-cream hover:decoration-cream"
           >
-            Ou découvrez les séances à distance, en visio
+            En savoir plus sur les séances à distance
           </Link>
         </p>
       </motion.div>

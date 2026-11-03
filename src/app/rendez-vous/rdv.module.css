@@ -41,7 +41,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--rv-sage-100);
+  background: var(--rv-mint);
   color: var(--rv-forest);
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
@@ -119,7 +119,7 @@
   place-items: center;
   font-size: 0.78rem;
   font-weight: 700;
-  background: var(--rv-sand);
+  background: var(--rv-mint);
   color: var(--rv-muted);
   flex-shrink: 0;
   transition: 0.2s;
@@ -128,10 +128,11 @@
 .stepNumActive {
   background: var(--rv-mint);
   color: var(--rv-forest);
+  box-shadow: 0 0 0 2px var(--rv-forest);
 }
 
 .stepNumDone {
-  background: var(--rv-sage-200);
+  background: var(--rv-mint);
   color: var(--rv-forest);
 }
 
@@ -192,7 +193,9 @@
 }
 
 .serviceBtnActive .serviceDesc {
-  color: rgba(251, 247, 240, 0.78);
+  /* Sur fond vert clair, le texte secondaire doit rester sombre : le blanc
+     (251,247,240) le rendait illisible. */
+  color: var(--rv-ink-soft);
 }
 
 .servicePrice {
@@ -285,7 +288,7 @@
 }
 
 .calNav:hover:not(:disabled) {
-  background: var(--rv-sage-100);
+  background: var(--rv-sage-300);
 }
 
 .calNav:disabled {
@@ -325,13 +328,13 @@
 
 .dayAvail {
   color: var(--rv-forest);
-  background: var(--rv-forest-50);
+  background: var(--rv-mint);
   cursor: pointer;
   transition: 0.2s;
 }
 
 .dayAvail:hover {
-  background: var(--rv-sage-100);
+  background: var(--rv-sage-300);
 }
 
 .dayActive {
@@ -393,7 +396,7 @@
 
 .slot:hover {
   border-color: var(--rv-sage);
-  background: var(--rv-sage-100);
+  background: var(--rv-sage-300);
 }
 
 .slotActive {
@@ -463,7 +466,7 @@
 
 .totalBox {
   margin-top: 1.25rem;
-  background: var(--rv-sage-100);
+  background: var(--rv-mint);
   border-radius: 1.25rem;
   padding: 1rem 1.15rem;
   display: flex;
@@ -594,7 +597,7 @@
 }
 
 .alertInfo {
-  background: var(--rv-sand);
+  background: var(--rv-mint);
   color: var(--rv-ink-soft);
 }
 
@@ -652,7 +655,7 @@
   width: 4rem;
   height: 4rem;
   border-radius: 999px;
-  background: var(--rv-sage-100);
+  background: var(--rv-mint);
   display: grid;
   place-items: center;
   margin: 0 auto;
@@ -753,7 +756,7 @@
 
 .notice {
   border: 1px solid rgba(46, 89, 64, 0.28);
-  background: #f3f9f1;
+  background: var(--rv-mint);
   border-radius: 1rem;
   padding: 0.9rem 1.1rem;
   margin-bottom: 0.35rem;

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Reiki à distance : comment se déroule une séance",
+  title: "Séances à distance : comment se déroule une rencontre en ligne",
   description:
     "Séance de reiki et de soins énergétiques à distance, en visioconférence ou par téléphone, depuis la Guadeloupe. Déroulement, préparation, durée et réservation avec Cindy Guillaume.",
   keywords: [
@@ -28,7 +28,7 @@ export const metadata = {
   ],
   alternates: { canonical: "https://terrasigne.fr/seances-a-distance" },
   openGraph: {
-    title: "Reiki à distance : comment se déroule une séance | Terrasigne",
+    title: "Séances à distance : comment se déroule une rencontre en ligne | Terrasigne",
     description:
       "Une séance de reiki à distance, en visioconférence ou par téléphone, où que vous soyez. Le déroulé, pas à pas, avec Cindy Guillaume.",
     url: "https://terrasigne.fr/seances-a-distance",
@@ -45,7 +45,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Reiki à distance : comment se déroule une séance | Terrasigne",
+    title: "Séances à distance : comment se déroule une rencontre en ligne | Terrasigne",
     description:
       "Séance à distance en visio ou par téléphone : le déroulé, la préparation et la réservation.",
     images: ["https://terrasigne.fr/images/logoterra.png"],
@@ -58,34 +58,34 @@ const etapes = [
     titre: "Avant la séance",
     icone: Video,
     texte:
-      "Nous convenons d’un rendez-vous en visioconférence ou par téléphone, à l’heure qui vous convient. Vous recevez un lien, vous vous installez dans un endroit calme, et la séance commence par un temps d’échange sur ce que vous traversez en ce moment.",
+      "Vous prenez rendez-vous, en sélectionnant téléphone ou visioconférence. Par téléphone, je vous appelle à l’heure prévue. En visioconférence, vous recevez un lien par email, vous vous installez dans un endroit calme. Dans les 2 cas, la séance commence par un temps d’échange sur ce que vous traversez en ce moment et vos attentes.",
   },
   {
     titre: "Pendant la séance",
     icone: Heart,
     texte:
-      "Vous restez allongé ou assis, chez vous, en confort. Je vous accompagne à la voix : respiration, détente, écoute. Une séance dure entre 30 minutes et 1 h 30 selon la prestation choisie. Certaines personnes s’endorment, d’autres ressentent des fourmillements, une chaleur, ou simplement un apaisement.",
+      "Vous vous installez confortablement dans un endroit calme et isolé pour assurer votre confort et votre disponibilité. Je vous accompagne à la voix : accueil, écoute, guidance, tout en m’adaptant à l’aide de la vidéo, selon les techniques.\n\nUne rencontre dure entre 30 min et 1 h 30 selon la prestation choisie. En fin de rencontre, un temps d’échange permet de revenir sur ce que vous avez ressenti. Certaines personnes ressentent une légère fatigue, un apaisement, de la clarté et de l’enthousiasme pour avancer.",
   },
   {
     titre: "Après la séance",
     icone: Sparkles,
     texte:
-      "Un temps d’échange permet de revenir sur ce que vous avez ressenti. Vous repartez avec quelques repères simples à pratiquer chez vous. Je conseille de garder un moment calme dans l’heure qui suit, pour laisser le travail se poser.",
+      "Vous repartez avec des repères simples et pratiques à mettre en place dans votre quotidien. Je conseille de garder un moment de calme après la rencontre pour intégrer la séance.\n\nUn résumé écrit vous aide à retenir l’essentiel et vous soutient pour la suite.",
   },
 ];
 
 const faq = [
   {
     q: "Une séance à distance, c’est différent d’une séance en présentiel ?",
-    a: "Le cadre change, pas la manière de travailler : l’écoute, la parole et les pratiques restent les mêmes. La séance se fait chez vous, en visioconférence ou par téléphone, sans déplacement. Certaines personnes préfèrent le présentiel pour le contact, d’autres se sentent plus détendues chez elles.",
+    a: "La séance se fait dans le lieu de votre choix, en visioconférence ou par téléphone, sans déplacement. Les client(e)s suivi(e)s à distance obtiennent les mêmes résultats et sont très satisfait(e)s et surpris(es) d’obtenir les mêmes résultats. Certain(e)s commencent en présentiel et préfèrent poursuivre à distance pour profiter de résultats similaires, sans avoir à se déplacer.",
   },
   {
     q: "Où habitez-vous, et à quelle heure se passe la séance ?",
-    a: "Je suis installée à Terre-de-Bas, en Guadeloupe, et j’accompagne des personnes partout en France et à l’étranger. Le créneau que vous choisissez est affiché dans votre propre fuseau horaire : entre la Guadeloupe et la France métropolitaine, comptez 6 heures de décalage en été et 5 heures en hiver.",
+    a: "Je suis installée à Terre-de-Bas, en Guadeloupe, et j’accompagne des personnes en France hexagonale, dans les Dom Tom, en Europe et dans tout autre pays. Le créneau que vous choisissez est affiché dans votre propre fuseau horaire : entre la Guadeloupe et la France métropolitaine, comptez 6 heures de décalage en été et 5 heures en hiver.",
   },
   {
     q: "Faut-il être seul et au calme ?",
-    a: "Un endroit calme où vous ne serez pas interrompu est préférable. Un casque améliore le confort sonore, mais il n’est pas obligatoire. Évitez de faire la séance au volant, en marchant, ou dans un lieu où vous ne pouvez pas vous poser.",
+    a: "Un endroit calme où vous ne serez pas interrompu est préférable. Pour plus de confort et de stabilité de l’image et de la connexion, il est préférable de se connecter à partir d’un ordinateur plutôt que d’utiliser un téléphone portable (que je conseille de mettre en silencieux).",
   },
   {
     q: "Est-ce que je dois arrêter mon traitement ?",
@@ -93,11 +93,11 @@ const faq = [
   },
   {
     q: "Quelles prestations sont proposées à distance ?",
-    a: "La consultation globale (1 h 30), la consultation de suivi (1 h), la technique de lâcher-prise, le dialogue intérieur, la consultation des mémoires akashiques, ainsi qu’un rendez-vous conseil de 30 minutes par téléphone pour faire le point avant de commencer.",
+    a: "Toutes les techniques de relation d’aide et techniques énergétiques sont accessibles à distance. La consultation globale (1 h 30), la consultation de suivi (1 h), la technique de lâcher-prise, le dialogue intérieur, la consultation des mémoires akashiques, ainsi qu’un rendez-vous conseil de 30 minutes par téléphone pour faire le point avant de commencer.",
   },
   {
     q: "Comment se passe la réservation et le paiement ?",
-    a: "La réservation se fait en ligne, sur la page rendez-vous : vous choisissez la prestation, le créneau et le mode (visioconférence ou téléphone). Vous recevez ensuite une confirmation par email avec le lien de la séance.",
+    a: "La réservation se fait en ligne, sur la page rendez-vous : vous choisissez la prestation, le créneau et le mode (visioconférence ou téléphone). Vous recevez ensuite une confirmation par email avec le lien de la séance. Le paiement se fait par virement au moment de la séance.",
   },
 ];
 
@@ -130,11 +130,11 @@ export default function SeancesADistance() {
               Séances à distance
             </span>
             <h1 className="mt-4 font-display text-4xl font-semibold leading-tight text-forest md:text-5xl">
-              Reiki à distance : comment se déroule une{" "}
-              <span className="italic text-violet">séance</span>
+              Séances à distance : comment se déroule une{" "}
+              <span className="italic text-violet">rencontre en ligne</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl leading-relaxed text-ink-soft">
-              Vous êtes en France métropolitaine, ailleurs en Europe, ou simplement
+              Vous êtes en France métropolitaine, ailleurs dans le monde, ou simplement
               dans un moment où vous ne pouvez pas vous déplacer : une séance à
               distance se déroule comme une séance classique, avec la même écoute et
               le même accompagnement, mais depuis chez vous.
@@ -160,12 +160,12 @@ export default function SeancesADistance() {
               Une séance à distance n’est pas un enregistrement, ni un contenu envoyé
               par email : c’est un rendez-vous en direct, en visioconférence ou par
               téléphone, pendant lequel nous travaillons ensemble. Le lien se fait par
-              la parole et par la présence, pas par le contact physique.
+              la parole et par la présence,
+              authentique et bienveillante.
             </p>
             <p className="mt-4 leading-relaxed text-ink-soft">
-              Cette formule convient particulièrement aux personnes qui vivent loin de
-              l’archipel, qui voyagent, qui ont un emploi du temps difficile à
-              déplacer, ou qui se sentent plus en confiance dans leur propre espace.
+              Cette formule convient particulièrement aux personnes qui vivent loin du
+              cabinet, qui ont un emploi du temps difficile à organiser, ou qui se sentent plus en confiance dans leur propre espace.
               Elle permet aussi de garder un fil continu entre deux séances en
               présentiel, lorsque vous êtes en déplacement.
             </p>
@@ -175,7 +175,7 @@ export default function SeancesADistance() {
                 <Wifi size={20} className="text-violet" />
                 <p className="mt-3 text-sm font-bold text-forest">Visio ou téléphone</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                  Vous choisissez le mode au moment de réserver, selon votre connexion
+                  Vous choisissez le mode de communication au moment de réserver, selon votre connexion
                   et votre confort.
                 </p>
               </div>
@@ -183,16 +183,18 @@ export default function SeancesADistance() {
                 <Clock size={20} className="text-violet" />
                 <p className="mt-3 text-sm font-bold text-forest">Le bon fuseau horaire</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                  Les créneaux sont affichés dans votre heure locale, pas dans celle de
-                  la Guadeloupe.
+                  Les créneaux sont affichés dans votre heure locale : l’agenda
+                  s’affiche pour correspondre au fuseau horaire du lieu d’où vous
+                  prenez rendez-vous.
                 </p>
               </div>
               <div className="card p-5">
                 <MapPin size={20} className="text-violet" />
                 <p className="mt-3 text-sm font-bold text-forest">Où que vous soyez</p>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-                  France métropolitaine, Europe, Canada : la seule condition est une
-                  connexion stable.
+                  France hexagonale, Dom Tom, Europe, tout autre pays : la seule condition est
+                  une connexion stable, dans un endroit calme et isolé pour vous sentir
+                  disponible.
                 </p>
               </div>
             </div>
@@ -205,8 +207,10 @@ export default function SeancesADistance() {
                 Le déroulé d’une séance, pas à pas
               </h2>
               <p className="mt-4 leading-relaxed text-ink-soft">
-                Trois temps, toujours dans le même ordre. Rien n’est imposé : si vous
-                préférez ne pas parler au début, c’est possible aussi.
+                Trois temps, toujours dans le même ordre.
+                <br />
+                Rien n’est imposé : si vous préférez ne pas parler au début, c’est
+                possible aussi.
               </p>
             </div>
 
@@ -223,7 +227,7 @@ export default function SeancesADistance() {
                         {index + 1}. {etape.titre}
                       </p>
                     </div>
-                    <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+                    <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-ink-soft">
                       {etape.texte}
                     </p>
                   </article>
@@ -262,16 +266,21 @@ export default function SeancesADistance() {
               Quand prendre une séance à distance ?
             </h2>
             <p className="mt-4 leading-relaxed text-ink-soft">
-              Il n’y a pas de bonne ou de mauvaise raison de venir. Les motifs les plus
-              fréquents :
+              Mes services s’adressent à des personnes stables et autonomes d’un point de
+              vue de leur santé mentale et de leur capacité à mettre en place des actions
+              pour atteindre leurs objectifs.
             </p>
             <ul className="mt-5 space-y-3">
               {[
                 "Un besoin de souffler, de poser ce qui pèse en ce moment.",
-                "Une période de transition : déménagement, changement de travail, séparation.",
+                "Une période de transition de vie avec recherche d’alignement, de soutien, d’équilibre : déménagement, changement professionnel, séparation.",
                 "Une fatigue qui s’installe, un sommeil qui se dégrade, sans cause identifiée.",
                 "Un accompagnement après un deuil ou une épreuve.",
                 "L’envie de comprendre ce qui se répète dans votre vie, et de lâcher prise.",
+                "Une période de flou, de doute, pour clarifier vos besoins, vos désirs, vos blocages, vos objectifs.",
+                "Une problématique physique à cerner, accepter et transformer, en complément de l’approche médicale.",
+                "Un schéma relationnel de rapport de force, de loyauté et/ou de culpabilité à transformer.",
+                "Un lieu qui provoque un inconfort et nécessite une harmonisation.",
                 "Le souhait de garder un suivi régulier quand vous êtes loin de la Guadeloupe.",
               ].map((item) => (
                 <li key={item} className="flex gap-3 leading-relaxed text-ink-soft">
@@ -289,10 +298,10 @@ export default function SeancesADistance() {
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {[
-                ["Un endroit calme", "Une pièce où vous ne serez pas dérangé pendant une heure environ."],
-                ["De l’eau à portée de main", "On a souvent soif après une séance de détente."],
+                ["Un endroit calme", "Une pièce où vous ne serez pas dérangé pendant toute la durée de la rencontre."],
+                ["De l’eau à portée de main", "On a souvent soif au cours d’une séance, et l’eau permet de faire circuler les émotions et l’énergie."],
                 ["Un casque si possible", "Le son est plus net, l’immersion meilleure."],
-                ["Quinze minutes après", "Gardez un temps calme après la séance pour laisser retomber."],
+                ["Quinze minutes après", "Gardez un temps calme après la séance pour laisser les prises de conscience et les informations se poser."],
               ].map(([titre, texte]) => (
                 <div key={titre} className="rounded-3xl border border-sand-200/70 bg-white/70 p-5">
                   <p className="text-sm font-bold text-forest">{titre}</p>

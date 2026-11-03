@@ -56,9 +56,9 @@ const engagements = [
   },
   {
     icone: FileCheck2,
-    titre: "Un cadre clair et un tarif fixe",
+    titre: "Un cadre et des tarifs clairs",
     texte:
-      "Le tarif d’une séance est connu à l’avance, sans engagement de plusieurs séances et sans paiement anticipé d’un forfait.",
+      "Le tarif d’une séance est connu à l’avance, et certaines offres privilèges avantageuses peuvent être mises en place selon les besoins. Les paiements ne sont pas pris en charge par le site internet pour le moment.",
   },
   {
     icone: Lock,
@@ -70,7 +70,7 @@ const engagements = [
     icone: Check,
     titre: "Le droit de dire non",
     texte:
-      "Vous pouvez arrêter une séance à tout moment, refuser un exercice, ou ne pas parler d’un sujet. Rien ne se fait sans votre accord.",
+      "Vous pouvez arrêter une séance à tout moment, refuser un exercice, ou ne pas parler d’un sujet : votre accord et votre engagement sont nécessaires tout au long du cheminement.",
   },
 ];
 
@@ -216,10 +216,10 @@ export default function CadreDeLaPratique() {
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {[
-                ["Signalez votre suivi médical", "Un traitement en cours, une pathologie, une grossesse : c’est utile, pas éliminatoire."],
-                ["Précisez le mode", "Présentiel à Terre-de-Bas, visioconférence ou téléphone."],
-                ["Posez vos questions", "Aucune question n’est gênante, y compris sur ce qui ne se fait pas en séance."],
-                ["Gardez la main", "Vous pouvez arrêter à tout moment, sans avoir à vous justifier."],
+                ["Signalez votre suivi médical", "Un traitement en cours, une pathologie, une grossesse : toute information est utile et importante pour optimiser la personnalisation de votre accompagnement."],
+                ["Posez vos questions", "Toute interrogation est utile et bienvenue, y compris sur ce qui est possible ou non en séance."],
+                ["Précisez votre mode de communication", "Présentiel à Terre-de-Bas, visioconférence ou téléphone."],
+                ["Choisissez en toute conscience", "Un simple message pour prévenir de votre choix suffit. Je reste disponible pour vous aider à prendre les décisions les plus adaptées à vos véritables besoins."],
               ].map(([titre, texte]) => (
                 <div key={titre} className="rounded-3xl border border-sand-200/70 bg-white/70 p-5">
                   <p className="text-sm font-bold text-forest">{titre}</p>

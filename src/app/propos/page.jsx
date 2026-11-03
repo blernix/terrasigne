@@ -139,7 +139,7 @@ export default function Propos() {
               de respect de mes propres besoins.
               <br />
               <br />
-              L’appel de me consacrer entièrement à l’équiLIBRE de L’ÊTRE est
+              L’appel à me consacrer entièrement à l’équiLIBRE de L’ÊTRE est
               alors devenu très fort.
             </p>
           </section>
