@@ -161,7 +161,7 @@ export async function getCarrousel() {
 
 export async function getFeaturedServices() {
   const services = await directusGet(
-    "/items/services?fields=id,titre,description,prix,categorie_id.titre&filter[status][_eq]=published&filter[accueil][_eq]=true",
+    "/items/services?fields=id,titre,description,prix,duree,mode_rdv,categorie_id.titre&filter[status][_eq]=published&filter[accueil][_eq]=true",
     ["services"]
   );
 
@@ -170,6 +170,8 @@ export async function getFeaturedServices() {
     titre: s.titre,
     description: s.description,
     prix: s.prix,
+    duree: s.duree ?? null,
+    mode_rdv: Array.isArray(s.mode_rdv) ? s.mode_rdv : [],
     categorie: { titre: s.categorie_id?.titre || "Sans catégorie" },
   }));
 }

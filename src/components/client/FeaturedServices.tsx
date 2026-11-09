@@ -7,9 +7,34 @@ interface Service {
   titre: string;
   description: string;
   prix: number;
+  duree?: number | null;
+  mode_rdv?: string[];
   categorie: {
     titre: string;
   };
+}
+
+const LIBELLES_MODE: Record<string, string> = {
+  Visioconférence: "visio",
+  Présentiel: "présentiel",
+  Téléphone: "téléphone",
+};
+
+/** 30 -> « 30 min », 60 -> « 1 h », 90 -> « 1 h 30 ». */
+function formatDuree(minutes?: number | null) {
+  if (!minutes || minutes <= 0) return null;
+  const heures = Math.floor(minutes / 60);
+  const reste = minutes % 60;
+  if (heures === 0) return `${reste} min`;
+  return reste === 0 ? `${heures} h` : `${heures} h ${String(reste).padStart(2, "0")}`;
+}
+
+/** ["Visioconférence","Présentiel"] -> « visio ou présentiel ». */
+function formatModes(modes?: string[]) {
+  const libelles = (modes || []).map((m) => LIBELLES_MODE[m] || m.toLowerCase());
+  if (libelles.length === 0) return null;
+  if (libelles.length === 1) return libelles[0];
+  return `${libelles.slice(0, -1).join(", ")} ou ${libelles[libelles.length - 1]}`;
 }
 
 export default function FeaturedServices({ services }: { services: Service[] }) {
@@ -31,35 +56,42 @@ export default function FeaturedServices({ services }: { services: Service[] }) 
 
         {services.length > 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="card flex flex-col p-7 transition hover:-translate-y-1 hover:shadow-soft"
-              >
-                <span className="eyebrow self-start">
-                  {service.categorie?.titre || "Service"}
-                </span>
-                <h3 className="mt-4 font-display text-2xl font-semibold text-forest">
-                  {service.titre}
-                </h3>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
-                  {stripHtml(service.description).length > 160
-                    ? stripHtml(service.description).substring(0, 160) + "…"
-                    : stripHtml(service.description)}
-                </p>
-                <p className="mt-5 font-display text-2xl font-semibold text-violet">
-                  {service.prix ? `${service.prix} €` : ""}
-                </p>
-                <Link
-                  href={`/services?service=${service.id}#category-${createSlug(
-                    service.categorie.titre
-                  )}`}
-                  className="btn btn-primary mt-5 w-full"
+            {services.map((service) => {
+              const duree = formatDuree(service.duree);
+              const modes = formatModes(service.mode_rdv);
+
+              return (
+                <div
+                  key={service.id}
+                  className="card flex flex-col p-7 transition hover:-translate-y-1 hover:shadow-soft"
                 >
-                  Voir le détail
-                </Link>
-              </div>
-            ))}
+                  <p className="text-xs font-bold text-forest">
+                    {duree}
+                    {duree && modes ? <span className="font-semibold text-muted"> · </span> : null}
+                    {modes ? <span className="font-semibold text-muted">{modes}</span> : null}
+                  </p>
+                  <h3 className="mt-4 font-display text-2xl font-semibold text-forest">
+                    {service.titre}
+                  </h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
+                    {stripHtml(service.description).length > 160
+                      ? stripHtml(service.description).substring(0, 160) + "…"
+                      : stripHtml(service.description)}
+                  </p>
+                  <p className="mt-5 font-display text-2xl font-semibold text-violet">
+                    {service.prix ? `${service.prix} €` : ""}
+                  </p>
+                  <Link
+                    href={`/services?service=${service.id}#category-${createSlug(
+                      service.categorie.titre
+                    )}`}
+                    className="btn btn-primary mt-5 w-full"
+                  >
+                    Voir le détail
+                  </Link>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="text-ink-soft">Aucun service mis en avant pour le moment.</p>
