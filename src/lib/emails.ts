@@ -167,8 +167,8 @@ export function bookingConfirmationEmailHtml(params: BookingEmailParams): string
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
   if (supplement)
     rows.push({
-      label: "Créneau anticipé (+1 h)",
-      value: `+${supplement} € (à régler sur place, non facturé)`,
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à régler sur place, non facturé",
     });
 
   const manageBlock = manageUrl
@@ -308,16 +308,24 @@ export interface RescheduleEmailParams {
   service: string;
   oldDateLabel: string;
   newDateLabel: string;
+  /** Supplément de la nouvelle plage (0 ou absent : aucune ligne). */
+  supplement?: number | null;
   manageUrl?: string;
 }
 
 export function rescheduleEmailHtml(params: RescheduleEmailParams): string {
-  const { name, service, oldDateLabel, newDateLabel, manageUrl } = params;
+  const { name, service, oldDateLabel, newDateLabel, supplement, manageUrl } =
+    params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
     { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
   ];
+  if (supplement)
+    rows.push({
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à régler sur place, non facturé",
+    });
 
   const manageBlock = manageUrl
     ? `<tr>
@@ -398,8 +406,8 @@ export function ownerNotificationEmailHtml(
   if (price) rows.push({ label: "Tarif", value: `${price} €` });
   if (supplement)
     rows.push({
-      label: "Créneau anticipé (+1 h)",
-      value: `+${supplement} € à encaisser sur place`,
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à encaisser sur place",
     });
 
   const messageHtml = message
@@ -472,14 +480,24 @@ export interface OwnerRescheduleEmailParams {
   service: string;
   oldDateLabel: string;
   newDateLabel: string;
+  /** Supplément de la nouvelle plage (0 ou absent : aucune ligne). */
+  supplement?: number | null;
   manageUrl?: string;
 }
 
 export function ownerRescheduleEmailHtml(
   params: OwnerRescheduleEmailParams
 ): string {
-  const { name, email, phone, service, oldDateLabel, newDateLabel, manageUrl } =
-    params;
+  const {
+    name,
+    email,
+    phone,
+    service,
+    oldDateLabel,
+    newDateLabel,
+    supplement,
+    manageUrl,
+  } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
@@ -488,6 +506,11 @@ export function ownerRescheduleEmailHtml(
     { label: "Email", value: escapeHtml(email) },
   ];
   if (phone) rows.push({ label: "Téléphone", value: escapeHtml(phone) });
+  if (supplement)
+    rows.push({
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à encaisser sur place",
+    });
 
   const inner = `
   ${header("Rendez-vous modifié")}
@@ -499,6 +522,171 @@ export function ownerRescheduleEmailHtml(
     </td>
   </tr>
   ${card(rows)}
+  ${ownerManageBlock(manageUrl)}
+  ${ownerAgendaBlock(manageUrl)}`;
+
+  return layout(inner);
+}
+
+export interface ClientServiceChangedEmailParams {
+  name: string;
+  oldService: string;
+  newService: string;
+  dateLabel: string;
+  durationMin: number;
+  price?: number | null;
+  supplement?: number | null;
+  /** Qui a changé la prestation : la cliente elle-même ou Cindy. */
+  changedBy?: "client" | "owner";
+  manageUrl?: string;
+}
+
+/**
+ * Mail envoyé à la cliente après un changement de prestation. La date et
+ * l'heure ne bougent pas : seules la prestation, la durée et le prix changent.
+ * Le paiement sur place est rappelé, comme dans le mail de Cindy (B4).
+ */
+export function clientServiceChangedEmailHtml(
+  params: ClientServiceChangedEmailParams
+): string {
+  const {
+    name,
+    oldService,
+    newService,
+    dateLabel,
+    durationMin,
+    price,
+    supplement,
+    changedBy,
+    manageUrl,
+  } = params;
+  const rows = [
+    { label: "Ancienne prestation", value: escapeHtml(oldService) },
+    { label: "Nouvelle prestation", value: escapeHtml(newService) },
+    { label: "Date & heure", value: escapeHtml(dateLabel) },
+    { label: "Nouvelle durée", value: `${durationMin} min` },
+  ];
+  if (price) rows.push({ label: "Tarif", value: `${price} €` });
+  if (supplement)
+    rows.push({
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à régler sur place, non facturé",
+    });
+
+  const intro =
+    changedBy === "owner"
+      ? "Cindy a modifié la prestation de votre rendez-vous. La date et l'heure ne changent pas :"
+      : "Vous avez modifié la prestation de votre rendez-vous. La date et l'heure ne changent pas :";
+
+  const manageBlock = manageUrl
+    ? `<tr>
+    <td style="padding:24px 32px 0;text-align:center;">
+      <a href="${escapeHtml(manageUrl)}" style="display:inline-block;background-color:${BRAND.primary};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:999px;padding:14px 32px;">Modifier ou annuler mon rendez-vous</a>
+    </td>
+  </tr>`
+    : "";
+
+  const inner = `
+  ${header("Prestation modifiée")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 8px;font-size:16px;color:${BRAND.text};line-height:1.6;">
+        Bonjour <strong>${escapeHtml(name)}</strong>,
+      </p>
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        ${intro}
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  <tr>
+    <td style="padding:16px 32px 0;text-align:center;">
+      <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
+        Le paiement se fait sur place.
+      </p>
+    </td>
+  </tr>
+  ${manageBlock}`;
+
+  return layout(inner);
+}
+
+export interface OwnerServiceChangedEmailParams {
+  name: string;
+  email: string;
+  phone?: string;
+  oldService: string;
+  newService: string;
+  dateLabel: string;
+  durationMin: number;
+  price?: number | null;
+  supplement?: number | null;
+  /** Qui a changé la prestation : la cliente depuis son lien, ou Cindy. */
+  changedBy?: "client" | "owner";
+  manageUrl?: string;
+}
+
+/**
+ * Mail envoyé à Cindy quand la prestation d'un rendez-vous change : qui a
+ * changé quoi, l'ancienne et la nouvelle prestation, la nouvelle durée et le
+ * prix. Le paiement sur place est rappelé (B4).
+ */
+export function ownerServiceChangedEmailHtml(
+  params: OwnerServiceChangedEmailParams
+): string {
+  const {
+    name,
+    email,
+    phone,
+    oldService,
+    newService,
+    dateLabel,
+    durationMin,
+    price,
+    supplement,
+    changedBy,
+    manageUrl,
+  } = params;
+  const rows = [
+    { label: "Client", value: escapeHtml(name) },
+    { label: "Email", value: escapeHtml(email) },
+  ];
+  if (phone) rows.push({ label: "Téléphone", value: escapeHtml(phone) });
+  rows.push(
+    { label: "Ancienne prestation", value: escapeHtml(oldService) },
+    { label: "Nouvelle prestation", value: escapeHtml(newService) },
+    { label: "Date & heure", value: escapeHtml(dateLabel) },
+    { label: "Nouvelle durée", value: `${durationMin} min` }
+  );
+  if (price) rows.push({ label: "Tarif", value: `${price} €` });
+  if (supplement)
+    rows.push({
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à encaisser sur place",
+    });
+
+  const intro =
+    changedBy === "client"
+      ? "La cliente a changé la prestation de son rendez-vous depuis son lien de gestion :"
+      : "Vous avez changé la prestation de ce rendez-vous :";
+
+  const inner = `
+  ${header("Prestation modifiée")}
+  <tr>
+    <td style="background-color:#ffffff;padding:32px 32px 8px;border-radius:0 0 16px 16px;">
+      <p style="margin:0 0 24px;font-size:15px;color:${BRAND.muted};line-height:1.6;">
+        ${intro}
+      </p>
+    </td>
+  </tr>
+  ${card(rows)}
+  <tr>
+    <td style="padding:16px 32px 0;text-align:center;">
+      <p style="margin:0;font-size:13px;color:${BRAND.muted};line-height:1.6;">
+        Le paiement se fait sur place.
+      </p>
+    </td>
+  </tr>
   ${ownerManageBlock(manageUrl)}
   ${ownerAgendaBlock(manageUrl)}`;
 
@@ -609,6 +797,8 @@ export interface ClientRescheduledByOwnerParams {
   service: string;
   oldDateLabel: string;
   newDateLabel: string;
+  /** Supplément de la nouvelle plage (0 ou absent : aucune ligne). */
+  supplement?: number | null;
   reason?: string;
   manageUrl?: string;
 }
@@ -620,13 +810,25 @@ export interface ClientRescheduledByOwnerParams {
 export function clientRescheduledByOwnerEmailHtml(
   params: ClientRescheduledByOwnerParams
 ): string {
-  const { name, service, oldDateLabel, newDateLabel, reason, manageUrl } =
-    params;
+  const {
+    name,
+    service,
+    oldDateLabel,
+    newDateLabel,
+    supplement,
+    reason,
+    manageUrl,
+  } = params;
   const rows = [
     { label: "Service", value: escapeHtml(service) },
     { label: "Ancienne date", value: escapeHtml(oldDateLabel) },
     { label: "Nouvelle date", value: escapeHtml(newDateLabel) },
   ];
+  if (supplement)
+    rows.push({
+      label: `Créneau majoré (+${supplement} €)`,
+      value: "à régler sur place, non facturé",
+    });
 
   const manageBlock = manageUrl
     ? `<tr>

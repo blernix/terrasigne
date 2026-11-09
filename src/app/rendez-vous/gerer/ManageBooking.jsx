@@ -9,6 +9,7 @@ import {
   groupSlots,
   buildMonthGrid,
 } from "@/lib/calendar";
+import ChoixPrestation from "@/components/common/ChoixPrestation";
 
 const CARD =
   "bg-white rounded-2xl border border-sand-200 shadow-soft";
@@ -73,8 +74,13 @@ function ManageContent({ token }) {
     setSelectedSlot(null);
     try {
       const tz = booking.clientTimezone || "America/Guadeloupe";
+      // La pause du rendez-vous compte dans la place occupée : on la transmet
+      // quand elle est connue (aujourd'hui /api/booking/manage ne l'expose
+      // pas encore, le serveur retombe alors sur la pause du service).
+      const pauseParam =
+        booking.pauseMin != null ? `&pause=${booking.pauseMin}` : "";
       const res = await fetch(
-        `/api/booking/availability?serviceId=${booking.serviceId}&duree=${booking.durationMin}&timezone=${tz}`
+        `/api/booking/availability?serviceId=${booking.serviceId}&duree=${booking.durationMin}${pauseParam}&timezone=${tz}`
       );
       const data = await res.json();
       setAvailability(data);
@@ -126,6 +132,78 @@ function ManageContent({ token }) {
     }
   }
 
+  function startServiceChange() {
+    setMode("service");
+    setFeedback(null);
+    setConfirmCancel(false);
+  }
+
+  async function confirmServiceChange(option) {
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/booking/change-service", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Seuls des identifiants partent : durée, pause et prix sont résolus
+        // côté serveur, jamais imposés par le navigateur.
+        body: JSON.stringify({
+          token,
+          serviceId: option.serviceId,
+          formuleId: option.formuleId,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        // Le rendez-vous reste affiché au-dessus du sélecteur : une erreur de
+        // prestation ne doit pas masquer la réservation existante.
+        setFeedback({
+          type: "error",
+          text: data.message || "Une erreur est survenue.",
+        });
+        return;
+      }
+
+      const supplement = Number(data.supplement) || 0;
+      setBooking((previous) =>
+        previous
+          ? {
+              ...previous,
+              serviceName: data.serviceName || previous.serviceName,
+              durationMin:
+                data.durationMin != null
+                  ? data.durationMin
+                  : previous.durationMin,
+              prix: data.prix != null ? data.prix : previous.prix,
+              supplement,
+            }
+          : previous
+      );
+      setFeedback({
+        type: "success",
+        text: "Votre prestation a été modifiée.",
+        lines: [
+          `Nouvelle prestation : ${data.serviceName || "—"}`,
+          `Durée : ${data.durationMin} min`,
+          `Prix : ${
+            data.prix != null ? `${data.prix} €` : "Prix non communiqué"
+          }`,
+          supplement > 0
+            ? `Supplément : +${supplement} € (à régler sur place)`
+            : "Supplément : aucun",
+          "La praticienne a été prévenue par email.",
+        ],
+        warning: data.warning,
+      });
+      setMode("view");
+    } catch {
+      setFeedback({ type: "error", text: "Une erreur inattendue est survenue." });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   async function doCancel() {
     setSubmitting(true);
     setFeedback(null);
@@ -163,13 +241,26 @@ function ManageContent({ token }) {
 
   const feedbackBox = feedback && (
     <div
+      role={feedback.type === "error" ? "alert" : "status"}
       className={`px-5 py-4 text-center font-semibold rounded-xl mb-6 border ${
         feedback.type === "success"
           ? "text-forest border-sage-200 bg-sage-100"
           : "text-[#8c3b34] border-[#eed3ce] bg-[#fbeeec]"
       }`}
     >
-      {feedback.text}
+      {feedback.text && <p>{feedback.text}</p>}
+      {feedback.lines && (
+        <ul className="mt-2 space-y-1">
+          {feedback.lines.map((line, index) => (
+            <li key={index}>{line}</li>
+          ))}
+        </ul>
+      )}
+      {feedback.warning && (
+        <p className="mt-3 rounded-xl bg-[#fff6e5] border border-[#f0d9a8] px-3 py-2 text-sm text-[#8a5a12]">
+          ⚠️ {feedback.warning}
+        </p>
+      )}
     </div>
   );
 
@@ -277,6 +368,13 @@ function ManageContent({ token }) {
               <div className="grid gap-3">
                 <button onClick={startReschedule} className={BTN_ACCENT}>
                   Modifier la date ou l'heure
+                </button>
+
+                <button
+                  onClick={startServiceChange}
+                  className="border border-forest/25 text-forest py-3.5 rounded-full font-bold hover:bg-sage-100 transition"
+                >
+                  Changer ma prestation
                 </button>
 
                 {!confirmCancel ? (
@@ -412,7 +510,7 @@ function ManageContent({ token }) {
                       {capitalize(selectedDay.month)}
                     </span>
                   </div>
-                  {groupSlots(selectedDay.slots.filter((slot) => !slot.early)).map((group) => (
+                  {groupSlots(selectedDay.slots).map((group) => (
                     <div key={group.label} className="mb-5 last:mb-0">
                       <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
                         {group.label}
@@ -430,11 +528,23 @@ function ManageContent({ token }) {
                             }`}
                           >
                             {slot.timeLabel}
+                            {Number(slot.supplement) > 0 && (
+                              <span className="block mt-0.5 text-[0.6rem] font-extrabold text-violet">
+                                +{slot.supplement} €
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>
                     </div>
                   ))}
+
+                  {Number(selectedSlot?.supplement) > 0 && (
+                    <p className="text-sm font-semibold text-violet mt-4">
+                      Créneau majoré : +{selectedSlot.supplement} € (à régler
+                      sur place).
+                    </p>
+                  )}
 
                   <button
                     onClick={confirmReschedule}
@@ -447,6 +557,56 @@ function ManageContent({ token }) {
                   </button>
                 </div>
               )}
+            </div>
+          )}
+
+          {status === "ready" && mode === "service" && booking && (
+            <div>
+              <button
+                onClick={() => {
+                  setMode("view");
+                  setFeedback(null);
+                }}
+                className="text-violet hover:text-forest transition text-sm font-semibold mb-6"
+              >
+                ← Retour
+              </button>
+              <h2 className="font-display text-xl md:text-2xl text-forest-700 mb-2 text-center">
+                Changer ma prestation
+              </h2>
+              <p className="text-center text-xs text-muted mb-6">
+                La date et l&apos;heure du rendez-vous ne changent pas.
+              </p>
+
+              <div className={`${CARD} overflow-hidden mb-6`}>
+                <div className="bg-sage-100 px-6 py-4 border-b border-sand-200">
+                  <h3 className="font-display text-lg text-forest-700">
+                    {booking.serviceName}
+                  </h3>
+                </div>
+                <div className="px-6 py-5 space-y-3">
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted">Date &amp; heure</span>
+                    <span className="text-ink font-semibold capitalize text-right">
+                      {dateLabel}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-muted">Durée actuelle</span>
+                    <span className="text-ink font-semibold">
+                      {booking.durationMin} min
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <ChoixPrestation
+                currentServiceId={booking.serviceId}
+                currentDurationMin={booking.durationMin}
+                onSelect={confirmServiceChange}
+                busy={submitting}
+                error={feedback?.type === "error" ? feedback.text : null}
+              />
             </div>
           )}
         </section>

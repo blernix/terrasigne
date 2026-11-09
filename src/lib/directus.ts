@@ -18,12 +18,13 @@ interface DirectusService {
   duree: number | null;
   pause: number | null;
   rendez_vous: boolean;
+  status: string;
   pdf: DirectusServicePdf | null;
 }
 
 export async function fetchService(serviceId: string): Promise<DirectusService> {
   const res = await fetch(
-    `${DIRECTUS_API}/items/services/${serviceId}?fields=id,titre,description,prix,duree,pause,rendez_vous,pdf.id,pdf.filename_download,pdf.filename_disk,pdf.type`,
+    `${DIRECTUS_API}/items/services/${serviceId}?fields=id,titre,description,prix,duree,pause,rendez_vous,status,pdf.id,pdf.filename_download,pdf.filename_disk,pdf.type`,
     {
       headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
       cache: "no-store",
@@ -38,6 +39,101 @@ export async function fetchService(serviceId: string): Promise<DirectusService> 
 
 export function getDirectusFileUrl(filenameDisk: string): string {
   return `${process.env.NEXT_PUBLIC_DIRECTUS_STORAGE}/uploads/${filenameDisk}`;
+}
+
+/** Prestation réservable résolue dans Directus, seule source du prix et de la durée. */
+export interface BookingOption {
+  serviceId: string;
+  titre: string;
+  duree: number;
+  pause: number;
+  prix: number | null;
+  pdf: { name: string; url: string } | null;
+}
+
+interface DirectusFormule {
+  id: string;
+  titre: string;
+  duree: number | null;
+  pause: number | null;
+  prix: number | null;
+  service_id: string;
+  status: string;
+}
+
+/**
+ * Résout une prestation réservable pour un rendez-vous existant : le service
+ * doit être publié et marqué `rendez_vous`, et la formule — quand elle est
+ * fournie — doit être publiée et rattachée à ce service. Rend `null` (demande
+ * invalide, pas une panne) dans tous les cas de refus ; une panne Directus
+ * lève, pour que l'appelant réponde 502 sans avoir rien écrit.
+ *
+ * Même logique de lecture que fetchService (service) et /api/services
+ * (formules publiées) ; le prix tombe de la formule, sinon du service.
+ */
+export async function fetchBookingOption(
+  serviceId: string,
+  formuleId?: string | null
+): Promise<BookingOption | null> {
+  const service = await fetchService(String(serviceId));
+  if (
+    !service ||
+    service.status !== "published" ||
+    service.rendez_vous !== true
+  ) {
+    return null;
+  }
+
+  let duree = Number(service.duree);
+  let pause = Number(service.pause || 0);
+  let prix = service.prix != null ? Number(service.prix) : null;
+
+  if (formuleId) {
+    const res = await fetch(
+      `${DIRECTUS_API}/items/formule/${encodeURIComponent(
+        String(formuleId)
+      )}?fields=id,titre,duree,pause,prix,service_id,status`,
+      {
+        headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
+        cache: "no-store",
+      }
+    );
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Directus error ${res.status}`);
+
+    const { data }: { data: DirectusFormule | null } = await res.json();
+    if (
+      !data ||
+      data.status !== "published" ||
+      String(data.service_id) !== String(serviceId)
+    ) {
+      return null;
+    }
+
+    if (data.duree != null) duree = Number(data.duree);
+    if (data.pause != null) pause = Number(data.pause);
+    if (data.prix != null) prix = Number(data.prix);
+  }
+
+  if (!Number.isFinite(duree) || duree <= 0) return null;
+
+  const pdf = service.pdf?.filename_disk
+    ? {
+        url: getDirectusFileUrl(service.pdf.filename_disk),
+        name:
+          service.pdf.filename_download ||
+          `document-${service.pdf.filename_disk}`,
+      }
+    : null;
+
+  return {
+    serviceId: String(service.id),
+    titre: service.titre,
+    duree,
+    pause: Number.isFinite(pause) ? pause : 0,
+    prix: prix != null && Number.isFinite(prix) ? prix : null,
+    pdf,
+  };
 }
 
 const REVALIDATE = 300;

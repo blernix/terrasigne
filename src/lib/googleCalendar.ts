@@ -2,15 +2,15 @@ import { google } from "googleapis";
 import path from "path";
 import { randomUUID } from "crypto";
 import {
-  EARLY_SLOT_MIN_BEFORE,
-  EARLY_SLOT_SUPPLEMENT,
-} from "@/lib/bookingOptions";
-import { buildEventDescription } from "@/lib/eventDescription";
+  buildSlots,
+  parseWindow,
+  validateSlot,
+  type WindowInput,
+} from "@/lib/plages";
+import { buildEventDescription, rewriteDescriptionFields } from "@/lib/eventDescription";
+import type { ServiceChangePatch } from "@/lib/serviceChange";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
-const OPEN_MARKER = "dispo";
-
-const SLOT_STEP_MIN = 30;
 
 export const MIN_LEAD_HOURS = 48;
 export const MAX_AHEAD_DAYS = 90;
@@ -47,7 +47,7 @@ interface CalendarEvent {
 }
 
 export function isOpenWindow(summary: string): boolean {
-  return summary.trim().toLowerCase().startsWith(OPEN_MARKER);
+  return parseWindow(summary).open;
 }
 
 export async function listEvents(
@@ -76,30 +76,15 @@ export async function listEvents(
 export interface Slot {
   start: Date;
   end: Date;
-  /** Créneau proposé avant l'ouverture, avec supplément. */
-  early?: boolean;
+  /** 0 = créneau normal, SUPPLEMENT_MAJO = créneau d'une plage majorée. */
+  supplement: number;
 }
 
-function splitWindowIntoSlots(
-  windowStart: Date,
-  windowEnd: Date,
-  durationMin: number
-): Slot[] {
-  const slots: Slot[] = [];
-  const durationMs = durationMin * 60000;
-  const stepMs = SLOT_STEP_MIN * 60000;
-  let t = windowStart.getTime();
-  const endMs = windowEnd.getTime();
-
-  while (t + durationMs <= endMs) {
-    slots.push({ start: new Date(t), end: new Date(t + durationMs) });
-    t += stepMs;
-  }
-
-  return slots;
-}
-
-function overlaps(a: Slot, bStart: Date, bEnd: Date): boolean {
+function overlaps(
+  a: { start: Date; end: Date },
+  bStart: Date,
+  bEnd: Date
+): boolean {
   return a.start.getTime() < bEnd.getTime() && bStart.getTime() < a.end.getTime();
 }
 
@@ -111,42 +96,22 @@ export async function getAvailability(
 ): Promise<Slot[]> {
   const events = await listEvents(timeMin, timeMax);
 
-  const openWindows = events.filter((e) => isOpenWindow(e.summary));
+  const windows: WindowInput[] = events
+    .filter((e) => isOpenWindow(e.summary))
+    .map((e) => ({ summary: e.summary, start: e.start, end: e.end }));
   const busy = events.filter((e) => !isOpenWindow(e.summary));
 
-  const slots: Slot[] = [];
-  for (const w of openWindows) {
-    const start = new Date(w.start);
-    const end = new Date(w.end);
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) continue;
-    slots.push(...splitWindowIntoSlots(start, end, durationMin));
-
-    // Créneaux anticipés : ils commencent avant l'ouverture de la plage et
-    // débordent dedans, d'où le +20 €. On ne remonte jamais plus d'une heure.
-    for (let m = EARLY_SLOT_MIN_BEFORE; m >= SLOT_STEP_MIN; m -= SLOT_STEP_MIN) {
-      const s = new Date(start.getTime() - m * 60000);
-      const e = new Date(s.getTime() + durationMin * 60000);
-      if (e.getTime() <= start.getTime()) continue;
-      slots.push({ start: s, end: e, early: true });
-    }
-  }
-
   const now = Date.now();
-  const minStart = now + MIN_LEAD_HOURS * 3600000;
-  const maxStart = now + MAX_AHEAD_DAYS * 86400000;
+  const minStart = new Date(now + MIN_LEAD_HOURS * 3600000);
+  const maxStart = new Date(now + MAX_AHEAD_DAYS * 86400000);
 
-  const seen = new Set<number>();
-  const unique = slots.filter((slot) => {
-    const key = slot.start.getTime();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  // plages.ts découpe les plages et valide chaque début de façon stricte :
+  // aucun créneau hors plage, aucune marge, supplément = max des plages
+  // couvrantes (indépendant de l'ordre de lecture de Google).
+  const slots = buildSlots(windows, durationMin, { minStart, maxStart });
 
-  const free = unique.filter(
+  const free = slots.filter(
     (slot) =>
-      slot.start.getTime() >= minStart &&
-      slot.start.getTime() <= maxStart &&
       !busy.some((b) => {
         const bs = new Date(b.start);
         const be = new Date(b.end);
@@ -157,8 +122,6 @@ export async function getAvailability(
       })
   );
 
-  // Les creneaux anticipes sont ajoutes apres la plage : on retrie pour
-  // garder un affichage chronologique.
   return free.sort((a, b) => a.start.getTime() - b.start.getTime());
 }
 
@@ -198,7 +161,6 @@ export async function createBookingEvent(input: BookingInput) {
     serviceName: input.serviceName,
     prix: input.prix,
     supplement: input.supplement,
-    earlySlotMinBefore: EARLY_SLOT_MIN_BEFORE,
     zoomLink: input.zoomLink,
     consentAt: input.consentAt,
     ownerManageUrl: input.ownerManageUrl,
@@ -397,10 +359,24 @@ export interface ManagedBooking {
   clientTimezone: string;
   meetingType?: string;
   phone?: string;
+  /** Prix stocké dans l'événement (0 si absent : rendez-vous antérieur). */
+  prix: number;
+  pauseMin: number;
+  supplement: number;
+  pdfName: string;
+  pdfUrl: string;
+  /**
+   * Description Google de l'événement. Lue seulement sur demande explicite
+   * (`findBookingByToken(token, { withDescription: true })`) : c'est le seul
+   * stockage des infos clientes, du consentement et du lien praticienne signé,
+   * donc elle ne doit jamais sortir d'une réponse HTTP.
+   */
+  description?: string;
 }
 
 export async function findBookingByToken(
-  token: string
+  token: string,
+  options: { withDescription?: boolean } = {}
 ): Promise<ManagedBooking | null> {
   const calendar = await getCalendarClient();
   const res = await calendar.events.list({
@@ -417,7 +393,10 @@ export async function findBookingByToken(
   if (!e) return null;
 
   const p = e.extendedProperties?.private || {};
-  return {
+  const prix = Number(p.prix);
+  const pauseMin = Number(p.pauseMin);
+  const supplement = Number(p.supplement);
+  const booking: ManagedBooking = {
     id: e.id || "",
     token,
     start: e.start?.dateTime || e.start?.date || "",
@@ -431,7 +410,21 @@ export async function findBookingByToken(
     clientTimezone: p.clientTimezone || BUSINESS_TIMEZONE,
     meetingType: p.meetingType || "",
     phone: p.clientPhone || "",
+    // Champs ajoutés pour le changement de prestation : additifs, aucune clé
+    // existante n'est renommée. Un rendez-vous antérieur n'a pas de prix
+    // stocké : 0, jamais NaN.
+    prix: Number.isFinite(prix) ? prix : 0,
+    pauseMin: Number.isFinite(pauseMin) ? pauseMin : 0,
+    supplement: Number.isFinite(supplement) ? supplement : 0,
+    pdfName: p.pdfName || "",
+    pdfUrl: p.pdfUrl || "",
   };
+
+  if (options.withDescription) {
+    booking.description = e.description || "";
+  }
+
+  return booking;
 }
 
 export async function cancelBooking(
@@ -448,10 +441,25 @@ export async function cancelBooking(
   return booking;
 }
 
+export interface RescheduleOptions {
+  /**
+   * Supplément recalculé de la nouvelle plage (0 = créneau normal).
+   * Absent : la valeur stockée n'est pas touchée (appel praticienne historique).
+   */
+  supplement?: number;
+  /**
+   * Description complète de remplacement. Si elle est absente et que le
+   * supplément est fourni, la description existante est réécrite sur place
+   * (seules les lignes Service / Prix / Supplément changent).
+   */
+  description?: string;
+}
+
 export async function rescheduleBooking(
   token: string,
   newStart: Date,
-  newEnd: Date
+  newEnd: Date,
+  options: RescheduleOptions = {}
 ): Promise<ManagedBooking | null> {
   const booking = await findBookingByToken(token);
   if (!booking) return null;
@@ -463,20 +471,33 @@ export async function rescheduleBooking(
   });
   const privateProps = existing.data.extendedProperties?.private || {};
 
+  const privatePatch: Record<string, string> = {
+    ...privateProps,
+    reminderSent: "false",
+    // Réarmé aussi : sinon un rendez-vous reporté après le récap de la
+    // veille n'apparaît plus jamais dans le récap de Cindy.
+    ownerReminderSent: "false",
+  };
+
+  let description = options.description;
+  if (options.supplement !== undefined) {
+    privatePatch.supplement = String(options.supplement);
+    if (description === undefined) {
+      description = rewriteDescriptionFields(existing.data.description || "", {
+        supplement: options.supplement,
+      });
+    }
+  }
+
   await calendar.events.patch({
     calendarId: getCalendarId(),
     eventId: booking.id,
     requestBody: {
       start: { dateTime: newStart.toISOString(), timeZone: BUSINESS_TIMEZONE },
       end: { dateTime: newEnd.toISOString(), timeZone: BUSINESS_TIMEZONE },
+      ...(description !== undefined ? { description } : {}),
       extendedProperties: {
-        private: {
-          ...privateProps,
-          reminderSent: "false",
-          // Réarmé aussi : sinon un rendez-vous reporté après le récap de la
-          // veille n'apparaît plus jamais dans le récap de Cindy.
-          ownerReminderSent: "false",
-        },
+        private: privatePatch,
       },
     },
   });
@@ -489,28 +510,60 @@ export async function rescheduleBooking(
 }
 
 /**
+ * Applique un changement de prestation sur l'événement existant : même id,
+ * même début, même `bookingToken`. `If-Match` porte sur l'`etag` relu juste
+ * avant le patch : une modification concurrente de Cindy n'est pas écrasée
+ * (Google répond 412, l'appelant traduit en 409).
+ *
+ * Les propriétés privées existantes (`consentAt`, `bookingToken`,
+ * `clientEmail`, `meetingType`…) sont étalées, jamais reconstruites : le patch
+ * n'en supprime aucune.
+ */
+export async function changeBookingService(
+  eventId: string,
+  patch: ServiceChangePatch
+): Promise<void> {
+  const calendar = await getCalendarClient();
+  const existing = await calendar.events.get({
+    calendarId: getCalendarId(),
+    eventId,
+  });
+
+  const privateProps = existing.data.extendedProperties?.private || {};
+  const etag = existing.data.etag;
+
+  await calendar.events.patch(
+    {
+      calendarId: getCalendarId(),
+      eventId,
+      requestBody: {
+        summary: patch.summary,
+        // Pas de `start` : la place du rendez-vous dans l'agenda ne bouge pas.
+        end: { dateTime: patch.end, timeZone: BUSINESS_TIMEZONE },
+        description: patch.description,
+        extendedProperties: {
+          private: { ...privateProps, ...patch.privateProps },
+        },
+      },
+    },
+    etag ? { headers: { "If-Match": etag } } : undefined
+  );
+}
+
+/**
  * Vérifie qu'un créneau demandé correspond bien à une plage ouverte de l'agenda,
- * ou à sa marge anticipée (EARLY_SLOT_MIN_BEFORE, avec supplément).
- * Sans ce contrôle, l'API acceptait n'importe quelle heure libre du calendrier.
+ * entièrement contenue dans cette plage (aucune marge), et rend le supplément
+ * de la plage (maximum si plusieurs plages le couvrent).
  */
 export async function getSlotAllowance(
   start: Date,
   end: Date
-): Promise<{ allowed: boolean; early: boolean }> {
+): Promise<{ allowed: boolean; supplement: number }> {
   const lookback = new Date(start.getTime() - 24 * 3600000);
   const events = await listEvents(lookback, end);
-  const windows = events.filter((e) => isOpenWindow(e.summary));
+  const windows: WindowInput[] = events
+    .filter((e) => isOpenWindow(e.summary))
+    .map((e) => ({ summary: e.summary, start: e.start, end: e.end }));
 
-  for (const w of windows) {
-    const ws = new Date(w.start);
-    const we = new Date(w.end);
-    if (Number.isNaN(ws.getTime()) || Number.isNaN(we.getTime())) continue;
-    const earliest = ws.getTime() - EARLY_SLOT_MIN_BEFORE * 60000;
-    if (start.getTime() >= earliest && end.getTime() <= we.getTime()) {
-      return { allowed: true, early: start.getTime() < ws.getTime() };
-    }
-  }
-  return { allowed: false, early: false };
+  return validateSlot(windows, start, end);
 }
-
-export { EARLY_SLOT_SUPPLEMENT };

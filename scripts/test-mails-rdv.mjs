@@ -275,19 +275,26 @@ const description = desc.buildEventDescription({
   serviceName: "Reiki",
   prix: 60,
   supplement: 20,
-  earlySlotMinBefore: 60,
   ownerManageUrl: MANAGE,
   client: {
     name: "Marie Dupont",
     email: "marie@example.com",
     phone: "0690 00 00 00",
+    profession: "Infirmière",
+    suivi: "Oui",
+    typeSeance: "À distance",
+    message: "Merci de me rappeler",
     consent: true,
     consentAt: "2026-11-03T10:00:00.000Z",
   },
 });
 check("description : contient le lien de gestion", description.includes(MANAGE));
 check("description : prévient de ne pas supprimer l'événement", /Ne supprimez pas cet événement/.test(description));
-check("description : libellé du supplément anticipé", description.includes("Supplément créneau anticipé (+1 h)"));
+check("description : libellé du supplément majoré", description.includes("Supplément créneau majoré"));
+check(
+  "description : montant du supplément à régler sur place",
+  description.includes("+20 € (à régler sur place, non facturé)")
+);
 check("description : informations client conservées", description.includes("Client : Marie Dupont"));
 
 const noLinkDesc = desc.buildEventDescription({
@@ -295,6 +302,252 @@ const noLinkDesc = desc.buildEventDescription({
   client: { name: "Marie Dupont", email: "marie@example.com" },
 });
 check("description sans lien : aucun bloc de gestion", !noLinkDesc.includes("Gérer ce rendez-vous"));
+
+/* ------------------------------------------------------------------ */
+section("Report : le supplément de la nouvelle plage suit dans les mails");
+
+const clientResched = emails.rescheduleEmailHtml({
+  name: base.name,
+  service: base.service,
+  oldDateLabel: "Lundi 2 novembre 2026 à 09:00",
+  newDateLabel: base.dateLabel,
+  supplement: 20,
+});
+const clientReschedNoSupp = emails.rescheduleEmailHtml({
+  name: base.name,
+  service: base.service,
+  oldDateLabel: "Lundi 2 novembre 2026 à 09:00",
+  newDateLabel: base.dateLabel,
+});
+const ownerReschedSupp = emails.ownerRescheduleEmailHtml({
+  name: base.name,
+  email: "marie@example.com",
+  service: base.service,
+  oldDateLabel: "Lundi 2 novembre 2026 à 09:00",
+  newDateLabel: base.dateLabel,
+  supplement: 20,
+});
+check(
+  "report cliente : ligne « Créneau majoré (+20 €) »",
+  /Créneau majoré \(\+20 €\)/.test(plain(clientResched))
+);
+check(
+  "report cliente : supplément à régler sur place",
+  /à régler sur place, non facturé/.test(plain(clientResched))
+);
+check(
+  "report cliente sans supplément : aucune ligne majorée",
+  !/Créneau majoré/.test(plain(clientReschedNoSupp))
+);
+check(
+  "report Cindy : ligne « Créneau majoré (+20 €) »",
+  /Créneau majoré \(\+20 €\)/.test(plain(ownerReschedSupp))
+);
+check("report Cindy : supplément à encaisser sur place", /à encaisser sur place/.test(plain(ownerReschedSupp)));
+
+/* ------------------------------------------------------------------ */
+section("Plus aucune mention de « créneau anticipé »");
+
+const renderedTemplates = [
+  confPdf,
+  confNoPdf,
+  remPdf,
+  remNoPdf,
+  ownerNew,
+  ownerNewNoLink,
+  ownerResched,
+  ownerReschedSupp,
+  ownerCancel,
+  cancelledWithReason,
+  cancelledNoReason,
+  rescheduledByOwner,
+  clientResched,
+  clientReschedNoSupp,
+  recap,
+];
+check(
+  "aucun gabarit de mail ne parle de « créneau anticipé »",
+  renderedTemplates.every((html) => !/anticip/i.test(html))
+);
+check("la description d'agenda ne parle plus de « créneau anticipé »", !/anticip/i.test(description));
+
+/* ------------------------------------------------------------------ */
+section("Réécriture chirurgicale de la description (report / changement)");
+
+const legacyLines = [
+  "Service : Reiki",
+  "Prix : 60 €",
+  "Supplément créneau anticipé (+1 h) : 20 € (à régler sur place, non facturé)",
+  "Client : Marie Dupont",
+  "Email : marie@example.com",
+  "Profession : Infirmière",
+  "Consentement RGPD : Oui (le 2026-11-03T10:00:00.000Z)",
+  "Message : Merci de me rappeler",
+  "",
+  "———",
+  "Gérer ce rendez-vous (déplacer / annuler) :",
+  MANAGE,
+];
+const legacy = legacyLines.join("\n");
+
+const rewritten = desc.rewriteDescriptionFields(legacy, {
+  serviceName: "Access Bars",
+  prix: 80,
+  supplement: 0,
+});
+check("réécriture : le service change", rewritten.includes("Service : Access Bars"));
+check("réécriture : le prix change", rewritten.includes("Prix : 80 €"));
+check(
+  "réécriture : la ligne de supplément est retirée (ancien libellé reconnu)",
+  !rewritten.includes("Supplément") && !rewritten.includes("anticipé")
+);
+check(
+  "réécriture : toutes les autres lignes sont conservées octet pour octet",
+  ["Client : Marie Dupont", "Email : marie@example.com", "Profession : Infirmière", "Consentement RGPD : Oui (le 2026-11-03T10:00:00.000Z)", "Message : Merci de me rappeler", MANAGE].every(
+    (line) => rewritten.includes(line)
+  ) && rewritten.split("\n").length === legacy.split("\n").length - 1
+);
+check(
+  "réécriture : jamais deux lignes « Prix : »",
+  (rewritten.match(/^Prix\s*:/gm) || []).length === 1
+);
+
+const noSupp = ["Service : Reiki", "Prix : 60 €", "Client : Marie Dupont"].join("\n");
+const inserted = desc.rewriteDescriptionFields(noSupp, { supplement: 20 });
+const insertedLines = inserted.split("\n");
+check(
+  "réécriture : la ligne de supplément est insérée juste après Prix",
+  insertedLines[2] === desc.supplementLine(20)
+);
+check(
+  "réécriture : réécrire avec le même supplément ne crée pas de doublon",
+  (inserted.match(/^Supplément/gm) || []).length === 1 &&
+    desc.rewriteDescriptionFields(inserted, { supplement: 20 }) === inserted
+);
+check(
+  "réécriture : retirer un supplément absent ne change rien",
+  desc.rewriteDescriptionFields(noSupp, { supplement: 0 }) === noSupp
+);
+
+const twoPrices = ["Service : Reiki", "Prix : 60 €", "Prix : 70 €", "Client : Marie Dupont"].join("\n");
+const onePrice = desc.rewriteDescriptionFields(twoPrices, { prix: 90 });
+check(
+  "réécriture : un doublon de « Prix : » est supprimé",
+  (onePrice.match(/^Prix\s*:/gm) || []).length === 1 && onePrice.includes("Prix : 90 €")
+);
+
+
+/* ------------------------------------------------------------------ */
+section("Changement de prestation — mails cliente et praticienne");
+
+const changedClient = emails.clientServiceChangedEmailHtml({
+  name: "Marie Dupont",
+  oldService: "Reiki 60 min",
+  newService: "Access Bars 90 min",
+  dateLabel: "Jeudi 5 novembre 2026 à 09:00",
+  durationMin: 90,
+  price: 110,
+  supplement: 20,
+  changedBy: "client",
+  manageUrl: MANAGE,
+});
+const changedClientText = plain(changedClient);
+check(
+  "changement cliente : ancienne ET nouvelle prestation",
+  changedClientText.includes("Reiki 60 min") &&
+    changedClientText.includes("Access Bars 90 min")
+);
+check(
+  "changement cliente : nouvelle durée",
+  changedClientText.includes("Nouvelle durée") && changedClientText.includes("90 min")
+);
+check("changement cliente : prix", changedClientText.includes("110 €"));
+check(
+  "changement cliente : supplément majoré",
+  /Créneau majoré \(\+20 €\)/.test(changedClientText)
+);
+check(
+  "changement cliente : paiement sur place",
+  /paiement se fait sur place/i.test(changedClientText)
+);
+check(
+  "changement cliente : lien de gestion présent",
+  changedClient.includes(MANAGE_HTML)
+);
+check(
+  "changement cliente : dit que la cliente a changé",
+  /Vous avez modifié la prestation/.test(changedClientText)
+);
+
+const changedClientByOwner = emails.clientServiceChangedEmailHtml({
+  name: "Marie Dupont",
+  oldService: "Reiki 60 min",
+  newService: "Access Bars 90 min",
+  dateLabel: "Jeudi 5 novembre 2026 à 09:00",
+  durationMin: 90,
+  price: 110,
+  changedBy: "owner",
+});
+check(
+  "changement cliente : dit que Cindy a changé",
+  /Cindy a modifié la prestation/.test(plain(changedClientByOwner))
+);
+check(
+  "changement cliente par Cindy : pas de bouton de gestion sans URL",
+  !plain(changedClientByOwner).includes("Modifier ou annuler mon rendez-vous")
+);
+
+const changedOwner = emails.ownerServiceChangedEmailHtml({
+  name: "Marie Dupont",
+  email: "marie@example.com",
+  phone: "+590 690 00 00 00",
+  oldService: "Reiki 60 min",
+  newService: "Access Bars 90 min",
+  dateLabel: "Jeudi 5 novembre 2026 à 09:00",
+  durationMin: 90,
+  price: 110,
+  supplement: 20,
+  changedBy: "client",
+  manageUrl: MANAGE,
+});
+const changedOwnerText = plain(changedOwner);
+check(
+  "changement praticienne : ancienne ET nouvelle prestation",
+  changedOwnerText.includes("Reiki 60 min") &&
+    changedOwnerText.includes("Access Bars 90 min")
+);
+check(
+  "changement praticienne : nouvelle durée et prix",
+  changedOwnerText.includes("90 min") && changedOwnerText.includes("110 €")
+);
+check(
+  "changement praticienne : dit que la cliente a changé",
+  /La cliente a changé la prestation/.test(changedOwnerText)
+);
+check(
+  "changement praticienne : paiement sur place",
+  /paiement se fait sur place/i.test(changedOwnerText)
+);
+check(
+  "changement praticienne : bouton Gérer ce rendez-vous",
+  changedOwner.includes(MANAGE_HTML)
+);
+
+const changedOwnerEscaped = emails.ownerServiceChangedEmailHtml({
+  name: "<script>alert(1)</script>",
+  email: "marie@example.com",
+  oldService: "Reiki <b>60</b>",
+  newService: "Access Bars",
+  dateLabel: "Jeudi 5 novembre 2026 à 09:00",
+  durationMin: 90,
+  changedBy: "owner",
+});
+check(
+  "changement praticienne : nom et prestation échappés",
+  !changedOwnerEscaped.includes("<script>") &&
+    !changedOwnerEscaped.includes("<b>60</b>") &&
+    changedOwnerEscaped.includes("&lt;script&gt;")
+);
 
 /* ------------------------------------------------------------------ */
 console.log(

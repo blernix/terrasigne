@@ -1,4 +1,15 @@
+#!/usr/bin/env node
+/**
+ * Liste les plages « dispo » à venir dans l'agenda de Cindy, et dit lesquelles
+ * portent le supplément de 20 €.
+ *
+ *   node --experimental-strip-types scripts/check-dispo.mjs
+ *
+ * Le marqueur et le montant sont lus dans src/lib/plages.ts (source unique) :
+ * ce script ne duplique plus la règle de titre.
+ */
 import { google } from "googleapis";
+import { parseWindow } from "../src/lib/plages.ts";
 
 const auth = new google.auth.GoogleAuth({
   keyFile: "generique-450417-2aa30cb6faea.json",
@@ -17,8 +28,8 @@ const res = await calendar.events.list({
   maxResults: 2500,
 });
 
-const dispo = (res.data.items || []).filter((e) =>
-  (e.summary || "").trim().toLowerCase().startsWith("dispo")
+const dispo = (res.data.items || []).filter(
+  (e) => parseWindow(e.summary || "").open
 );
 
 console.log('Événements "dispo" à venir :', dispo.length);
@@ -26,6 +37,7 @@ console.log("");
 for (const e of dispo) {
   const s = e.start.dateTime || e.start.date;
   const en = e.end.dateTime || e.end.date;
+  const { supplement } = parseWindow(e.summary || "");
   console.log(
     "•",
     JSON.stringify(e.summary),
@@ -33,7 +45,8 @@ for (const e of dispo) {
     s,
     "→",
     en,
-    e.start.date ? "(journée entière)" : ""
+    e.start.date ? "(journée entière)" : "",
+    supplement ? `(majorée +${supplement} €)` : ""
   );
 }
 if (dispo.length === 0) {

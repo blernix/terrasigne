@@ -24,7 +24,10 @@ import {
 } from "lucide-react";
 import styles from "./rdv.module.css";
 
-const STORAGE_KEY = "terrasigne-booking";
+// v2 : le supplément remplace l'ancien drapeau porté par le créneau. Une
+// session ouverte avant le déploiement pouvait restaurer un créneau marqué
+// sans son supplément ; on repart d'un stockage propre.
+const STORAGE_KEY = "terrasigne-booking-v2";
 const PROFILE_KEY = "terrasigne-client-profile";
 const DEFAULT_MODES = ["Téléphone", "Visioconférence", "Présentiel"];
 
@@ -428,6 +431,12 @@ function BookingContent({ targetServiceId }) {
       )}`
     : "";
 
+  // Le supplément vient de la plage choisie par Cindy, jamais d'une marge
+  // horaire : on ne l'annonce que si un créneau de la journée est majoré.
+  const hasSupplementedSlots = Boolean(
+    selectedDay?.slots?.some((slot) => Number(slot.supplement) > 0)
+  );
+
   const stepClass = (n) =>
     n === step
       ? `${styles.stepNum} ${styles.stepNumActive}`
@@ -474,6 +483,13 @@ function BookingContent({ targetServiceId }) {
                     selectedFormule ? `${selectedFormule.duree} min` : "—"
                   }
                 />
+                {Number(selectedSlot?.supplement) > 0 && (
+                  <Row
+                    icon={<Sparkles size={16} className={styles.iconTerra} />}
+                    label="Créneau majoré"
+                    value={`+${selectedSlot.supplement} € (à régler sur place)`}
+                  />
+                )}
                 <Row
                   icon={<MapPin size={16} className={styles.iconSage} />}
                   label="Rencontre"
@@ -728,10 +744,12 @@ function BookingContent({ targetServiceId }) {
                 <h2 className={styles.stepTitle}>Choisissez un horaire</h2>
               </div>
 
-              <p className={styles.calHint}>
-                Un créneau marqué +20 € commence 1 h avant l&rsquo;ouverture
-                habituelle (supplément réglé sur place).
-              </p>
+              {hasSupplementedSlots && (
+                <p className={styles.calHint}>
+                  Un créneau marqué +20 € comporte un supplément à régler sur
+                  place.
+                </p>
+              )}
 
               {!selectedDay ? (
                 <p className={styles.placeholder}>
@@ -755,8 +773,10 @@ function BookingContent({ targetServiceId }) {
                             }`}
                           >
                             {slot.timeLabel}
-                            {slot.early && (
-                              <span className={styles.slotBadge}>+20 €</span>
+                            {Number(slot.supplement) > 0 && (
+                              <span className={styles.slotBadge}>
+                                +{slot.supplement} €
+                              </span>
                             )}
                           </button>
                         ))}
@@ -793,11 +813,11 @@ function BookingContent({ targetServiceId }) {
                   label="Heure"
                   value={selectedSlot?.timeLabel || "Non choisie"}
                 />
-                {selectedSlot?.early && (
+                {Number(selectedSlot?.supplement) > 0 && (
                   <Row
                     icon={<Sparkles size={16} className={styles.iconTerra} />}
-                    label="Créneau anticipé"
-                    value="+20 € (à régler sur place)"
+                    label="Créneau majoré"
+                    value={`+${selectedSlot.supplement} € (à régler sur place)`}
                   />
                 )}
                 <Row

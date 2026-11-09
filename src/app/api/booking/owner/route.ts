@@ -18,6 +18,7 @@ import { formatDateLabel } from "@/lib/timezones";
 import { getRequestOrigin } from "@/lib/newsletter";
 import { verifyOwnerToken } from "@/lib/ownerLink";
 import { normalizeMotif, motifPhrase } from "@/lib/motifsAnnulation";
+import { performServiceChange } from "@/lib/serviceChangeFlow";
 
 /**
  * Page praticienne : lecture et écriture d'un rendez-vous par Cindy, sans
@@ -75,7 +76,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { token, sig, action, start, end, motif } = body || {};
+    const { token, sig, action, start, end, motif, serviceId, formuleId } =
+      body || {};
 
     if (!guard(token, sig)) return forbidden();
 
@@ -87,8 +89,73 @@ export async function POST(req: Request) {
       );
     }
 
-    if (action !== "cancel" && action !== "reschedule") {
+    if (
+      action !== "cancel" &&
+      action !== "reschedule" &&
+      action !== "change-service"
+    ) {
       return NextResponse.json({ message: "Action inconnue" }, { status: 400 });
+    }
+
+    if (action === "change-service") {
+      // Aucune valeur déclarative : la durée, la pause et le prix viennent de
+      // Directus, jamais du navigateur (même règle que la route cliente).
+      const declarative = ["duree", "pause", "prix"].filter((field) =>
+        Object.prototype.hasOwnProperty.call(body || {}, field)
+      );
+      if (declarative.length > 0) {
+        return NextResponse.json(
+          {
+            message:
+              "Le corps de la requête ne peut pas imposer la durée, la pause ou le prix : ils sont lus dans la base.",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (typeof serviceId !== "string" || !serviceId) {
+        return NextResponse.json(
+          { message: "Paramètres manquants" },
+          { status: 400 }
+        );
+      }
+
+      if (
+        formuleId !== undefined &&
+        formuleId !== null &&
+        (typeof formuleId !== "string" || !formuleId)
+      ) {
+        return NextResponse.json(
+          { message: "Paramètres invalides" },
+          { status: 400 }
+        );
+      }
+
+      const result = await performServiceChange({
+        token: String(token),
+        serviceId,
+        formuleId:
+          typeof formuleId === "string" && formuleId ? formuleId : undefined,
+        actor: "owner",
+      });
+
+      if (result.ok === false) {
+        return NextResponse.json(
+          { message: result.message },
+          { status: result.status }
+        );
+      }
+
+      return NextResponse.json({
+        message: result.message,
+        serviceName: result.serviceName,
+        durationMin: result.durationMin,
+        prix: result.prix,
+        supplement: result.supplement,
+        dateLabel: result.dateLabel,
+        dateLabelOwner: result.dateLabelOwner,
+        warning: result.warning,
+      });
     }
 
     const booking = await findBookingByToken(String(token));
@@ -198,11 +265,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const updated = await rescheduleBooking(
-      String(token),
-      newStart,
-      newEnd
-    );
+    // Le supplément de la nouvelle plage suit le déplacement : sans lui,
+    // l'événement gardait le supplément de l'ancienne plage (ou aucun) et la
+    // description n'était jamais réécrite. `rescheduleBooking` recalcule la
+    // ligne « Supplément créneau majoré » depuis la description relue juste
+    // avant le patch (même forme que la route cliente reschedule).
+    const updated = await rescheduleBooking(String(token), newStart, newEnd, {
+      supplement: allowance.supplement,
+    });
+
     if (!updated) {
       return NextResponse.json(
         { message: "Ce rendez-vous n'existe plus." },
@@ -221,6 +292,7 @@ export async function POST(req: Request) {
           service: booking.serviceName,
           oldDateLabel: formatDateLabel(new Date(booking.start), clientTz),
           newDateLabel,
+          supplement: allowance.supplement,
           reason: reason || undefined,
           manageUrl: clientManageUrl,
         }),

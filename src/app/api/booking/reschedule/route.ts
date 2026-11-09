@@ -3,6 +3,7 @@ import {
   findBookingByToken,
   rescheduleBooking,
   isSlotFree,
+  getSlotAllowance,
   BUSINESS_TIMEZONE,
   MIN_LEAD_HOURS,
   MAX_AHEAD_DAYS,
@@ -79,6 +80,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // Le créneau doit être entièrement contenu dans une plage ouverte (aucune
+    // marge) : sans ce contrôle, la cliente pouvait reporter à 3 h du matin.
+    // Contrôle AVANT le recalcul du supplément, et avant tout patch.
+    const allowance = await getSlotAllowance(newStart, newEnd);
+    if (!allowance.allowed) {
+      return NextResponse.json(
+        { message: "Ce créneau n'est pas proposé à la réservation." },
+        { status: 400 }
+      );
+    }
+
     const free = await isSlotFree(newStart, newEnd, existing.id);
     if (!free) {
       return NextResponse.json(
@@ -87,7 +99,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const updated = await rescheduleBooking(token, newStart, newEnd);
+    // rescheduleBooking réécrit aussi la description (ligne Supplément) pour
+    // que l'agenda de Cindy reflète le supplément de la nouvelle plage.
+    const updated = await rescheduleBooking(token, newStart, newEnd, {
+      supplement: allowance.supplement,
+    });
     if (!updated) {
       return NextResponse.json(
         { message: "Rendez-vous introuvable" },
@@ -116,6 +132,7 @@ export async function POST(req: Request) {
         service: existing.serviceName,
         oldDateLabel,
         newDateLabel,
+        supplement: allowance.supplement,
         manageUrl,
       }),
     });
@@ -132,6 +149,7 @@ export async function POST(req: Request) {
           service: existing.serviceName,
           oldDateLabel: ownerOldDateLabel,
           newDateLabel: ownerNewDateLabel,
+          supplement: allowance.supplement,
           manageUrl: ownerManageUrl || undefined,
         }),
       });
