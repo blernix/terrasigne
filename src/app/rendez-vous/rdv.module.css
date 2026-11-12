@@ -245,7 +245,7 @@
 .placeholder {
   margin-top: 1rem;
   border: 1px dashed var(--rv-sand-200);
-  background: rgba(251, 247, 240, 0.6);
+  background: rgba(248, 251, 245, 0.6);
   border-radius: 1.25rem;
   padding: 1rem 1.1rem;
   font-size: 0.85rem;
@@ -512,9 +512,10 @@
 .textarea {
   width: 100%;
   border: 1px solid var(--rv-sand-200);
-  background: rgba(251, 247, 240, 0.6);
+  /* Aligné sur la classe globale .field (contact, blog, newsletter). */
+  background: rgba(248, 251, 245, 0.6);
   border-radius: 1rem;
-  padding: 0.7rem 0.9rem;
+  padding: 0.75rem 1rem;
   font-size: 0.875rem;
   color: var(--rv-ink);
   outline: none;
@@ -522,12 +523,18 @@
   font-family: inherit;
 }
 
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--rv-muted);
+  opacity: 1;
+}
+
 .input:focus,
 .select:focus,
 .textarea:focus {
   border-color: var(--rv-sage);
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(110, 156, 134, 0.18);
+  box-shadow: 0 0 0 2px rgba(121, 169, 125, 0.2);
 }
 
 .textarea {
@@ -546,7 +553,7 @@
   align-items: flex-start;
   gap: 0.65rem;
   border: 1px solid var(--rv-sand-200);
-  background: rgba(251, 247, 240, 0.5);
+  background: rgba(248, 251, 245, 0.5);
   border-radius: 1.25rem;
   padding: 0.85rem;
   cursor: pointer;
@@ -679,7 +686,7 @@
 .recapBox {
   margin-top: 2rem;
   border: 1px solid var(--rv-sand-200);
-  background: rgba(251, 247, 240, 0.6);
+  background: rgba(248, 251, 245, 0.6);
   border-radius: 1.5rem;
   padding: 1.35rem;
   text-align: left;
