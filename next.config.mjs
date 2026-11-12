@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Dossier de sortie surchargeable : permet de builder à côté du dossier servi
+  // (NEXT_DIST_DIR=.next-build) puis de basculer d'un `mv`, sans fenêtre où le
+  // site sert un mélange d'ancien HTML et de nouveaux chunks.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // Les erreurs TypeScript et ESLint ne sont plus ignorées au build :
   // elles doivent bloquer, sinon on publie du code cassé (le projet est
   // propre : tsc --noEmit passe, eslint 0 erreur).
