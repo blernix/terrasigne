@@ -59,7 +59,7 @@ export async function sendNewsletterConfirmation(
 
   await sendBrevoEmail({
     to: [{ email }],
-    subject: "Confirmez votre inscription à la newsletter TerraSigne",
+    subject: "Confirmez votre inscription à la newsletter Terrasigne",
     htmlContent: newsletterConfirmationEmailHtml({ confirmUrl }),
   });
 }

@@ -10,6 +10,16 @@ import { formatDateLabel } from "@/lib/timezones";
 export async function POST(req: Request) {
   try {
     const { token } = await req.json();
+
+    // Préprod (terra.killian-lecrut.com) : aucune écriture réelle — ni agenda,
+    // ni email — tant que PREPROD_MODE=1. La production n'est pas concernée.
+    if (process.env.PREPROD_MODE === "1") {
+      return NextResponse.json(
+        { message: "Annulation désactivée sur la préprod." },
+        { status: 403 }
+      );
+    }
+
     if (!token) {
       return NextResponse.json({ message: "Jeton manquant" }, { status: 400 });
     }

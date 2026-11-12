@@ -88,6 +88,7 @@ export async function GET(req: Request) {
         start: slot.start.toISOString(),
         end: slot.end.toISOString(),
         timeLabel: timeFmt.format(d),
+        supplement: slot.supplement,
       });
     }
 

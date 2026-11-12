@@ -3,17 +3,90 @@
 @tailwind utilities;
 
 :root {
-  --background: #F6E8D6;
-  --foreground: #3E3E3E;
-  --primary: #6B46C1;
-  --secondary: #def1e4;
-  --accent: #ED8936;
-  --highlight: #C9C5FF;
+  /* DA : vert clair dominant (nature), violet (spiritualité), neutres chauds */
+  --cream: #f8fbf5;
+  --sand: #eef5e9;
+  --sand-200: #ddebd7;
+  --ink: #1f2a24;
+  --ink-soft: #45534b;
+  --muted: #66706a;
+  --forest: #2e5940;
+  --forest-700: #234530;
+  --forest-50: #f0f6eb;
+  --sage: #79a97d;
+  --sage-100: #e5f1df;
+  --sage-200: #cde4c6;
+  --sage-300: #aed4a8;
+  --eau: #b4d9c8;
+  --mint: #def1e4;
+  --violet: #6e5498;
+  --violet-100: #efebf7;
+
+  --background: var(--cream);
+  --foreground: var(--ink);
+  --primary: var(--forest);
+  --secondary: var(--forest-50);
+  --accent: var(--violet);
+  --highlight: var(--sage-200);
 }
 
 body {
   color: var(--foreground);
-  background: var(--secondary);
+  background: var(--background);
+  font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer components {
+  .container-soft {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-sage-100 px-3 py-1 text-xs font-bold text-forest;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest/40;
+  }
+  .btn-primary {
+    @apply bg-mint text-forest border border-forest/25 shadow-sm hover:bg-sage-300 hover:-translate-y-0.5;
+  }
+  .btn-violet {
+    @apply bg-violet text-white shadow-lg shadow-violet/25 hover:brightness-105 hover:-translate-y-0.5;
+  }
+  .btn-ghost {
+    @apply border border-forest/20 bg-white/70 text-forest hover:bg-white hover:border-forest/40;
+  }
+  .btn-light {
+    @apply bg-white text-forest shadow-lg hover:bg-cream;
+  }
+
+  .card {
+    @apply rounded-4xl border border-sand-200/70 bg-white shadow-sm;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-sand-200 bg-cream/60 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:border-sage focus:bg-white focus:ring-2 focus:ring-sage/20;
+  }
+
+  .label-text {
+    @apply block text-xs font-bold text-ink-soft;
+  }
+
+  .heading-display {
+    @apply font-display font-semibold text-forest;
+  }
+
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .link-underline {
+    @apply font-semibold text-forest underline decoration-sage/50 underline-offset-2 transition hover:text-violet hover:decoration-violet;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -27,13 +100,13 @@ body {
 
 /* Liens */
 .editor-content a {
-  color: #007bff;
+  color: var(--forest);
   text-decoration: underline;
   font-weight: bold;
 }
 
 .editor-content a:hover {
-  color: #0056b3;
+  color: var(--forest-700);
 }
 
 .editor-content img {
@@ -49,13 +122,13 @@ body {
 }
 
 .editor-content th, .editor-content td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--sand-200);
   padding: 8px;
   text-align: left;
 }
 
 .editor-content th {
-  background-color: #f4f4f4;
+  background-color: var(--sand);
   font-weight: bold;
 }
 
@@ -73,49 +146,49 @@ body {
 .editor-blog {
   font-size: 1rem;
   line-height: 1.8;
-  color: #333;
+  color: var(--ink);
 }
 
 .editor-blog h1 {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #1a202c;
+  color: var(--forest);
 }
 
 .editor-blog h2 {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: var(--forest);
 }
 
 .editor-blog h3 {
   font-size: 1.75rem;
   font-weight: bold;
   margin-bottom: 0.8rem;
-  color: #4a5568;
+  color: var(--forest);
 }
 
 .editor-blog h4 {
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 0.7rem;
-  color: #718096;
+  color: var(--forest);
 }
 
 .editor-blog h5 {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.6rem;
-  color: #a0aec0;
+  color: var(--forest);
 }
 
 .editor-blog h6 {
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #718096;
+  color: var(--forest);
 }
 
 .editor-blog p {
@@ -125,10 +198,10 @@ body {
 }
 
 .editor-blog blockquote {
-  border-left: 4px solid #ff6600;
+  border-left: 4px solid var(--sage);
   padding-left: 1rem;
   font-style: italic;
-  color: #555;
+  color: var(--ink-soft);
   margin: 1.5rem 0;
 }
 
@@ -149,13 +222,13 @@ body {
 }
 
 .editor-blog a {
-  color: #0070f3;
+  color: var(--forest);
   text-decoration: underline;
   transition: color 0.2s ease-in-out;
 }
 
 .editor-blog a:hover {
-  color: #0056b3;
+  color: var(--forest-700);
 }
 
 .editor-blog table {
@@ -166,13 +239,13 @@ body {
 
 .editor-blog th,
 .editor-blog td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--sand-200);
   padding: 0.75rem;
   text-align: left;
 }
 
 .editor-blog th {
-  background-color: #f7f7f7;
+  background-color: var(--sand);
   font-weight: bold;
 }
 
@@ -270,7 +343,7 @@ body {
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 18px !important;
-  color: #6B46C1;
+  color: #6e5498;
 }
 
 @media (max-width: 768px) {
@@ -331,4 +404,104 @@ body {
   .animate-floating {
     animation: none;
   }
+}
+
+/* Contenu riche des services (Directus, souvent collé depuis Word) :
+   on neutralise les styles inline pour garder une mise en page propre. */
+.service-richtext {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.service-richtext * {
+  font-family: inherit !important;
+  max-width: 100%;
+}
+.service-richtext p,
+.service-richtext div,
+.service-richtext span {
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+  color: inherit !important;
+}
+.service-richtext p,
+.service-richtext div {
+  margin: 0 0 1rem !important;
+  text-indent: 0 !important;
+}
+.service-richtext li p,
+.service-richtext li div {
+  margin: 0 !important;
+}
+.service-richtext h1,
+.service-richtext h2,
+.service-richtext h3 {
+  font-family: var(--font-fraunces), Georgia, serif !important;
+  font-size: 1.4rem !important;
+  line-height: 1.3 !important;
+  font-weight: 600 !important;
+  color: var(--forest) !important;
+  margin: 1.75rem 0 0.75rem !important;
+}
+.service-richtext h4,
+.service-richtext h5,
+.service-richtext h6 {
+  font-size: 1rem !important;
+  line-height: 1.75 !important;
+  font-weight: 700 !important;
+  color: inherit !important;
+  margin: 0 0 1rem !important;
+}
+.service-richtext ul,
+.service-richtext ol {
+  margin: 0 0 1rem !important;
+  padding-left: 1.4rem !important;
+}
+.service-richtext ul {
+  list-style: disc outside !important;
+}
+.service-richtext ol {
+  list-style: decimal outside !important;
+}
+.service-richtext li {
+  margin: 0.3rem 0 !important;
+  text-indent: 0 !important;
+}
+.service-richtext a {
+  color: var(--violet) !important;
+  text-decoration: underline !important;
+  font-weight: 600;
+}
+.service-richtext strong,
+.service-richtext b {
+  font-weight: 700;
+}
+.service-richtext em,
+.service-richtext i {
+  font-style: italic;
+}
+.service-richtext img {
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 1rem;
+}
+.service-richtext table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+.service-richtext th,
+.service-richtext td {
+  border: 1px solid var(--sand-200);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.service-richtext blockquote {
+  border-left: 3px solid var(--sage);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
 }
