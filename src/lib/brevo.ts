@@ -16,8 +16,21 @@ interface SendBrevoEmailParams {
   subject: string;
   htmlContent?: string;
   textContent?: string;
+  /** Adresse de réponse. Brevo refuse un replyTo sans `name` non vide. */
   replyTo?: string;
+  replyToName?: string;
   attachments?: BrevoAttachment[];
+}
+
+/**
+ * Brevo rejette la requête entière (`missing_parameter: name is missing in
+ * replyTo`) dès que `replyTo.name` est vide : un message de contact partait donc
+ * en erreur 500. On garantit toujours un nom non vide.
+ */
+export function buildReplyTo(replyTo?: string, replyToName?: string) {
+  if (!replyTo) return undefined;
+  const nom = (replyToName || "").trim();
+  return { email: replyTo, name: nom || replyTo };
 }
 
 export async function sendBrevoEmail({
@@ -26,6 +39,7 @@ export async function sendBrevoEmail({
   htmlContent,
   textContent,
   replyTo,
+  replyToName,
   attachments,
 }: SendBrevoEmailParams) {
   const apiKey = process.env.BREVO_API_KEY;
@@ -44,7 +58,7 @@ export async function sendBrevoEmail({
     body: JSON.stringify({
       sender: { name: senderName, email: senderEmail },
       to,
-      replyTo: replyTo ? { email: replyTo, name: "" } : undefined,
+      replyTo: buildReplyTo(replyTo, replyToName),
       subject,
       htmlContent,
       textContent,
