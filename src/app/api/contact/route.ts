@@ -75,6 +75,7 @@ export async function POST(req: Request) {
     await sendBrevoEmail({
       to: [{ email: process.env.CONTACT_RECIPIENT_EMAIL || "terrasigne971@gmail.com" }],
       replyTo: email,
+      replyToName: name,
       subject: `Nouveau message de ${name} - Service : ${service}`,
       htmlContent: emailHtml,
     });

@@ -550,6 +550,31 @@ check(
 );
 
 /* ------------------------------------------------------------------ */
+// replyTo : Brevo rejette la requête entière si `name` est vide
+// (« missing_parameter: name is missing in replyTo »). Le formulaire de
+// contact partait donc en 500 en production.
+const brevo = await import("../src/lib/brevo.ts");
+
+check("replyTo absent -> pas de replyTo du tout", brevo.buildReplyTo(undefined) === undefined);
+check(
+  "replyTo avec nom -> nom conservé",
+  brevo.buildReplyTo("marie@example.com", "Marie Dupont")?.name === "Marie Dupont"
+);
+check(
+  "replyTo sans nom -> repli sur l'adresse (jamais vide)",
+  brevo.buildReplyTo("marie@example.com")?.name === "marie@example.com"
+);
+check(
+  "replyTo avec nom vide ou espaces -> repli sur l'adresse",
+  brevo.buildReplyTo("marie@example.com", "   ")?.name === "marie@example.com"
+);
+const payloadContact = brevo.buildReplyTo("marie@example.com", "Marie <b>Dupont</b>");
+check(
+  "replyTo : nom non vide et adresse intacte",
+  payloadContact.email === "marie@example.com" && (payloadContact.name || "").length > 0
+);
+
+/* ------------------------------------------------------------------ */
 console.log(
   `\n${pass} vérifications passées, ${failures.length} échec(s).`
 );
