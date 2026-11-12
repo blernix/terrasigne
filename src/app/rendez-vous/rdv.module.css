@@ -782,5 +782,5 @@
   margin-top: 0.4rem;
   font-size: 0.79rem;
   line-height: 1.65;
-  color: #3c4a41;
+  color: var(--rv-ink-soft);
 }

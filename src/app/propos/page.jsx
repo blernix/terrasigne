@@ -265,7 +265,7 @@ export default function Propos() {
                   est de t’aider à retrouver ton équilibre physique, émotionnel
                   et énergétique. »
                 </p>
-                <p className="mt-4 font-semibold text-white/90">
+                <p className="mt-4 font-semibold text-white">
                   – Cindy, Terrasigne
                 </p>
               </div>

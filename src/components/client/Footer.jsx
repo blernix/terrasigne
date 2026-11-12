@@ -14,14 +14,14 @@ export default function Footer() {
             avec Cindy Guillaume, praticienne en soins holistiques à Terre de Bas,
             Guadeloupe.
           </p>
-          <p className="mt-4 text-xs text-forest/70">
+          <p className="mt-4 text-xs text-ink-soft">
             Les pratiques proposées sont complémentaires et ne remplacent pas un
             avis médical.
           </p>
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-forest/70">
+          <p className="text-xs font-bold uppercase tracking-widest text-ink-soft">
             Navigation
           </p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-forest/70">
+          <p className="text-xs font-bold uppercase tracking-widest text-ink-soft">
             Contact
           </p>
           <div className="mt-4 flex flex-col gap-3 text-sm">
@@ -82,7 +82,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-forest/15">
-        <p className="container-soft py-5 text-center text-xs text-forest/70">
+        <p className="container-soft py-5 text-center text-xs text-ink-soft">
           &copy; {year} Terrasigne. Tous droits réservés.
         </p>
       </div>

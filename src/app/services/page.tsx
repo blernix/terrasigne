@@ -95,12 +95,12 @@ export default async function ServicesPage() {
                 <span className="italic text-violet">bien-être</span> en
                 Guadeloupe
               </h1>
-              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
+              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700 lg:mx-0">
                 Découvrez un ensemble de prestations alliant techniques
                 relationnelles, corporelles et énergétiques, adaptées à vos
                 besoins.
               </p>
-              <p className="mx-auto mt-4 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
+              <p className="mx-auto mt-4 max-w-xl leading-relaxed text-forest-700 lg:mx-0">
                 Laisse toi guider, je te propose d&rsquo;évaluer la pratique qui
                 te convient.
               </p>

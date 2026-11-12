@@ -100,13 +100,13 @@ body {
 
 /* Liens */
 .editor-content a {
-  color: #007bff;
+  color: var(--forest);
   text-decoration: underline;
   font-weight: bold;
 }
 
 .editor-content a:hover {
-  color: #0056b3;
+  color: var(--forest-700);
 }
 
 .editor-content img {
@@ -122,13 +122,13 @@ body {
 }
 
 .editor-content th, .editor-content td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--sand-200);
   padding: 8px;
   text-align: left;
 }
 
 .editor-content th {
-  background-color: #f4f4f4;
+  background-color: var(--sand);
   font-weight: bold;
 }
 
@@ -146,49 +146,49 @@ body {
 .editor-blog {
   font-size: 1rem;
   line-height: 1.8;
-  color: #333;
+  color: var(--ink);
 }
 
 .editor-blog h1 {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #1a202c;
+  color: var(--forest);
 }
 
 .editor-blog h2 {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: var(--forest);
 }
 
 .editor-blog h3 {
   font-size: 1.75rem;
   font-weight: bold;
   margin-bottom: 0.8rem;
-  color: #4a5568;
+  color: var(--forest);
 }
 
 .editor-blog h4 {
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 0.7rem;
-  color: #718096;
+  color: var(--forest);
 }
 
 .editor-blog h5 {
   font-size: 1.25rem;
   font-weight: bold;
   margin-bottom: 0.6rem;
-  color: #a0aec0;
+  color: var(--forest);
 }
 
 .editor-blog h6 {
   font-size: 1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
-  color: #718096;
+  color: var(--forest);
 }
 
 .editor-blog p {
@@ -198,10 +198,10 @@ body {
 }
 
 .editor-blog blockquote {
-  border-left: 4px solid #ff6600;
+  border-left: 4px solid var(--sage);
   padding-left: 1rem;
   font-style: italic;
-  color: #555;
+  color: var(--ink-soft);
   margin: 1.5rem 0;
 }
 
@@ -222,13 +222,13 @@ body {
 }
 
 .editor-blog a {
-  color: #0070f3;
+  color: var(--forest);
   text-decoration: underline;
   transition: color 0.2s ease-in-out;
 }
 
 .editor-blog a:hover {
-  color: #0056b3;
+  color: var(--forest-700);
 }
 
 .editor-blog table {
@@ -239,13 +239,13 @@ body {
 
 .editor-blog th,
 .editor-blog td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--sand-200);
   padding: 0.75rem;
   text-align: left;
 }
 
 .editor-blog th {
-  background-color: #f7f7f7;
+  background-color: var(--sand);
   font-weight: bold;
 }
 

@@ -72,7 +72,7 @@ export default async function BlogPage() {
                 Blog <span className="italic text-violet">Terrasigne</span> :
                 bien-être &amp; équilibre intérieur
               </h1>
-              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700/85 lg:mx-0">
+              <p className="mx-auto mt-6 max-w-xl leading-relaxed text-forest-700 lg:mx-0">
                 Retrouvez des articles, témoignages pour partager, découvrir,
                 mieux se connaître SOI et évoluer ensemble vers plus
                 d&rsquo;équiLIBRE.

@@ -78,7 +78,7 @@ export default function CTASection({ title, description }) {
             <h2 className="mt-5 font-display text-3xl font-semibold text-ink md:text-4xl">
               {title}
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl whitespace-pre-line leading-relaxed text-ink/85">
+            <p className="mx-auto mt-4 max-w-2xl whitespace-pre-line leading-relaxed text-ink">
               {description}
             </p>
             <button className="btn btn-violet mt-8" onClick={() => setShowModal(true)}>

@@ -36,7 +36,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
           <span className="italic">à distance</span>
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-cream/90 [text-shadow:0_1px_12px_rgba(0,0,0,0.55)]">
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-cream [text-shadow:0_1px_12px_rgba(0,0,0,0.55)]">
           Se relier à SOI pour vivre l&rsquo;équiLIBRE et la joie D&rsquo;ETRE
         </p>
 
@@ -53,7 +53,7 @@ export default function HeroSection({ images }: { images: CarrouselImage[] }) {
           </Link>
         </div>
 
-        <p className="mt-6 text-sm text-cream/85">
+        <p className="mt-6 text-sm text-cream">
           <Link
             href="/seances-a-distance"
             className="underline decoration-cream/40 underline-offset-4 transition hover:text-cream hover:decoration-cream"
