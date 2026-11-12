@@ -57,13 +57,13 @@ export default async function BlogPage() {
           }}
         />
 
-        <section className="relative flex min-h-[70svh] items-center overflow-hidden bg-hero">
+        <section className="relative flex min-h-[70svh] items-center overflow-hidden bg-eau">
           <img
             src="/images/hero_blog.jpg"
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-30"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-hero/95 via-hero/90 to-hero/75" />
+          <div className="absolute inset-0 bg-gradient-to-r from-eau/95 via-eau/90 to-eau/75" />
 
           <div className="container-soft relative z-10 grid items-center gap-12 py-28 lg:grid-cols-[1fr_0.8fr]">
             <div className="text-center lg:text-left">

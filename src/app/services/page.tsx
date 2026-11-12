@@ -77,13 +77,13 @@ export default async function ServicesPage() {
       <main id="main-content" className="overflow-x-hidden bg-cream">
         {serviceListJsonLd && <JsonLd data={serviceListJsonLd} />}
 
-        <section className="relative flex min-h-[90svh] items-center overflow-hidden bg-hero">
+        <section className="relative flex min-h-[90svh] items-center overflow-hidden bg-eau">
           <img
             src="/images/hero_service.jpg"
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-35"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-hero/95 via-hero/90 to-hero/75" />
+          <div className="absolute inset-0 bg-gradient-to-r from-eau/95 via-eau/90 to-eau/75" />
 
           <div className="container-soft relative z-10 grid items-center gap-12 py-28 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="text-center lg:text-left">
