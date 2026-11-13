@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 
 export async function GET(req: Request) {
   try {
@@ -94,6 +95,7 @@ export async function GET(req: Request) {
     return NextResponse.json(formattedServices);
   } catch (error) {
     console.error("Erreur lors de la récupération des services :", error);
+    noterIncident("catalogue", error, { route: "/api/services", action: "lecture des prestations" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

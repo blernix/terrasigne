@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import { performServiceChange } from "@/lib/serviceChangeFlow";
 
 const DECLARATIVE_FIELDS = ["duree", "pause", "prix"] as const;
@@ -117,6 +118,10 @@ export async function POST(req: Request) {
       "Erreur changement de prestation :",
       error instanceof Error ? error.message : error
     );
+    noterIncident("reservation", error, {
+      route: "/api/booking/change-service",
+      action: "changement de prestation",
+    });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

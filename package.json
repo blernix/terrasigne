@@ -11,6 +11,9 @@
     "test:mails": "node --experimental-strip-types scripts/test-mails-rdv.mjs",
     "test:plages": "node --experimental-strip-types scripts/test-plages.mjs",
     "test:prestation": "node --experimental-strip-types scripts/test-prestation.mjs",
+    "test:incidents": "node --experimental-strip-types scripts/test-incidents.mjs",
+    "test:veille": "python3 scripts/test-veille.py",
+    "veille": "python3 scripts/veille-terrasigne.py",
     "backfill:owner-links": "node --experimental-strip-types --env-file=.env scripts/backfill-owner-links.mjs"
   },
   "dependencies": {

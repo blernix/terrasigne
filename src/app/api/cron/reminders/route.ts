@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import {
   listPendingReminders,
   markReminderSent,
@@ -77,6 +78,7 @@ export async function GET(req: Request) {
         sent++;
       } catch (e) {
         console.error(`Erreur rappel pour l'événement ${b.id} :`, e);
+        noterIncident("cron", e, { route: "/api/cron/reminders", action: "rappel client" });
       }
     }
 
@@ -139,12 +141,14 @@ export async function GET(req: Request) {
         }
       } catch (e) {
         console.error("Erreur récap praticienne :", e);
+        noterIncident("cron", e, { route: "/api/cron/reminders", action: "récap praticienne" });
       }
     }
 
     return NextResponse.json({ message: "OK", sent, recap });
   } catch (error) {
     console.error("Erreur cron rappels :", error);
+    noterIncident("cron", error, { route: "/api/cron/reminders", action: "passage complet" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }
