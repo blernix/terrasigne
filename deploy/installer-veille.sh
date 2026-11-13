@@ -42,8 +42,9 @@ ALERTE_EMAIL=killian.lecrut@gmail.com
 # FENETRE_ALERTE=6
 # HEURES_CRON=3
 EOF
-  chmod 600 "$CONF"
-  echo "conf créée : $CONF"
+  chmod 640 "$CONF"
+  chown root:"$UTILISATEUR" "$CONF" 2>/dev/null || true
+  echo "conf créée : $CONF (lisible par $UTILISATEUR, pas par les autres)"
 else
   echo "conf existante conservée : $CONF"
 fi
