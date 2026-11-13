@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import { fetchService, getDirectusFileUrl } from "@/lib/directus";
 import {
   createBookingEvent,
@@ -336,6 +337,7 @@ export async function POST(req: Request) {
         });
       } catch (e) {
         console.error("Erreur ajout contact Brevo (RDV) :", e);
+        noterIncident("email", e, { route: "/api/booking", action: "ajout contact Brevo" });
       }
 
       if (newsletter) {
@@ -345,6 +347,7 @@ export async function POST(req: Request) {
             await sendNewsletterConfirmation(email, [newsletterListId], siteUrl);
           } catch (e) {
             console.error("Erreur envoi confirmation newsletter :", e);
+            noterIncident("email", e, { route: "/api/booking", action: "confirmation newsletter" });
           }
         }
       }
@@ -357,6 +360,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Erreur API réservation :", error);
+    noterIncident("reservation", error, { route: "/api/booking", action: "création" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

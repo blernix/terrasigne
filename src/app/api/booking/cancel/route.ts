@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import { cancelBooking, BUSINESS_TIMEZONE } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
 import {
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Rendez-vous annulé" });
   } catch (error) {
     console.error("Erreur annulation RDV :", error);
+    noterIncident("reservation", error, { route: "/api/booking/cancel", action: "annulation" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

@@ -1,0 +1,19 @@
+[Unit]
+Description=Veille de terrasigne.fr (controles et alerte mail)
+Documentation=file:/var/www/terrasigne/terrasigne/scripts/veille-terrasigne.py
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Tourne avec les droits de l'app : c'est elle qui lit son journal d'incidents.
+Type=oneshot
+User=webapp
+Group=webapp
+Environment=HOME=/home/webapp
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+WorkingDirectory=/var/www/terrasigne/terrasigne
+ExecStart=/usr/bin/python3 /var/www/terrasigne/terrasigne/scripts/veille-terrasigne.py
+TimeoutStartSec=180
+# Le script journalise lui-même ; ceci ne sert qu'à `journalctl -u`.
+StandardOutput=journal
+StandardError=journal

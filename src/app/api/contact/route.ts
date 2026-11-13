@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import { sendBrevoEmail } from "@/lib/brevo";
 import { escapeHtml } from "@/lib/emails";
 
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Email envoyé avec succès." }, { status: 200 });
   } catch (error) {
     console.error("❌ Erreur envoi email contact :", error);
+    noterIncident("email", error, { route: "/api/contact", action: "formulaire de contact" });
     return NextResponse.json(
       { message: "Erreur lors de l'envoi de l'email." },
       { status: 500 }

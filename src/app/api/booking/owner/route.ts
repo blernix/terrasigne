@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import {
   findBookingByToken,
   cancelBooking,
@@ -69,6 +70,7 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("Erreur page praticienne (lecture) :", error);
+    noterIncident("serveur", error, { route: "/api/booking/owner", action: "lecture praticienne" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }
@@ -191,6 +193,7 @@ export async function POST(req: Request) {
         });
       } catch (e) {
         console.error("Erreur email annulation praticienne :", e);
+        noterIncident("email", e, { route: "/api/booking/owner", action: "email annulation" });
         return NextResponse.json(
           {
             message:
@@ -301,6 +304,7 @@ export async function POST(req: Request) {
       // Le déplacement est fait : on ne le défait pas, mais on le dit à Cindy
       // au lieu de renvoyer « c'est fait » alors que la cliente ignore tout.
       console.error("Erreur email déplacement praticienne :", e);
+      noterIncident("email", e, { route: "/api/booking/owner", action: "email déplacement" });
       warning =
         "Le rendez-vous est déplacé, mais l'email à la cliente n'a pas pu être envoyé. Prévenez-la par téléphone.";
     }
@@ -315,6 +319,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Erreur page praticienne (écriture) :", error);
+    noterIncident("reservation", error, { route: "/api/booking/owner", action: "écriture praticienne" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

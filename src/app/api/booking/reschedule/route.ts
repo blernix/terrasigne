@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { noterIncident } from "@/lib/incidents";
 import {
   findBookingByToken,
   rescheduleBooking,
@@ -158,6 +159,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Rendez-vous modifié", dateLabel: newDateLabel });
   } catch (error) {
     console.error("Erreur modification RDV :", error);
+    noterIncident("reservation", error, { route: "/api/booking/reschedule", action: "report" });
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 }

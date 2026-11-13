@@ -1,0 +1,13 @@
+[Unit]
+Description=Veille de terrasigne.fr toutes les 15 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+AccuracySec=1min
+# Un passage manqué (machine éteinte) n'est pas rattrapé en rafale.
+Persistent=false
+Unit=terrasigne-veille.service
+
+[Install]
+WantedBy=timers.target
