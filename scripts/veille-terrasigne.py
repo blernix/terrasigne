@@ -45,6 +45,8 @@ FUSEAU_LOCAL = timezone(timedelta(hours=-4))  # America/Guadeloupe, sans heure d
 
 DEFAUTS = {
     "SITE_URL": "http://127.0.0.1:3018",
+    # Destinataire de l'alerte : posé dans /etc/terrasigne-veille.conf.
+    "ALERTE_EMAIL": "",
     "INCIDENTS_FILE": "/var/log/terrasigne/incidents.jsonl",
     "ETAT_FILE": "/var/lib/terrasigne/veille-etat.json",
     "CRON_LOG": "/home/webapp/cron-reminders.log",
@@ -52,6 +54,7 @@ DEFAUTS = {
     "APP_ENV": "/var/www/terrasigne/terrasigne/.env",
     "MIN_SERVICES": "10",
     "MIN_ARTICLES": "3",
+    "PM2_APP": "terrasigne",
     "SEUIL_DISQUE": "90",
     "FENETRE_ALERTE": "6",
     "HEURES_CRON": "3",
@@ -153,6 +156,7 @@ def requete(url: str, timeout: float = 15.0) -> tuple[int, bytes]:
 
 
 def controle_pm2(conf: dict) -> str | None:
+    nom_app = conf.get("PM2_APP") or "terrasigne"
     pm2 = shutil.which("pm2") or "/usr/local/bin/pm2"
     if not os.path.exists(pm2):
         return None  # pm2 absent : ce contrôle ne s'applique pas, on ne crie pas
@@ -164,12 +168,12 @@ def controle_pm2(conf: dict) -> str | None:
         if debut < 0:
             return None
         for process in json.loads(sortie[debut:]):
-            if process.get("name") == "terrasigne":
+            if process.get("name") == nom_app:
                 statut = (process.get("pm2_env") or {}).get("status")
                 if statut != "online":
-                    return f"le process pm2 « terrasigne » est « {statut} » au lieu de « online »"
+                    return f"le process pm2 « {nom_app} » est « {statut} » au lieu de « online »"
                 return None
-        return "le process pm2 « terrasigne » n'existe plus"
+        return f"le process pm2 « {nom_app} » n'existe plus"
     except (subprocess.SubprocessError, ValueError, OSError) as e:
         journal(f"contrôle pm2 ignoré ({e})")
         return None
@@ -451,9 +455,8 @@ def passage(conf: dict, force: bool = False) -> int:
             maintenant = datetime.now(timezone.utc).isoformat()
             for cle, _ in a_signaler:
                 alertes[cle] = maintenant
-    elif problemes:
+    elif problemes and not premiere_fois:
         journal(f"{len(problemes)} problème(s), déjà signalé(s) récemment : pas de mail")
-
     journal(
         f"passage terminé : {len(problemes)} problème(s), {len(a_signaler)} signalé(s), "
         f"{nombre_incidents} incident(s) nouveau(x)"

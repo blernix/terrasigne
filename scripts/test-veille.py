@@ -226,6 +226,8 @@ ETAT_SITE["http"] = 200
 print("\nAuto-test : le canal d'alerte est joignable")
 code, sortie = lancer("--auto-test")
 check("auto-test signale l'absence de clé", "ALERTE NON ENVOYÉE" in sortie, sortie[-300:])
+check("le destinataire vient bien de la configuration", "destinataire : test@example.com" in sortie, sortie[-400:])
+check("code de sortie 1 quand le mail ne peut pas partir", code == 1, f"obtenu {code}")
 
 print("\nVoir l'état")
 code, sortie = lancer("--voir-etat")
