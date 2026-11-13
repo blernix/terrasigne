@@ -7,7 +7,7 @@
  *
  *   node --experimental-strip-types scripts/test-incidents.mjs
  */
-import { mkdtempSync, readFileSync, existsSync, chmodSync } from "node:fs";
+import { mkdtempSync, readFileSync, existsSync, chmodSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -67,6 +67,25 @@ check("message absent -> chaîne vide", lignes()[4]?.message === "", JSON.string
 
 check("cinq lignes au total", lignes().length === 5, `obtenu ${lignes().length}`);
 check("champs inconnus absents", Object.keys(lignes()[0]).sort().join(",") === "action,message,route,ts,type");
+
+console.log("\nRotation : le journal ne grossit pas sans fin\n");
+
+const repet = "y".repeat(280);
+let ecrites = 0;
+while (statSync(fichier).size <= 2 * 1024 * 1024 && ecrites < 20000) {
+  noterIncident("serveur", repet);
+  ecrites++;
+}
+check("le journal dépasse 2 Mo après une boucle d'erreurs", statSync(fichier).size > 2 * 1024 * 1024);
+noterIncident("serveur", "après rotation");
+check("l'ancien journal est conservé en .1", existsSync(fichier + ".1"));
+const apresRotation = lignes();
+check(
+  "le journal reparti de zéro ne contient que la nouvelle erreur",
+  apresRotation.length === 1 && apresRotation[0].message === "après rotation",
+  `${apresRotation.length} ligne(s)`
+);
+check("le fichier .1 garde les anciennes lignes", statSync(fichier + ".1").size > 2 * 1024 * 1024);
 
 console.log("\nRobustesse : ne doit jamais lever\n");
 

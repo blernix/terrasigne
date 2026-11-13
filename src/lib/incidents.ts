@@ -1,4 +1,4 @@
-import { appendFileSync } from "node:fs";
+import { appendFileSync, renameSync, statSync } from "node:fs";
 
 /**
  * Journal d'incidents du site.
@@ -28,6 +28,11 @@ const FICHIER =
 
 const MESSAGE_MAX = 300;
 
+// Un journal d'erreurs qui boucle (Directus en panne, page très visitée) ne doit pas
+// remplir le disque : au-delà de 2 Mo, on repart d'un fichier neuf et l'ancien reste
+// en `.1` pour le diagnostic.
+const TAILLE_MAX = 2 * 1024 * 1024;
+
 function texteDe(valeur: unknown): string {
   if (valeur instanceof Error) {
     return `${valeur.name}: ${valeur.message}`;
@@ -50,6 +55,7 @@ export function noterIncident(
   contexte: ContexteIncident = {}
 ): void {
   try {
+    ecrireSiSousLaLimite();
     const ligne = JSON.stringify({
       ts: new Date().toISOString(),
       type,
@@ -60,5 +66,16 @@ export function noterIncident(
     appendFileSync(FICHIER, ligne + "\n");
   } catch {
     // volontairement silencieux : voir l'en-tête du fichier
+  }
+}
+
+/** Bascule le journal en `.1` quand il dépasse la limite. Ne lève jamais. */
+function ecrireSiSousLaLimite(): void {
+  try {
+    if (statSync(FICHIER).size > TAILLE_MAX) {
+      renameSync(FICHIER, `${FICHIER}.1`);
+    }
+  } catch {
+    // fichier absent ou dossier non inscriptible : l'append décidera
   }
 }
