@@ -537,6 +537,57 @@ check(
 );
 
 /* ------------------------------------------------------------------ */
+section("Délai — la praticienne n'en a plus, la cliente si");
+
+/* Le 24 novembre, Cindy a voulu changer la prestation d'un rendez-vous du
+   lendemain et s'est heurtée au délai de 48 h pensé pour les clientes. Le
+   délai suit maintenant l'ACTEUR, pas le code. */
+const dansDeuxHeures = { ...booking, start: inHours(2) };
+const praticienneDeuxHeures = validate({ booking: dansDeuxHeures, minLeadHours: 0 });
+
+check(
+  "praticienne : rendez-vous dans 2 h → accepté",
+  praticienneDeuxHeures.ok === true,
+  JSON.stringify(praticienneDeuxHeures)
+);
+
+checkRefusal(
+  "cliente : rendez-vous dans 2 h → refusé",
+  validate({ booking: dansDeuxHeures, minLeadHours: SERVICE_CHANGE_MIN_LEAD_HOURS }),
+  400,
+  "Ce rendez-vous a lieu dans moins de 48 h : il ne peut plus être modifié."
+);
+
+checkRefusal(
+  "praticienne : rendez-vous déjà commencé → refusé quand même",
+  validate({ booking: { ...booking, start: inHours(-1) }, minLeadHours: 0 }),
+  400,
+  "Ce rendez-vous est passé : il ne peut plus être modifié."
+);
+
+/* ------------------------------------------------------------------ */
+section("Refus de plage — la phrase explique au lieu de constater");
+
+checkRefusal(
+  "praticienne : plage refusée → la phrase préparée remplace le message générique",
+  validate({
+    allowed: false,
+    minLeadHours: 0,
+    slotMessage:
+      "Le mardi 1er décembre n'a aucune plage « dispo » ouverte dans l'agenda. Rouvrez une plage dans Google Agenda, ou choisissez un autre jour.",
+  }),
+  400,
+  "Le mardi 1er décembre n'a aucune plage « dispo » ouverte dans l'agenda. Rouvrez une plage dans Google Agenda, ou choisissez un autre jour."
+);
+
+checkRefusal(
+  "sans phrase préparée : message générique conservé (aucune régression)",
+  validate({ allowed: false }),
+  400,
+  "Ce créneau n'est pas proposé à la réservation."
+);
+
+/* ------------------------------------------------------------------ */
 console.log(`\n${pass} vérifications passées, ${failures.length} échec(s).`);
 if (failures.length) {
   for (const failure of failures) console.log(`  - ${failure.name}`);

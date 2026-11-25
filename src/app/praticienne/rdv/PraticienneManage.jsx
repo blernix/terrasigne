@@ -110,7 +110,7 @@ export default function PraticienneManage({ token, sig }) {
       const pauseParam =
         booking.pauseMin != null ? `&pause=${booking.pauseMin}` : "";
       const res = await fetch(
-        `/api/booking/availability?serviceId=${booking.serviceId}&duree=${booking.durationMin}${pauseParam}&timezone=${siteTimezone}`
+        `/api/booking/availability?serviceId=${booking.serviceId}&duree=${booking.durationMin}${pauseParam}&timezone=${siteTimezone}&token=${encodeURIComponent(token)}&sig=${encodeURIComponent(sig)}`
       );
       const data = await res.json();
       setAvailability(data);

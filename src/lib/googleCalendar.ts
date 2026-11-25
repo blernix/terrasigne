@@ -558,12 +558,22 @@ export async function changeBookingService(
 export async function getSlotAllowance(
   start: Date,
   end: Date
-): Promise<{ allowed: boolean; supplement: number }> {
+): Promise<{
+  allowed: boolean;
+  supplement: number;
+  /** Les plages ouvertes trouvées ce jour-là : servent à écrire POURQUOI un
+      créneau est refusé. Ajout pur, `allowed`/`supplement` ne changent pas. */
+  windows: { start: string; end: string }[];
+}> {
   const lookback = new Date(start.getTime() - 24 * 3600000);
   const events = await listEvents(lookback, end);
   const windows: WindowInput[] = events
     .filter((e) => isOpenWindow(e.summary))
     .map((e) => ({ summary: e.summary, start: e.start, end: e.end }));
 
-  return validateSlot(windows, start, end);
+  const verdict = validateSlot(windows, start, end);
+  return {
+    ...verdict,
+    windows: windows.map((w) => ({ start: String(w.start), end: String(w.end) })),
+  };
 }

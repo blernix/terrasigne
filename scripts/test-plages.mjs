@@ -21,6 +21,7 @@ import {
   rewriteDescriptionFields,
   supplementLine,
 } from "../src/lib/eventDescription.ts";
+import { messageCreneauRefuse, jourLisible } from "../src/lib/slotMessages.ts";
 
 let pass = 0;
 const failures = [];
@@ -414,6 +415,69 @@ check(
   "report plage majorée → plage normale : ligne Supplément supprimée",
   !/^\s*Supplément/m.test(backToNormal) && backToNormal === NORMAL_DESCRIPTION,
   JSON.stringify(backToNormal)
+);
+
+/* ------------------------------------------------------------------ */
+section("Phrases de refus — dire pourquoi, pas seulement que non");
+
+/* Le 24 novembre, Cindy lisait « Ce créneau n'est pas proposé à la
+   réservation. » alors que la vraie cause était une journée sans plage
+   ouverte. Deux cas, deux phrases. */
+const MARDI_1ER = new Date("2026-12-01T13:30:00-04:00");
+const MARDI_1ER_FIN = new Date("2026-12-01T15:00:00-04:00");
+
+const phraseJourneeFermee = messageCreneauRefuse({
+  debut: MARDI_1ER,
+  fin: MARDI_1ER_FIN,
+  plages: [],
+  acteur: "owner",
+});
+check(
+  "journée sans plage : on nomme le jour et l'absence d'ouverture",
+  phraseJourneeFermee ===
+    "Le mardi 1er décembre n'a aucune plage « dispo » ouverte dans l'agenda. Rouvrez une plage dans Google Agenda, ou choisissez un autre jour.",
+  phraseJourneeFermee
+);
+
+const phraseHorsPlages = messageCreneauRefuse({
+  debut: MARDI_1ER,
+  fin: MARDI_1ER_FIN,
+  plages: [
+    { start: "2026-12-01T05:00:00-04:00", end: "2026-12-01T06:00:00-04:00" },
+  ],
+  acteur: "owner",
+});
+check(
+  "créneau dehors : on nomme les plages qui existent",
+  phraseHorsPlages ===
+    "Le créneau 13:30–15:00 sort des plages ouvertes du mardi 1er décembre (05:00–06:00). Choisissez un autre créneau ou rouvrez une plage.",
+  phraseHorsPlages
+);
+
+const phraseCliente = messageCreneauRefuse({
+  debut: MARDI_1ER,
+  fin: MARDI_1ER_FIN,
+  plages: [
+    { start: "2026-12-01T05:00:00-04:00", end: "2026-12-01T06:00:00-04:00" },
+  ],
+  acteur: "client",
+});
+check(
+  "cliente : phrase neutre, aucun détail de l'agenda",
+  phraseCliente ===
+    "Ce créneau ne fait plus partie des horaires d'ouverture. Choisissez un autre créneau." &&
+    !phraseCliente.includes("dispo") &&
+    !phraseCliente.includes("05:00"),
+  phraseCliente
+);
+
+/* Le 1er du mois prend « 1er », les autres jours non. */
+const jourPremier = jourLisible(new Date("2027-01-01T12:00:00-04:00"));
+const jourOrdinaire = jourLisible(new Date("2026-12-08T12:00:00-04:00"));
+check(
+  "date lisible : « 1er » seulement le premier du mois",
+  jourPremier === "vendredi 1er janvier" && jourOrdinaire === "mardi 8 décembre",
+  `${jourPremier} / ${jourOrdinaire}`
 );
 
 /* ------------------------------------------------------------------ */

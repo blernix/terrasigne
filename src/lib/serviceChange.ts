@@ -42,6 +42,9 @@ export interface ValidateServiceChangeInput {
   free: boolean;
   now?: Date | number;
   minLeadHours?: number;
+  /** Phrase de refus de plage, déjà rédigée (cf. `slotMessages.ts`). Sans elle,
+      le message générique d'avant est conservé. */
+  slotMessage?: string;
 }
 
 export type ServiceChangeValidation =
@@ -128,7 +131,8 @@ export function validateServiceChange(
     return {
       ok: false,
       status: 400,
-      message: "Ce créneau n'est pas proposé à la réservation.",
+      message:
+        input.slotMessage || "Ce créneau n'est pas proposé à la réservation.",
     };
   }
 

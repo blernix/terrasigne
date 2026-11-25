@@ -7,7 +7,6 @@ import {
   isSlotFree,
   getSlotAllowance,
   BUSINESS_TIMEZONE,
-  MIN_LEAD_HOURS,
   MAX_AHEAD_DAYS,
 } from "@/lib/googleCalendar";
 import { sendBrevoEmail } from "@/lib/brevo";
@@ -19,6 +18,7 @@ import { formatDateLabel } from "@/lib/timezones";
 import { getRequestOrigin } from "@/lib/newsletter";
 import { verifyOwnerToken } from "@/lib/ownerLink";
 import { normalizeMotif, motifPhrase } from "@/lib/motifsAnnulation";
+import { messageCreneauRefuse } from "@/lib/slotMessages";
 import { performServiceChange } from "@/lib/serviceChangeFlow";
 
 /**
@@ -233,13 +233,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const minStart = Date.now() + MIN_LEAD_HOURS * 3600000;
+    /* La praticienne déplace un rendez-vous SANS délai de 48 h : elle gère son
+       agenda (un imprévu se déplace au pied levé). Ce qui protège reste la
+       plage ouverte, le chevauchement, le plafond de 90 jours — et le refus de
+       déplacer un rendez-vous déjà commencé, qui ne doit pas devenir « passé ». */
     const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
-    if (newStart.getTime() < minStart) {
+    if (newStart.getTime() <= Date.now()) {
       return NextResponse.json(
-        {
-          message: `Les rendez-vous doivent être fixés au moins ${MIN_LEAD_HOURS} h à l'avance`,
-        },
+        { message: "Ce rendez-vous a déjà commencé : il ne peut plus être déplacé." },
         { status: 400 }
       );
     }
@@ -255,7 +256,15 @@ export async function POST(req: Request) {
     const allowance = await getSlotAllowance(newStart, newEnd);
     if (!allowance.allowed) {
       return NextResponse.json(
-        { message: "Ce créneau n'est pas proposé à la réservation." },
+        {
+          message: messageCreneauRefuse({
+            debut: newStart,
+            fin: newEnd,
+            plages: allowance.windows,
+            timezone: BUSINESS_TIMEZONE,
+            acteur: "owner",
+          }),
+        },
         { status: 400 }
       );
     }

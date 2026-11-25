@@ -10,6 +10,7 @@ import {
   dateKeyInTimezone,
   getTimezoneLabel,
 } from "@/lib/timezones";
+import { verifyOwnerToken } from "@/lib/ownerLink";
 
 function formatter(timeZone: string, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat("fr-FR", { timeZone, ...options });
@@ -54,7 +55,16 @@ export async function GET(req: Request) {
       );
     }
 
-    const timeMin = new Date(Date.now() + MIN_LEAD_HOURS * 3600000);
+    /* Le plancher de 48 h est une règle CLIENTE. La page praticienne doit
+       afficher les créneaux du jour même, sinon elle ne peut rien déplacer à
+       court terme : un jeton signé (lien praticienne) ouvre le plancher. Sans
+       signature valide, on retombe sur la règle cliente — aucune régression. */
+    const token = url.searchParams.get("token");
+    const sig = url.searchParams.get("sig");
+    const praticienne = Boolean(token && verifyOwnerToken(token, sig));
+    const plancherHeures = praticienne ? 0 : MIN_LEAD_HOURS;
+
+    const timeMin = new Date(Date.now() + plancherHeures * 3600000);
     const timeMax = new Date(Date.now() + days * 86400000);
 
     const slots = await getAvailability(duration, pause, timeMin, timeMax);

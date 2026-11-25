@@ -24,9 +24,11 @@ import {
 } from "@/lib/emails";
 import { rewriteDescriptionFields } from "@/lib/eventDescription";
 import {
+  SERVICE_CHANGE_MIN_LEAD_HOURS,
   buildChangeServicePatch,
   validateServiceChange,
 } from "@/lib/serviceChange";
+import { messageCreneauRefuse } from "@/lib/slotMessages";
 import { formatDateLabel } from "@/lib/timezones";
 import { buildOwnerUrl, ownerLinkAvailable } from "@/lib/ownerLink";
 
@@ -144,11 +146,29 @@ export async function performServiceChange(
   const allowance = await getSlotAllowance(start, newEnd);
   const free = await isSlotFree(start, newEnd, booking.id);
 
+  /* La praticienne n'a plus de délai minimum pour changer une prestation : elle
+     gère son agenda, et un rendez-vous du lendemain est un cas courant. La
+     cliente, elle, reste à 48 h. Le refus d'un rendez-vous déjà commencé est
+     dans `validateServiceChange` et vaut pour les deux. */
+  const minLeadHours =
+    input.actor === "owner" ? 0 : SERVICE_CHANGE_MIN_LEAD_HOURS;
+  const slotMessage = allowance.allowed
+    ? undefined
+    : messageCreneauRefuse({
+        debut: start,
+        fin: newEnd,
+        plages: allowance.windows,
+        timezone: BUSINESS_TIMEZONE,
+        acteur: input.actor,
+      });
+
   const validation = validateServiceChange({
     booking,
     target,
     allowed: allowance.allowed,
     free,
+    minLeadHours,
+    slotMessage,
   });
   if (validation.ok === false) {
     return {
