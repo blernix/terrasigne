@@ -21,7 +21,7 @@ import {
   rewriteDescriptionFields,
   supplementLine,
 } from "../src/lib/eventDescription.ts";
-import { messageCreneauRefuse, jourLisible } from "../src/lib/slotMessages.ts";
+import { messageCreneauRefuse, jourLisible, cleJour } from "../src/lib/slotMessages.ts";
 
 let pass = 0;
 const failures = [];
@@ -478,6 +478,15 @@ check(
   "date lisible : « 1er » seulement le premier du mois",
   jourPremier === "vendredi 1er janvier" && jourOrdinaire === "mardi 8 décembre",
   `${jourPremier} / ${jourOrdinaire}`
+);
+
+/* Une plage de la veille ne doit pas être citée dans la phrase du jour :
+   la fenêtre lue commence 24 h avant, d'où ce tri par jour local. */
+check(
+  "clé de jour : minuit UTC reste la veille en Guadeloupe",
+  cleJour(new Date("2026-12-01T01:00:00Z")) === "2026-11-30" &&
+    cleJour(new Date("2026-12-01T13:30:00-04:00")) === "2026-12-01",
+  `${cleJour(new Date("2026-12-01T01:00:00Z"))} / ${cleJour(new Date("2026-12-01T13:30:00-04:00"))}`
 );
 
 /* ------------------------------------------------------------------ */

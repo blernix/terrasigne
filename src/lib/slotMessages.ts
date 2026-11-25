@@ -86,6 +86,17 @@ export function plagesLisibles(
     .join(", ");
 }
 
+/** « 2026-12-01 » — la clé du jour local, pour ranger une date dans sa
+ *  journée. Sert à ne citer que les plages du jour concerné. */
+export function cleJour(date: Date, timezone?: string): string {
+  return new Intl.DateTimeFormat("fr-CA", {
+    timeZone: fuseau(timezone),
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
 export interface MessageCreneauInput {
   debut: Date;
   fin: Date;

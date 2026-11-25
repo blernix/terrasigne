@@ -8,6 +8,7 @@ import {
   type WindowInput,
 } from "@/lib/plages";
 import { buildEventDescription, rewriteDescriptionFields } from "@/lib/eventDescription";
+import { cleJour } from "@/lib/slotMessages";
 import type { ServiceChangePatch } from "@/lib/serviceChange";
 
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
@@ -92,7 +93,13 @@ export async function getAvailability(
   durationMin: number,
   pauseMin: number,
   timeMin: Date,
-  timeMax: Date
+  timeMax: Date,
+  /**
+   * Délai minimum avant un créneau, en heures. 48 h par défaut : c'est la règle
+   * cliente. La page praticienne passe 0 (elle déplace au pied levé) — sans ça
+   * le `timeMin` de la route ne suffisait pas, le plancher était reposé ici.
+   */
+  minLeadHours: number = MIN_LEAD_HOURS
 ): Promise<Slot[]> {
   const events = await listEvents(timeMin, timeMax);
 
@@ -102,7 +109,7 @@ export async function getAvailability(
   const busy = events.filter((e) => !isOpenWindow(e.summary));
 
   const now = Date.now();
-  const minStart = new Date(now + MIN_LEAD_HOURS * 3600000);
+  const minStart = new Date(now + minLeadHours * 3600000);
   const maxStart = new Date(now + MAX_AHEAD_DAYS * 86400000);
 
   // plages.ts découpe les plages et valide chaque début de façon stricte :
@@ -572,8 +579,14 @@ export async function getSlotAllowance(
     .map((e) => ({ summary: e.summary, start: e.start, end: e.end }));
 
   const verdict = validateSlot(windows, start, end);
+  /* Les plages remontées servent à écrire « les plages du mardi 1er décembre » :
+     on ne garde donc que celles du JOUR du créneau. La fenêtre lue commence
+     24 h avant, elle contient aussi la veille — la citer serait faux. */
+  const jour = cleJour(start, BUSINESS_TIMEZONE);
   return {
     ...verdict,
-    windows: windows.map((w) => ({ start: String(w.start), end: String(w.end) })),
+    windows: windows
+      .filter((w) => cleJour(new Date(String(w.start)), BUSINESS_TIMEZONE) === jour)
+      .map((w) => ({ start: String(w.start), end: String(w.end) })),
   };
 }

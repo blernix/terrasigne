@@ -67,7 +67,13 @@ export async function GET(req: Request) {
     const timeMin = new Date(Date.now() + plancherHeures * 3600000);
     const timeMax = new Date(Date.now() + days * 86400000);
 
-    const slots = await getAvailability(duration, pause, timeMin, timeMax);
+    const slots = await getAvailability(
+      duration,
+      pause,
+      timeMin,
+      timeMax,
+      plancherHeures
+    );
 
     const weekdayFmt = formatter(timeZone, { weekday: "long" });
     const monthFmt = formatter(timeZone, { month: "short" });
