@@ -17,6 +17,12 @@ import {
 import { formatDateLabel } from "@/lib/timezones";
 import { getRequestOrigin } from "@/lib/newsletter";
 import { buildOwnerUrl, ownerLinkAvailable } from "@/lib/ownerLink";
+import {
+  MESSAGE_MODIF_TROP_TARD,
+  cibleTropTot,
+  tropTardPourModifier,
+} from "@/lib/serviceChange";
+import { messageCreneauRefuse } from "@/lib/slotMessages";
 
 export async function POST(req: Request) {
   try {
@@ -46,6 +52,17 @@ export async function POST(req: Request) {
       );
     }
 
+    /* Décision du 25/11 : une cliente ne modifie plus un rendez-vous à moins de
+     * 24 h. Le plancher porte sur le rendez-vous EXISTANT, pas sur la cible :
+     * c'est lui qui devient intouchable, même si un créneau libre existe
+     * ailleurs. L'annulation, elle, reste libre. */
+    if (tropTardPourModifier(existing.start)) {
+      return NextResponse.json(
+        { message: MESSAGE_MODIF_TROP_TARD },
+        { status: 400 }
+      );
+    }
+
     const newStart = new Date(start);
     const newEnd = new Date(end);
     if (Number.isNaN(newStart.getTime()) || Number.isNaN(newEnd.getTime())) {
@@ -62,10 +79,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const minStart = Date.now() + MIN_LEAD_HOURS * 3600000;
-    const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
-
-    if (newStart.getTime() < minStart) {
+    if (cibleTropTot(newStart, Date.now(), MIN_LEAD_HOURS)) {
       return NextResponse.json(
         {
           message: `Les réservations doivent être prises au moins ${MIN_LEAD_HOURS}h à l'avance`,
@@ -74,6 +88,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const maxStart = Date.now() + MAX_AHEAD_DAYS * 86400000;
     if (newStart.getTime() > maxStart) {
       return NextResponse.json(
         { message: "Les réservations sont possibles jusqu'à 3 mois à l'avance" },
@@ -87,7 +102,15 @@ export async function POST(req: Request) {
     const allowance = await getSlotAllowance(newStart, newEnd);
     if (!allowance.allowed) {
       return NextResponse.json(
-        { message: "Ce créneau n'est pas proposé à la réservation." },
+        {
+          message: messageCreneauRefuse({
+            debut: newStart,
+            fin: newEnd,
+            plages: allowance.windows,
+            timezone: BUSINESS_TIMEZONE,
+            acteur: "client",
+          }),
+        },
         { status: 400 }
       );
     }

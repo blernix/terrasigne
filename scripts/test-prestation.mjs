@@ -11,6 +11,10 @@
  */
 import {
   SERVICE_CHANGE_MIN_LEAD_HOURS,
+  MODIF_CLIENT_MIN_HEURES,
+  MESSAGE_MODIF_TROP_TARD,
+  cibleTropTot,
+  tropTardPourModifier,
   validateServiceChange,
   buildChangeServicePatch,
 } from "../src/lib/serviceChange.ts";
@@ -106,9 +110,10 @@ function checkRefusal(name, result, status, message = "") {
 section("Constantes");
 
 check(
-  "SERVICE_CHANGE_MIN_LEAD_HOURS vaut 48",
-  SERVICE_CHANGE_MIN_LEAD_HOURS === 48,
-  String(SERVICE_CHANGE_MIN_LEAD_HOURS)
+  "plancher cliente : 24 h depuis le 25/11 (avant : 48 h)",
+  MODIF_CLIENT_MIN_HEURES === 24 &&
+    SERVICE_CHANGE_MIN_LEAD_HOURS === MODIF_CLIENT_MIN_HEURES,
+  `${MODIF_CLIENT_MIN_HEURES} / ${SERVICE_CHANGE_MIN_LEAD_HOURS}`
 );
 
 /* ------------------------------------------------------------------ */
@@ -175,18 +180,25 @@ checkRefusal(
   "Ce rendez-vous est passé : il ne peut plus être modifié."
 );
 checkRefusal(
-  "rendez-vous à 47 h → 400",
-  validate({ booking: { ...booking, start: inHours(47) } }),
+  "rendez-vous à 23 h → 400 (plancher cliente 24 h)",
+  validate({ booking: { ...booking, start: inHours(23) } }),
   400,
-  "Ce rendez-vous a lieu dans moins de 48 h : il ne peut plus être modifié."
+  MESSAGE_MODIF_TROP_TARD
 );
-checkRefusal(
-  "rendez-vous à 47 h 59 → 400",
-  validate({
-    booking: { ...booking, start: new Date(NOW.getTime() + (48 * 60 - 1) * 60000).toISOString() },
-  }),
-  400,
-  "Ce rendez-vous a lieu dans moins de 48 h : il ne peut plus être modifié."
+/* Décision du 25/11 : le plancher cliente passe de 48 h à 24 h. Un rendez-vous
+   de demain après-midi doit donc pouvoir bouger, un rendez-vous de cette nuit
+   non. */
+const at25h = validate({ booking: { ...booking, start: inHours(25) } });
+check(
+  "rendez-vous à 25 h → accepté",
+  at25h.ok === true,
+  JSON.stringify(at25h)
+);
+const at47h = validate({ booking: { ...booking, start: inHours(47) } });
+check(
+  "rendez-vous à 47 h → accepté (le plancher cliente n'est plus 48 h)",
+  at47h.ok === true,
+  JSON.stringify(at47h)
 );
 
 const at48h = validate({ booking: { ...booking, start: inHours(48) } });
@@ -200,13 +212,14 @@ checkRefusal(
   "délai personnalisé 24 h : rendez-vous à 23 h → 400",
   validate({ booking: { ...booking, start: inHours(23) }, minLeadHours: 24 }),
   400,
-  "Ce rendez-vous a lieu dans moins de 24 h : il ne peut plus être modifié."
+  MESSAGE_MODIF_TROP_TARD
 );
 const at24h = validate({ booking: { ...booking, start: inHours(24) }, minLeadHours: 24 });
-check(
-  "délai personnalisé 24 h : rendez-vous à exactement 24 h → accepté",
-  at24h.ok === true,
-  JSON.stringify(at24h)
+checkRefusal(
+  "délai de 24 h : rendez-vous à exactement 24 h → refusé (il faut PLUS de 24 h)",
+  at24h,
+  400,
+  MESSAGE_MODIF_TROP_TARD
 );
 checkRefusal(
   "date de début invalide → 400",
@@ -555,7 +568,7 @@ checkRefusal(
   "cliente : rendez-vous dans 2 h → refusé",
   validate({ booking: dansDeuxHeures, minLeadHours: SERVICE_CHANGE_MIN_LEAD_HOURS }),
   400,
-  "Ce rendez-vous a lieu dans moins de 48 h : il ne peut plus être modifié."
+  MESSAGE_MODIF_TROP_TARD
 );
 
 checkRefusal(
@@ -585,6 +598,53 @@ checkRefusal(
   validate({ allowed: false }),
   400,
   "Ce créneau n'est pas proposé à la réservation."
+);
+
+/* ------------------------------------------------------------------ */
+section("Plancher de modification — 24 h sur le RDV, 48 h sur la cible");
+
+/* Décision du 25/11 : une cliente peut encore déplacer un rendez-vous de
+   demain, plus celui de cette nuit. La cible garde sa règle de 48 h — les deux
+   planchers sont distincts et c'est tout l'objet de cette section. */
+const MAINTENANT = new Date("2026-11-25T14:00:00Z").getTime();
+const H = 3600000;
+
+check(
+  "RDV à 25 h : encore modifiable",
+  tropTardPourModifier(MAINTENANT + 25 * H, MAINTENANT) === false,
+  String(tropTardPourModifier(MAINTENANT + 25 * H, MAINTENANT))
+);
+check(
+  "RDV à 23 h : trop tard",
+  tropTardPourModifier(MAINTENANT + 23 * H, MAINTENANT) === true,
+  String(tropTardPourModifier(MAINTENANT + 23 * H, MAINTENANT))
+);
+check(
+  "RDV à 24 h pile : trop tard, il faut PLUS de 24 h",
+  tropTardPourModifier(MAINTENANT + 24 * H, MAINTENANT) === true,
+  String(tropTardPourModifier(MAINTENANT + 24 * H, MAINTENANT))
+);
+check(
+  "RDV à 25 h déplacé vers un créneau libre à +50 h : accepté",
+  tropTardPourModifier(MAINTENANT + 25 * H, MAINTENANT) === false &&
+    cibleTropTot(MAINTENANT + 50 * H, MAINTENANT, 48) === false,
+  ""
+);
+check(
+  "RDV à 25 h mais cible à +47 h 59 : refusé, la règle des 48 h tient",
+  cibleTropTot(MAINTENANT + (48 * 60 - 1) * 60000, MAINTENANT, 48) === true,
+  String(cibleTropTot(MAINTENANT + (48 * 60 - 1) * 60000, MAINTENANT, 48))
+);
+check(
+  "praticienne : aucun plancher, un RDV dans 2 h reste modifiable",
+  tropTardPourModifier(MAINTENANT + 2 * H, MAINTENANT, 0) === false,
+  ""
+);
+check(
+  "message « trop tard » : 24 h, et la porte de sortie",
+  MESSAGE_MODIF_TROP_TARD.includes("24 h") &&
+    MESSAGE_MODIF_TROP_TARD.includes("annuler"),
+  MESSAGE_MODIF_TROP_TARD
 );
 
 /* ------------------------------------------------------------------ */

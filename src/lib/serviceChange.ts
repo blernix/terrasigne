@@ -9,8 +9,51 @@
 // scripts/test-prestation.mjs l'importe avec node --experimental-strip-types,
 // hors build Next.
 
-/** Délai minimum avant un rendez-vous pour pouvoir en changer la prestation. */
-export const SERVICE_CHANGE_MIN_LEAD_HOURS = 48;
+/** Délai minimum avant un rendez-vous pour qu'une CLIENTE puisse encore le
+ *  modifier (déplacement comme changement de prestation). Décision du 25/11 :
+ *  on assouplit 48 h → 24 h, à la demande de Cindy. La praticienne, elle, n'a
+ *  aucun délai : côté propriétaire le plancher vaut 0 (cf. serviceChangeFlow). */
+export const MODIF_CLIENT_MIN_HEURES = 24;
+/** Ancien nom du même plancher, gardé pour les appels existants. */
+export const SERVICE_CHANGE_MIN_LEAD_HOURS = MODIF_CLIENT_MIN_HEURES;
+
+/** Ce que lit la cliente quand son rendez-vous est trop proche pour bouger. */
+export const MESSAGE_MODIF_TROP_TARD = `Ce rendez-vous ne peut plus être modifié à moins de ${MODIF_CLIENT_MIN_HEURES} h. Vous pouvez l'annuler ou nous contacter.`;
+
+/** Vrai si le rendez-vous EXISTANT est trop proche pour être modifié.
+ *  « Plus de 24 h » au sens strict : à 24 h pile, c'est déjà trop tard.
+ *  Une date illisible renvoie faux : la validation suivante dira pourquoi. */
+export function tropTardPourModifier(
+  start: string | Date | number,
+  now: number = Date.now(),
+  heures: number = MODIF_CLIENT_MIN_HEURES
+): boolean {
+  const ms =
+    start instanceof Date
+      ? start.getTime()
+      : typeof start === "number"
+        ? start
+        : new Date(start).getTime();
+  if (!Number.isFinite(ms)) return false;
+  return ms <= now + heures * 3600000;
+}
+
+/** Vrai si le NOUVEAU créneau est trop proche (règle de prise de rendez-vous).
+ *  Le nombre d'heures est passé par l'appelant : il n'est pas dupliqué ici. */
+export function cibleTropTot(
+  start: string | Date | number,
+  now: number,
+  heures: number
+): boolean {
+  const ms =
+    start instanceof Date
+      ? start.getTime()
+      : typeof start === "number"
+        ? start
+        : new Date(start).getTime();
+  if (!Number.isFinite(ms)) return false;
+  return ms < now + heures * 3600000;
+}
 
 /** Prestation résolue dans Directus, seule source de la durée, de la pause et du prix. */
 export interface ServiceChangeTarget {
@@ -119,11 +162,11 @@ export function validateServiceChange(
       message: "Ce rendez-vous est passé : il ne peut plus être modifié.",
     };
   }
-  if (startMs < nowMs + leadHours * 3600000) {
+  if (startMs <= nowMs + leadHours * 3600000) {
     return {
       ok: false,
       status: 400,
-      message: `Ce rendez-vous a lieu dans moins de ${leadHours} h : il ne peut plus être modifié.`,
+      message: MESSAGE_MODIF_TROP_TARD,
     };
   }
 
