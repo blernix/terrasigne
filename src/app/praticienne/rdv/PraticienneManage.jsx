@@ -432,17 +432,6 @@ export default function PraticienneManage({ token, sig }) {
                     <span>{m.label}</span>
                   </label>
                 ))}
-                <label className="flex items-start gap-3 text-sm text-ink-soft cursor-pointer">
-                  <input
-                    type="radio"
-                    name="motif"
-                    value=""
-                    checked={motifCode === ""}
-                    onChange={() => setMotifCode("")}
-                    className="mt-1"
-                  />
-                  <span>Pas de motif</span>
-                </label>
               </div>
 
               <textarea
