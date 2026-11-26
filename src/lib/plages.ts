@@ -154,9 +154,62 @@ function normalizeWindow(window: WindowInput): NormalizedWindow | null {
   };
 }
 
+export interface MergedPeriod {
+  start: Date;
+  end: Date;
+  /** Les plages ouvertes qui composent cette période continue. */
+  windows: NormalizedWindow[];
+}
+
+/**
+ * Fusionne les plages ouvertes qui se chevauchent ou se TOUCHENT en périodes
+ * continues.
+ *
+ * Pourquoi : le 26/11, une plage « Dispo majo » de 60 min suivie d'une plage
+ * normale collait si bien que 05:30 n'était jamais proposé (un créneau de 60
+ * min ne tenait pas dans 05:00–06:00, et la plage normale commençait à 06:00).
+ * Cindy voulait « 5h30 et pas juste 5h ». Une période continue rend les départs
+ * de 30 en 30 possibles d'un bout à l'autre.
+ *
+ * Deux plages séparées par un trou (ex. 09:00–12:00 puis 15:00–19:00) restent
+ * deux périodes : on n'ouvre jamais un créneau dans le trou.
+ */
+export function mergeOpenWindows(windows: WindowInput[]): MergedPeriod[] {
+  const normalized = windows
+    .map((window) => normalizeWindow(window))
+    .filter((window): window is NormalizedWindow => window !== null)
+    .sort(
+      (a, b) =>
+        a.start.getTime() - b.start.getTime() ||
+        a.end.getTime() - b.end.getTime()
+    );
+
+  const periods: MergedPeriod[] = [];
+  for (const window of normalized) {
+    const last = periods[periods.length - 1];
+    if (last && window.start.getTime() <= last.end.getTime()) {
+      last.windows.push(window);
+      if (window.end.getTime() > last.end.getTime()) {
+        last.end = window.end;
+      }
+      continue;
+    }
+    periods.push({
+      start: window.start,
+      end: window.end,
+      windows: [window],
+    });
+  }
+  return periods;
+}
+
 /**
  * Plages ouvertes qui contiennent entièrement [start, end].
  * Contrôle strict : start >= ouverture et end <= fermeture, sans marge.
+ *
+ * Attention : ce n'est PAS la règle d'acceptation (elle est dans `validateSlot`,
+ * qui raisonne sur les périodes fusionnées). Cette fonction reste le contrôle
+ * « une seule plage contient le créneau », utile au diagnostic.
  */
 export function findCoveringWindows(
   windows: WindowInput[],
@@ -185,27 +238,57 @@ export function findCoveringWindows(
 
 /**
  * Autorise ou refuse un créneau, et rend son supplément.
- * Supplément = maximum des plages qui couvrent le créneau : deux plages qui se
- * chevauchent ne dépendent pas de l'ordre de lecture de Google Agenda.
+ *
+ * Règle du 26/11 : le créneau doit tenir dans une PÉRIODE OUVERTE CONTINUE
+ * (plages fusionnées), pas dans une seule plage. Son supplément est celui de la
+ * plage qui contient son DÉBUT — 05:30 dans une plage majorée qui court jusqu'à
+ * 06:00 reste majoré, même si le créneau déborde sur la plage normale qui suit.
+ *
+ * Le début doit aussi tomber sur la grille de 30 min comptée depuis le début de
+ * la période : ce que la route accepte est exactement ce que l'écran propose.
  */
 export function validateSlot(
   windows: WindowInput[],
   start: Date | string,
-  end: Date | string
+  end: Date | string,
+  stepMin: number = SLOT_STEP_MIN
 ): { allowed: boolean; supplement: number } {
-  const covering = findCoveringWindows(windows, start, end);
-  if (covering.length === 0) return { allowed: false, supplement: 0 };
+  const startMs = new Date(start).getTime();
+  const endMs = new Date(end).getTime();
+  if (Number.isNaN(startMs) || Number.isNaN(endMs) || endMs <= startMs) {
+    return { allowed: false, supplement: 0 };
+  }
+
+  const stepMs = Number(stepMin) * 60000;
+  const period = mergeOpenWindows(windows).find(
+    (candidate) =>
+      startMs >= candidate.start.getTime() && endMs <= candidate.end.getTime()
+  );
+  if (!period) return { allowed: false, supplement: 0 };
+
+  if (stepMs > 0 && (startMs - period.start.getTime()) % stepMs !== 0) {
+    return { allowed: false, supplement: 0 };
+  }
+
+  const contenantes = period.windows.filter(
+    (window) =>
+      startMs >= window.start.getTime() && startMs < window.end.getTime()
+  );
 
   return {
     allowed: true,
-    supplement: Math.max(...covering.map((window) => window.supplement)),
+    supplement:
+      contenantes.length === 0
+        ? 0
+        : Math.max(...contenantes.map((window) => window.supplement)),
   };
 }
 
 /**
  * Créneaux proposables pour un ensemble de plages.
- * Chaque début candidat est validé contre toutes les plages (même règle qu'à la
- * réservation), dédoublonné par début, filtré par minStart/maxStart et trié.
+ * Les départs sont pris sur chaque période ouverte continue, de 30 en 30 depuis
+ * son début ; chaque départ est validé par `validateSlot` (même règle qu'à la
+ * réservation), filtré par minStart/maxStart et trié.
  */
 export function buildSlots(
   windows: WindowInput[],
@@ -219,12 +302,10 @@ export function buildSlots(
   if (!(durationMs > 0)) return [];
 
   const starts = new Set<number>();
-  for (const window of windows) {
-    const normalized = normalizeWindow(window);
-    if (!normalized) continue;
+  for (const period of mergeOpenWindows(windows)) {
     for (const slot of splitWindowIntoSlots(
-      normalized.start,
-      normalized.end,
+      period.start,
+      period.end,
       durationMin,
       stepMin
     )) {
@@ -237,7 +318,7 @@ export function buildSlots(
     if (startMs < minStart || startMs > maxStart) continue;
     const start = new Date(startMs);
     const end = new Date(startMs + durationMs);
-    const allowance = validateSlot(windows, start, end);
+    const allowance = validateSlot(windows, start, end, stepMin);
     if (!allowance.allowed) continue;
     slots.push({ start, end, supplement: allowance.supplement });
   }

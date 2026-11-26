@@ -256,10 +256,12 @@ check(
   JSON.stringify(onlyPlain)
 );
 
+/* Même règle : le créneau 11:30–12:30 COMMENCE dans la plage majorée, donc 20 €.
+   L'ancienne règle (maximum des plages couvrant le créneau entier) rendait 0 €. */
 const straddling = validateSlot(overlapping, at(11, 30), at(12, 30));
 check(
-  "11:30–12:30 à cheval sur la fin de la plage majorée → 0 €",
-  straddling.allowed === true && straddling.supplement === 0,
+  "11:30–12:30 commence dans la plage majorée → 20 €",
+  straddling.allowed === true && straddling.supplement === SUPPLEMENT_MAJO,
   JSON.stringify(straddling)
 );
 
@@ -270,7 +272,10 @@ check(
   String(covering.length)
 );
 
-const partialOverlap = [windowOf("dispo", 9, 12), windowOf("dispo majo", 9, 30, 12)];
+const partialOverlap = [
+  windowOf("dispo", 9, 12),
+  { summary: "dispo majo", start: at(9, 30), end: at(12) },
+];
 const beforeMajor = validateSlot(partialOverlap, at(9), at(9, 30));
 check(
   "09:00–09:30 commence avant la plage majorée → 0 €",
@@ -324,10 +329,14 @@ check(
     mergedSlots[mergedSlots.length - 1].supplement === 0,
   JSON.stringify(mergedSlots[mergedSlots.length - 1])
 );
+/* Règle du 26/11 : le supplément suit le DÉBUT du créneau. 11:30 commence dans
+   la plage majorée (09:00–12:00) et finit dans la normale : il est donc majoré.
+   Avant, on prenait le maximum des plages couvrant le créneau entier, ce qui
+   donnait 0 € ici. Cindy a tranché : c'est le début qui décide. */
 check(
-  "plages chevauchantes → 11:30 hors plage majorée à 0 €",
+  "plages chevauchantes → 11:30 commence dans la plage majorée, donc 20 €",
   mergedSlots.find((slot) => slot.start.getTime() === at(11, 30).getTime())
-    ?.supplement === 0
+    ?.supplement === SUPPLEMENT_MAJO
 );
 
 const mergedReversed = buildSlots(overlappingReversed, 60);
@@ -415,6 +424,102 @@ check(
   "report plage majorée → plage normale : ligne Supplément supprimée",
   !/^\s*Supplément/m.test(backToNormal) && backToNormal === NORMAL_DESCRIPTION,
   JSON.stringify(backToNormal)
+);
+
+/* ------------------------------------------------------------------ */
+section("Plages qui se touchent — 05:00, 05:30, puis la grille normale");
+
+/* Agenda réel du 25/11 : « Dispo majo » 05:00–06:00 collée à « Dispo »
+   06:00–19:00. Avant, un créneau de 60 min ne tenait que dans la plage majo,
+   d'où un seul départ à 05:00 puis un trou jusqu'à 06:00. */
+const COLLEES = [
+  { summary: "Dispo majo", start: at(5), end: at(6) },
+  { summary: "Dispo", start: at(6), end: at(19) },
+];
+
+const collees60 = buildSlots(COLLEES, 60);
+check(
+  "60 min : départs 05:00, 05:30, 06:00, 06:30…",
+  starts(collees60).startsWith("05:00,05:30,06:00,06:30,07:00"),
+  starts(collees60)
+);
+check(
+  "60 min : 05:00 et 05:30 majorés, 06:00 et après normaux",
+  collees60.find((s) => hhmm(s.start) === "05:00").supplement === SUPPLEMENT_MAJO &&
+    collees60.find((s) => hhmm(s.start) === "05:30").supplement === SUPPLEMENT_MAJO &&
+    collees60.find((s) => hhmm(s.start) === "06:00").supplement === 0 &&
+    collees60.find((s) => hhmm(s.start) === "06:30").supplement === 0,
+  collees60
+    .slice(0, 4)
+    .map((s) => `${hhmm(s.start)}=${s.supplement}`)
+    .join(" ")
+);
+check(
+  "60 min : aucun départ avant l'ouverture (05:00 est le premier)",
+  collees60[0].start.getTime() === at(5).getTime(),
+  hhmm(collees60[0].start)
+);
+check(
+  "60 min : le dernier départ laisse le créneau tenir jusqu'à 19:00",
+  collees60[collees60.length - 1].end.getTime() === at(19).getTime(),
+  hhmm(collees60[collees60.length - 1].start)
+);
+
+const collees90 = buildSlots(COLLEES, 90);
+check(
+  "90 min : 05:00 et 05:30 sont proposés, tous deux majorés",
+  collees90[0].start.getTime() === at(5).getTime() &&
+    collees90[1].start.getTime() === at(5, 30).getTime() &&
+    collees90[0].supplement === SUPPLEMENT_MAJO &&
+    collees90[1].supplement === SUPPLEMENT_MAJO,
+  collees90
+    .slice(0, 2)
+    .map((s) => `${hhmm(s.start)}=${s.supplement}`)
+    .join(" ")
+);
+
+/* Deux plages séparées par un trou ne doivent PAS se fusionner : le trou reste
+   fermé, et un créneau ne peut pas le chevaucher. */
+const TROU = [
+  { summary: "Dispo", start: at(9), end: at(12) },
+  { summary: "Dispo", start: at(15), end: at(19) },
+];
+const avecTrou = buildSlots(TROU, 60);
+check(
+  "trou 12:00–15:00 : aucun départ dans le trou",
+  !avecTrou.some((s) => hhmm(s.start) === "12:00") &&
+    !avecTrou.some((s) => hhmm(s.start) === "14:00") &&
+    avecTrou.some((s) => hhmm(s.start) === "11:00") &&
+    avecTrou.some((s) => hhmm(s.start) === "15:00"),
+  starts(avecTrou)
+);
+check(
+  "trou 12:00–15:00 : 11:30–12:30 refusé (déborde la première période)",
+  validateSlot(TROU, at(11, 30), at(12, 30)).allowed === false,
+  JSON.stringify(validateSlot(TROU, at(11, 30), at(12, 30)))
+);
+
+/* Ce que l'écran propose = ce que la route accepte. */
+const ecran = collees60.map((s) => hhmm(s.start));
+let desaccord = 0;
+for (let minute = 0; minute < 24 * 60; minute += 15) {
+  const debut = new Date(at(0).getTime() + minute * 60000);
+  if (debut < at(5) || debut > at(19)) continue;
+  const fin = new Date(debut.getTime() + 60 * 60000);
+  const accepte = validateSlot(COLLEES, debut, fin).allowed;
+  const propose = ecran.includes(hhmm(debut));
+  if (accepte !== propose) desaccord += 1;
+}
+check(
+  "aucun désaccord entre l'écran et la route (balayage de la journée par 15 min)",
+  desaccord === 0,
+  `${desaccord} désaccord(s)`
+);
+check(
+  "05:15 n'est ni proposé ni accepté (grille de 30 min)",
+  validateSlot(COLLEES, at(5, 15), at(6, 15)).allowed === false &&
+    !ecran.includes("05:15"),
+  JSON.stringify(validateSlot(COLLEES, at(5, 15), at(6, 15)))
 );
 
 /* ------------------------------------------------------------------ */
